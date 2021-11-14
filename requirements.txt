@@ -14,3 +14,4 @@ aiomysql==0.0.21
 pytz==2021.1
 wavelink==0.9.10
 pycord-components==1.0.2
+dnspython==2.1.0
