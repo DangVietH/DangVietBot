@@ -18,7 +18,7 @@ class Welcome(commands.Cog):
         self.ImageManager = discordSuperUtils.ImageManager()
         super().__init__()
 
-    @commands.command(help="Setup welcome message channel")
+    @commands.command(help="Setup welcome channel")
     @commands.has_permissions(administrator=True)
     async def welcome_channel(self, ctx, channel: discord.TextChannel):
         result = await cursors.find_one({"guild": ctx.guild.id})
@@ -30,7 +30,7 @@ class Welcome(commands.Cog):
             await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
             await ctx.send(f"Welcome channel updated to {channel.mention}")
 
-    @commands.command(help="Setup welcome message text")
+    @commands.command(help="Setup welcome text")
     @commands.has_permissions(administrator=True)
     async def welcome_text(self, ctx, *, text):
         result = await cursors.find_one({"guild": ctx.guild.id})
@@ -39,6 +39,16 @@ class Welcome(commands.Cog):
         else:
             await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"message": text}})
             await ctx.send(f"Welcome message updated to ```{text}```")
+
+    @commands.command(help="Setup welcome dm")
+    @commands.has_permissions(administrator=True)
+    async def welcome_dm(self, ctx, *, text):
+        result = await cursors.find_one({"guild": ctx.guild.id})
+        if result is None:
+            await ctx.send("You haven't set a welcome channel yet")
+        else:
+            await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"dm": text}})
+            await ctx.send(f"Welcome dm updated to ```{text}```")
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -59,7 +69,7 @@ class Welcome(commands.Cog):
                     transparency=127,
                 )
             )
-            if not member.client:
+            if not member.bot:
                 await member.send(result["dm"])
 
 

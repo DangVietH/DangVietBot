@@ -52,14 +52,16 @@ class Admin(commands.Cog):
     @commands.command(help="Kick member")
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason=None):
-        await member.send(f"You've been kick from **{ctx.guild.name}** for {reason}")
+        if not member.bot:
+            await member.send(f"You've been kick from **{ctx.guild.name}** for {reason}")
         await member.kick(reason=reason)
         await ctx.send(f'{member.mention} has been kick for {reason}')
 
     @commands.command(help="Ban member")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason=None):
-        await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for {reason}. What a shame 👎")
+        if not member.bot:
+            await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for {reason}. What a shame 👎")
         await member.ban(reason=reason)
         await ctx.send(f'{member.mention} has been **BANNED** for {reason}')
 
