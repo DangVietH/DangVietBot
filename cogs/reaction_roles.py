@@ -16,7 +16,7 @@ class Reaction(commands.Cog):
         self.client = client
 
     @commands.command(help="Set up reaction role")
-    @commands.has_permissions(administrator=True)
+    @commands.is_owner()
     async def react_role(self, ctx, emoji, msg_id, role: discord.Role):
         msg = await ctx.fetch_message(msg_id)
         insert = {"id": msg.id, "emoji": emoji, "role": role.id}
@@ -24,7 +24,7 @@ class Reaction(commands.Cog):
         await msg.add_reaction(emoji)
 
     @commands.command(help="Delete reaction role system")
-    @commands.has_permissions(administrator=True)
+    @commands.is_owner()
     async def del_react(self, ctx, msg_id: int):
         check = await cursor.find_one({"id": msg_id})
         if msg_id == check['id']:
