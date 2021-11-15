@@ -56,14 +56,14 @@ class Music(commands.Cog, discordSuperUtils.CogManager.Cog, name="Music"):
     @commands.command(help="See what song is currently playing")
     async def np(self, ctx):
         if player := await self.MusicManager.now_playing(ctx):
-            duration_played = await self.MusicManager.get_player_played_duration(
-                ctx, player
-            )
-
-            await ctx.send(
-                f"Currently playing: {player}, \n"
-                f"Duration: {duration_played}/{player.duration}"
-            )
+            duration_played = await self.MusicManager.get_player_played_duration(ctx, player)
+            thumbnail = player.data["videoDetails"]["thumbnail"]["thumbnails"][-1]["url"]
+            requester = player.requester if player.requester else "Autoplay"
+            embed = discord.Embed(title="Now playing", description=f"[{player.title}]({player.url})", color=discord.Color.random())
+            embed.add_field(name="duration", value=f"{duration_played}/{player.duration}")
+            embed.set_thumbnail(url=thumbnail)
+            embed.set_footer(text=f"Requested by {requester}", icon_url=requester.avatar.url)
+            await ctx.send(embed=embed)
 
     @commands.command(help="Join vc")
     async def join(self, ctx):
@@ -150,6 +150,41 @@ class Music(commands.Cog, discordSuperUtils.CogManager.Cog, name="Music"):
 
         page_manager = discordSuperUtils.PageManager(ctx, embeds, public=True)
         await page_manager.run()
+
+    @commands.command()
+    async def lyrics(self, ctx, *, query=None):
+        if response := await self.MusicManager.lyrics(ctx, query):
+            # If lyrics are found
+            title, author, query_lyrics = response
+            # Formatting the lyrics
+            splitted = query_lyrics.split("\n")
+            res = []
+            current = ""
+            for i, split in enumerate(splitted):
+                if len(splitted) <= i + 1 or len(current) + len(splitted[i + 1]) > 1024:
+                    res.append(current)
+                    current = ""
+                    continue
+                current += split + "\n"
+            # Creating embeds list for PageManager
+            embeds = [
+                discord.Embed(
+                    title=f"Lyrics for **'{title}'** by **'{author}'**, (Page {i + 1}/{len(res)})",
+                    description=x,
+                )
+                for i, x in enumerate(res)
+            ]
+
+            page_manager = discordSuperUtils.PageManager(
+                ctx,
+                embeds,
+                public=True,
+            )
+
+            await page_manager.run()
+
+        else:
+            await ctx.send("No lyrics were found for the song")
 
 
 def setup(client):
