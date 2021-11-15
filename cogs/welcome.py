@@ -58,8 +58,8 @@ class Welcome(commands.Cog):
         else:
             channel = self.client.get_channel(result["channel"])
             member_count = member.guild.member_count
+            embed = discord.Embed(title=f"Welcome to {member.guild.name}!", description=str(result["message"]).format(mention=member.mention, count=member_count, name=member.name, guild=member.guild.name, username=member))
             await channel.send(
-                str(result["message"]).format(mention=member.mention, count=member_count, name=member.name, guild=member.guild.name, username=member),
                 file=await self.ImageManager.create_welcome_card(
                     member,
                     discordSuperUtils.Backgrounds.FOREST,
@@ -67,7 +67,8 @@ class Welcome(commands.Cog):
                     f"Member {member_count}",
                     description_color=(255, 255, 255),
                     transparency=127,
-                )
+                ),
+                embed=embed
             )
             if not member.bot:
                 await member.send(result["dm"])
