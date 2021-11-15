@@ -151,7 +151,7 @@ class Music(commands.Cog, discordSuperUtils.CogManager.Cog, name="Music"):
         page_manager = discordSuperUtils.PageManager(ctx, embeds, public=True)
         await page_manager.run()
 
-    @commands.command()
+    @commands.command(help="See song lyrics")
     async def lyrics(self, ctx, *, query=None):
         if response := await self.MusicManager.lyrics(ctx, query):
             # If lyrics are found
