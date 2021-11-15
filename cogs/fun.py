@@ -7,8 +7,6 @@ import random
 import asyncio
 import os
 
-with open('config.json') as f:
-    data = json.load(f)
 
 reddit = asyncpraw.Reddit(client_id="WS8DpWseFlxeec8_v2sjrw",
                           client_secret=os.environ.get("reddit_secret"),
