@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
 from motor.motor_asyncio import AsyncIOMotorClient
+import os
 
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
