@@ -1,6 +1,5 @@
 import os
 import discord
-import json
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -60,12 +59,7 @@ class CustomHelp(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
 
-# open config.json
-with open('config.json') as f:
-    data = json.load(f)
-
-
-cluster = AsyncIOMotorClient(data['mango_link'])
+cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["custom_prefix"]
 cursor = db["prefix"]
 
@@ -122,4 +116,4 @@ if __name__ == '__main__':
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
             client.load_extension(f'cogs.{filename[: -3]}')
-    client.run(data['token'])
+    client.run(os.environ.get("token"))

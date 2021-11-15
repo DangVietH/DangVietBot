@@ -5,14 +5,15 @@ import requests
 import asyncpraw
 import random
 import asyncio
+import os
 
 with open('config.json') as f:
     data = json.load(f)
 
-reddit = asyncpraw.Reddit(client_id='WS8DpWseFlxeec8_v2sjrw',
-                          client_secret=data['reddit_secret'],
+reddit = asyncpraw.Reddit(client_id="WS8DpWseFlxeec8_v2sjrw",
+                          client_secret=os.environ.get("reddit_secret"),
                           username='DangVietHoang',
-                          password=data['reddit_pass'],
+                          password=os.environ.get("reddit_pass"),
                           user_agent='')
 
 

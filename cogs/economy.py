@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
-import json
+import os
 import asyncio
 
 shop = [{"name": "chicken", "price": 10, "description": "birb machine"},
@@ -20,10 +20,7 @@ shop = [{"name": "chicken", "price": 10, "description": "birb machine"},
         {"name": "gold", "price": 200000, "description": "rich kid who like to show off"},
         {"name": "diamonds", "price": 600000, "description": "extreme rich kid"}]
 
-with open('config.json') as f:
-    data = json.load(f)
-
-cluster = AsyncIOMotorClient(data['mango_link'])
+cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["economy"]
 cursor = db["users"]
 
