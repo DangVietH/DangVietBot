@@ -40,14 +40,14 @@ class Reaction(commands.Cog):
         else:
             check = await cursor.find_one({"id": payload.message_id})
             if payload.message_id == check['id'] and payload.emoji.name == check['emoji']:
-                role = discord.utils.get(payload.guild.roles, id=check['role'])
+                role = payload.guild.get_role(check['role'])
                 await payload.member.add_roles(role)
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
         check = await cursor.find_one({"id": payload.message_id})
         if payload.message_id == check['id'] and payload.emoji.name == check['emoji']:
-            role = discord.utils.get(payload.guild.roles, id=check['role'])
+            role = payload.guild.get_role(check['role'])
             await payload.member.remove_roles(role)
 
 
