@@ -1,5 +1,4 @@
 import discord
-import asyncio
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
@@ -41,14 +40,14 @@ class Reaction(commands.Cog):
         else:
             check = await cursor.find_one({"id": payload.message_id})
             if payload.message_id == check['id'] and payload.emoji.name == check['emoji']:
-                role = discord.utils.get(self.client.get_guild(payload.guild.id).roles, id=check['role'])
+                role = discord.utils.get(payload.guild.roles, id=check['role'])
                 await payload.member.add_roles(role)
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
         check = await cursor.find_one({"id": payload.message_id})
         if payload.message_id == check['id'] and payload.emoji.name == check['emoji']:
-            role = discord.utils.get(self.client.get_guild(payload.guild.id).roles, id=check['role'])
+            role = discord.utils.get(payload.guild.roles, id=check['role'])
             await payload.member.remove_roles(role)
 
 
