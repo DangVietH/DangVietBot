@@ -56,7 +56,7 @@ class Welcome(commands.Cog):
         else:
             channel = self.client.get_channel(result["channel"])
             member_count = member.guild.member_count
-            embed = discord.Embed(title=f"Welcome to {member.guild.name}!", description=str(result["message"]).format(mention=member.mention, count=member_count, name=member.name, guild=member.guild.name, username=member))
+            embed = discord.Embed(title=f"Welcome to {member.guild.name}!", description=str(result["message"]).format(mention=member.mention, count=member_count, name=member.name, guild=member.guild.name, username=member), color=discord.Color.random())
             embed.set_thumbnail(url=member.avatar.url)
             embed.set_image(url="https://c.tenor.com/XUgZ2mGI-LwAAAAC/welcome-greet.gif")
             await channel.send(embed=embed)
