@@ -1,5 +1,4 @@
 from discord.ext import commands
-import discordSuperUtils
 import discord
 from motor.motor_asyncio import AsyncIOMotorClient
 import json
@@ -15,7 +14,6 @@ cursors = dbs["channel"]
 class Welcome(commands.Cog):
     def __init__(self, client):
         self.client = client
-        self.ImageManager = discordSuperUtils.ImageManager()
         super().__init__()
 
     @commands.command(help="Setup welcome channel")
@@ -59,19 +57,11 @@ class Welcome(commands.Cog):
             channel = self.client.get_channel(result["channel"])
             member_count = member.guild.member_count
             embed = discord.Embed(title=f"Welcome to {member.guild.name}!", description=str(result["message"]).format(mention=member.mention, count=member_count, name=member.name, guild=member.guild.name, username=member))
-            await channel.send(
-                file=await self.ImageManager.create_welcome_card(
-                    member,
-                    discordSuperUtils.Backgrounds.FOREST,
-                    f"🎉 {member} just joined the server",
-                    f"Member {member_count}",
-                    description_color=(255, 255, 255),
-                    transparency=127,
-                ),
-                embed=embed
-            )
+            embed.set_thumbnail(url=member.avatar.url)
+            embed.set_image(url="https://tenor.com/view/welcome-greet-hello-flashing-text-youre-welcome-gif-17110416")
+            await channel.send(embed=embed)
             if not member.bot:
-                await member.send(result["dm"])
+                await member.send(str(result["dm"]).format(count=member_count, name=member.name, guild=member.guild.name, username=member))
 
 
 def setup(client):
