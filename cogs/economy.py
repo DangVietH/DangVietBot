@@ -90,6 +90,7 @@ class Economy(commands.Cog):
                     emojis.append(f":regional_indicator_{s.lower()}:")
                 else:
                     emojis.append("  ")
+            await ctx.send("Convert the message below to text")
             await ctx.send(' '.join(emojis))
             try:
                 message = await self.client.wait_for('message', timeout=30.0)
