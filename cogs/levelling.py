@@ -34,11 +34,10 @@ class Leveling(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.guild:
-            if not message.author.bot:
-                await self.update_user(message.author)
-                await self.add_exp(message.author)
-                await self.level_up(message.author, message)
+        if not message.author.bot:
+            await self.update_user(message.author)
+            await self.add_exp(message.author)
+            await self.level_up(message.author, message)
 
     @commands.command(help="See your rank")
     async def rank(self, ctx, member: discord.Member = None):
