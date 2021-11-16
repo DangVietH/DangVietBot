@@ -44,7 +44,7 @@ class Leveling(commands.Cog):
     @commands.command(help="See your rank")
     async def rank(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        result = await self.xp.find_one({"guild": member.guild.id})
+        result = await xp.find_one({"guild": member.guild.id})
         if result is None:
             await ctx.send(f"The specified member haven't send a message yet!")
         else:
