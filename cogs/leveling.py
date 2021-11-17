@@ -22,7 +22,7 @@ class Leveling(commands.Cog):
                     insert = {'user': message.author.id, 'lvl': 0, 'xp': 0}
                     await member.insert_one(insert)
                 else:
-                    nxp = member['xp'] + 5
+                    nxp = result['xp'] + 5
                     await member.update_one({"user": message.author.id}, {"$set": {"xp": nxp}})
                     lvl_og = result['lvl']
                     lvl_end = int(result['exp'] ** (1 / 4))
