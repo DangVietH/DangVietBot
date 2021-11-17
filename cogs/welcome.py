@@ -28,7 +28,7 @@ class Welcome(commands.Cog):
 
     @commands.command(help="Remove welcome system")
     @commands.has_permissions(administrator=True)
-    async def remove_channel(self, ctx):
+    async def remove_wchannel(self, ctx):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is not None:
             await cursors.delete_one(result)
