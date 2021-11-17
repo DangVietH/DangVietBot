@@ -109,7 +109,7 @@ async def on_guild_join(guild):
         to_many_bots = len(bots)
         if to_many_bots > 8:
             await guild.system_channel.send("Sorry about that but I have to leave this server because I'm against bot farming. Make sure you have less that 8 bots before inviting me.")
-            guild.leave()
+            await guild.leave()
         else:
             embed = discord.Embed(description=f"""Hello **{guild.name}**. I'm DHB, a multi-purpose bot made by **! DvH#9980**. Thanks for adding me into your server. 
 Begin by typing d!help or @DHB help to see my list of commands 
