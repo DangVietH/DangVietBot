@@ -29,7 +29,7 @@ class Leveling(commands.Cog):
                     if lvl_og < lvl_end:
                         new_lvl = lvl_og + 1
                         await member.update_one({"user": message.author.id}, {"$set": {"lvl": new_lvl}})
-                        await message.channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**!!🎉")
+                        await message.channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**! Noice!!")
 
     @commands.command(help="See your rank")
     async def rank(self, ctx, user: discord.Member = None):
