@@ -26,12 +26,22 @@ class Welcome(commands.Cog):
             await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
             await ctx.send(f"Welcome channel updated to {channel.mention}")
 
+    @commands.command(help="Remove welcome system")
+    @commands.has_permissions(administrator=True)
+    async def remove_channel(self, ctx):
+        result = await cursors.find_one({"guild": ctx.guild.id})
+        if result is not None:
+            await cursors.delete_one(result)
+            await ctx.send("Welcome system has been remove")
+        else:
+            await ctx.send("You don't have a welcome system")
+
     @commands.command(help="Setup welcome text")
     @commands.has_permissions(administrator=True)
     async def welcome_text(self, ctx, *, text):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is None:
-            await ctx.send("You haven't set a welcome channel yet")
+            await ctx.send("You haven't configure a welcome channel yet")
         else:
             await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"message": text}})
             await ctx.send(f"Welcome message updated to ```{text}```")
@@ -41,7 +51,7 @@ class Welcome(commands.Cog):
     async def welcome_dm(self, ctx, *, text):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is None:
-            await ctx.send("You haven't set a welcome channel yet")
+            await ctx.send("You haven't configure a welcome channel yet")
         else:
             await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"dm": text}})
             await ctx.send(f"Welcome dm updated to ```{text}```")
