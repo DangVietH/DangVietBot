@@ -41,7 +41,7 @@ class Leveling(commands.Cog):
             embed.add_field(name="XP", value=f"#{result['xp']}")
             await ctx.send(embed=embed)
         else:
-            await ctx.send(f"The specified member haven't send a message yet!")
+            await ctx.send(f"The specified member haven't send a message yet!!")
 
 
 def setup(client):
