@@ -5,34 +5,34 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["levelling"]
+xp = db['xp']
+role = db['roles']
 
 
 class Leveling(commands.Cog):
     def __init__(self, client):
         self.client = client
-        self.role = db['roles']
-        self.xp = db['xp']
 
     async def update_user(self, user, message):
-        result = await self.xp.find_one({"guild": message.guild.id}, {"member": user.id})
+        result = await xp.find_one({"guild": message.guild.id}, {"member": user.id})
         if result is None:
             insert = {"guild": message.guild.id, "member": user.id, "rank": 0, "xp": 0}
-            await self.xp.insert_one(insert)
+            await xp.insert_one(insert)
 
     async def add_exp(self, user, message):
-        result = await self.xp.find_one({"guild": message.guild.id}, {"member": user.id})
+        result = await xp.find_one({"guild": message.guild.id}, {"member": user.id})
         if result is not None:
             add_xp = result["xp"] + 5
-            await self.xp.update_one({"guild": message.guild.id}, {"member": user.id}, {"$set": {"xp": add_xp}})
+            await xp.update_one({"guild": message.guild.id}, {"member": user.id}, {"$set": {"xp": add_xp}})
 
     async def level_up(self, user, message):
-        result = await self.xp.find_one({"guild": message.guild.id}, {"member": user.id})
+        result = await xp.find_one({"guild": message.guild.id}, {"member": user.id})
         if result is not None:
             lvl_og = result['rank']
             lvl_end = int(result['xp'] ** (1 / 4))
             if lvl_og < lvl_end:
                 new_lvl = lvl_og + 1
-                await self.xp.update_one({"guild": message.guild.id}, {"member": user.id}, {"$set": {"rank": new_lvl}})
+                await xp.update_one({"guild": message.guild.id}, {"member": user.id}, {"$set": {"rank": new_lvl}})
                 await message.channel.send(f"🎉 {user.mention} has reach level **{new_lvl}**!!")
 
     @commands.Cog.listener()
