@@ -15,7 +15,7 @@ class Leveling(commands.Cog):
 
     async def update_user(self, user, message):
         result = await self.xp.find_one({"guild": message.guild.id})
-        if message.guild.id != result['guild'] and user.id != ['member']:
+        if message.guild.id != result['guild'] and user.id != result['member']:
             insert = {"guild": message.guild.id, "member": user.id, "rank": 0, "xp": 0}
             await self.xp.insert_one(insert)
 
