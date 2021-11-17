@@ -22,9 +22,6 @@ class Listener(commands.Cog):
 
         # prevent
         racist = ["nigger", "nigga", "chink"]
-        if "discord.gg" in message.content:
-            await message.delete()
-            await message.author.send('No server adds')
 
         if any(word in message.content.lower() for word in racist):
             member.kick(reason=None)
