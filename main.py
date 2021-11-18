@@ -104,18 +104,12 @@ async def on_command_error(ctx, error):
 
 @client.event
 async def on_guild_join(guild):
-    if guild.system_channel is not None:
-        bots = [member for member in guild.members if member.bot]
-        to_many_bots = len(bots)
-        if to_many_bots > 8:
-            await guild.system_channel.send("Sorry about that but I have to leave this server because I'm against bot farming. Make sure you have less that 8 bots before inviting me.")
-            await guild.leave()
-        else:
-            embed = discord.Embed(description=f"""Hello **{guild.name}**. I'm DHB, a multi-purpose bot made by **! DvH#9980**. Thanks for adding me into your server. 
+    embed = discord.Embed(description=f"""Hello **{guild.name}**. I'm DHB, a multi-purpose bot made by **! DvH#9980**. Thanks for adding me into your server. 
 Begin by typing d!help or @DHB help to see my list of commands 
 Join my [server](https://discord.gg/cnydBRnHU9) if you like too""")
-            embed.set_footer(text="Have fun!")
-            await guild.system_channel.send(embed=embed)
+    embed.set_footer(text="Have fun!")
+    await guild.system_channel.send(embed=embed)
+
 
 if __name__ == '__main__':
     # Load extension
