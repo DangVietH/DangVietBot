@@ -83,7 +83,7 @@ client = commands.Bot(command_prefix=get_prefix, intents=intents, help_command=C
 @client.event
 async def on_ready():
     print('DHB is online')
-    await client.change_presence(activity=discord.Streaming(name="d!help", url="https://www.twitch.tv/dvieth"))
+    await client.change_presence(activity=discord.Streaming(name="In development", url="https://www.twitch.tv/dvieth"))
 
 
 @client.event
