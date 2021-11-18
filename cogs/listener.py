@@ -19,6 +19,8 @@ class Listener(commands.Cog):
 
         if message.content.startswith("D!"):
             await message.channel.send("My commands prefix is case sensitive, so please use d! instead")
+        if message.content.startswith("f "):
+            await message.channel.send("f")
 
         # prevent
         racist = ["nigger", "nigga", "chink"]
