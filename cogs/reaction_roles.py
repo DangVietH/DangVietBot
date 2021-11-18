@@ -20,7 +20,7 @@ class Reaction(commands.Cog):
     async def self_react(self, ctx):
         await ctx.send("Answer These Question In Next 10Min!")
 
-        questions = ["Enter Message: ", "Enter Emojis: ", "Enter Roles (id): ", "Enter Channel: "]
+        questions = ["Enter Message: ", "Enter Emojis: ", "Enter Roles (name): ", "Enter Channel: "]
         answers = []
 
         def check(user):
