@@ -82,7 +82,7 @@ class Reaction(commands.Cog):
                     if chose_emoji == emojis[i]:
                         selected_role = roles[i]
 
-                        role = discord.utils.get(guild.roles, id=selected_role)
+                        role = discord.utils.get(guild.roles, name=selected_role)
 
                         await payload.member.add_roles(role)
 
@@ -106,7 +106,7 @@ class Reaction(commands.Cog):
                 if chose_emoji == emojis[i]:
                     selected_role = roles[i]
 
-                    role = discord.utils.get(guild.roles, id=selected_role)
+                    role = discord.utils.get(guild.roles, name=selected_role)
                     member = await(guild.fetch_member(payload.user_id))
                     if member is not None:
                         await member.remove_roles(role)
