@@ -18,7 +18,7 @@ class Music(commands.Cog):
 
         if not hasattr(bot, 'lavalink'):  # This ensures the client isn't overwritten during cog reloads.
             bot.music = lavalink.Client(875589545532485682)
-            bot.music.add_node('localhost', 2333, 'youshallnotpass', 'us', 'default-node')
+            bot.music.add_node('0.0.0.0', 2333, 'youshallnotpass', 'us', 'default-node')
             bot.add_listener(bot.music.voice_update_handler, 'on_socket_response')
 
         lavalink.add_event_hook(self.track_hook)
@@ -59,7 +59,7 @@ class Music(commands.Cog):
             guild = self.bot.get_guild(guild_id)
             await guild.voice_client.disconnect(force=True)
 
-    @commands.command(aliases=['p'])
+    @commands.command(help="Play music")
     async def play(self, ctx, *, query: str):
         player = self.bot.music.player_manager.get(ctx.guild.id)
         query = query.strip('<>')
@@ -99,7 +99,7 @@ class Music(commands.Cog):
         if not player.is_playing:
             await player.play()
 
-    @commands.command(name='queue')
+    @commands.command(help="see queue")
     async def queue(self, ctx, page: int = 1):
         player = self.bot.music.player_manager.get(ctx.guild.id)
 
