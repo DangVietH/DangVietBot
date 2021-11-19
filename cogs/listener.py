@@ -1,5 +1,4 @@
 from discord.ext import commands
-import discordSuperUtils
 
 
 class Listener(commands.Cog):
@@ -8,7 +7,6 @@ class Listener(commands.Cog):
     """
     def __init__(self, bot):
         self.bot = bot
-        self.ImageManager = discordSuperUtils.ImageManager()
         super().__init__()
 
     @commands.Cog.listener()
