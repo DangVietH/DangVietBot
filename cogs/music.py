@@ -31,7 +31,7 @@ class Music(commands.Cog):
         #  Ensure that the bot and command author share a mutual voicechannel.
 
     async def ensure_voice(self, ctx):
-        player = self.bot.lavalink.player_manager.create(ctx.guild.id, endpoint=str(ctx.guild.region))
+        player = self.bot.music.player_manager.create(ctx.guild.id, endpoint=str(ctx.guild.region))
         should_connect = ctx.command.name in ('play',)
 
         if not ctx.author.voice or not ctx.author.voice.channel:
