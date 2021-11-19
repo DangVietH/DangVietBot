@@ -6,14 +6,14 @@ class Listener(commands.Cog):
     """
     Commands to listen to events
     """
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         self.ImageManager = discordSuperUtils.ImageManager()
         super().__init__()
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author == self.client.user:
+        if message.author == self.bot.user:
             return
         member = message.author
 
@@ -30,5 +30,5 @@ class Listener(commands.Cog):
             await message.channel.send(f"{member.mention} has been kick for saying a racist word")
 
 
-def setup(client):
-    client.add_cog(Listener(client))
+def setup(bot):
+    bot.add_cog(Listener(bot))

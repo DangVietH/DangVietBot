@@ -10,8 +10,8 @@ cursors = dbs["channel"]
 
 
 class Welcome(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         super().__init__()
 
     @commands.command(help="Setup welcome channel")
@@ -62,7 +62,7 @@ class Welcome(commands.Cog):
         if result is None:
             return
         else:
-            channel = self.client.get_channel(result["channel"])
+            channel = self.bot.get_channel(result["channel"])
             member_count = member.guild.member_count
             embed = discord.Embed(title=f"Welcome to {member.guild.name}!", description=str(result["message"]).format(mention=member.mention, count=member_count, name=member.name, guild=member.guild.name, username=member), color=discord.Color.random())
             embed.set_thumbnail(url=member.avatar.url)
@@ -72,5 +72,5 @@ class Welcome(commands.Cog):
                 await member.send(str(result["dm"]).format(count=member_count, name=member.name, guild=member.guild.name, username=member))
 
 
-def setup(client):
-    client.add_cog(Welcome(client))
+def setup(bot):
+    bot.add_cog(Welcome(bot))

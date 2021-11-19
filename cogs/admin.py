@@ -3,8 +3,8 @@ from discord.ext import commands
 
 
 class Admin(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.command(help="Warn member")
     @commands.has_permissions(administrator=True)
@@ -104,5 +104,5 @@ class Admin(commands.Cog):
         await ctx.send('Channel unlocked.')
 
 
-def setup(client):
-    client.add_cog(Admin(client))
+def setup(bot):
+    bot.add_cog(Admin(bot))

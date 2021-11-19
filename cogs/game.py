@@ -3,8 +3,8 @@ import random
 
 
 class Game(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.command(help="Play rock paper scissors with the bot")
     async def rps(self, ctx, user_choice):
@@ -39,5 +39,5 @@ class Game(commands.Cog):
             await ctx.send('It must be rock paper scissors')
 
 
-def setup(client):
-    client.add_cog(Game(client))
+def setup(bot):
+    bot.add_cog(Game(bot))

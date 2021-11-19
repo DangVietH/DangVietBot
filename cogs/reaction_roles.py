@@ -12,8 +12,8 @@ cursor = db['reaction_roles']
 
 
 class Reaction(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.command(help="Set up reaction role")
     @commands.has_permissions(administrator=True)
@@ -30,7 +30,7 @@ class Reaction(commands.Cog):
             await ctx.send(question)
 
             try:
-                msg = await self.client.wait_for('message', timeout=600.0, check=check)
+                msg = await self.bot.wait_for('message', timeout=600.0, check=check)
             except asyncio.TimeoutError:
                 await ctx.send("Type Faster Next Time!")
                 return
@@ -40,7 +40,7 @@ class Reaction(commands.Cog):
         emojis = answers[1].split(" ")
         roles = answers[2].split(" ")
         c_id = int(answers[3][2:-1])
-        channel = self.client.get_channel(c_id)
+        channel = self.bot.get_channel(c_id)
 
         bot_msg = await channel.send(answers[0])
 
@@ -75,7 +75,7 @@ class Reaction(commands.Cog):
                 for role in check['roles']:
                     roles.append(role)
 
-                guild = self.client.get_guild(payload.guild_id)
+                guild = self.bot.get_guild(payload.guild_id)
 
                 for i in range(len(emojis)):
                     chose_emoji = str(payload.emoji)
@@ -99,7 +99,7 @@ class Reaction(commands.Cog):
             for role in check['roles']:
                 roles.append(role)
 
-            guild = self.client.get_guild(payload.guild_id)
+            guild = self.bot.get_guild(payload.guild_id)
 
             for i in range(len(emojis)):
                 chose_emoji = str(payload.emoji)
@@ -112,5 +112,5 @@ class Reaction(commands.Cog):
                         await member.remove_roles(role)
 
 
-def setup(client):
-    client.add_cog(Reaction(client))
+def setup(bot):
+    bot.add_cog(Reaction(bot))

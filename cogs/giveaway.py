@@ -6,8 +6,8 @@ import random
 
 
 class Giveaway(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.command(help="start Giveaway")
     @commands.has_permissions(administrator=True)
@@ -22,7 +22,7 @@ class Giveaway(commands.Cog):
         for question in giveaway_questions:
             await ctx.send(question)
             try:
-                message = await self.client.wait_for('message', timeout=30.0, check=check)
+                message = await self.bot.wait_for('message', timeout=30.0, check=check)
             except asyncio.TimeoutError:
                 await ctx.send(
                     "You didn't answer in time.  Please try again and be sure to send your answer within 30 seconds of the question.")
@@ -37,7 +37,7 @@ class Giveaway(commands.Cog):
                 f'You failed to mention the channel correctly.  Please do it like this: {ctx.channel.mention}')
             return
 
-        channel = self.client.get_channel(c_id)
+        channel = self.bot.get_channel(c_id)
         prize = str(giveaway_answers[1])
         time = int(giveaway_answers[2])
 
@@ -59,7 +59,7 @@ class Giveaway(commands.Cog):
         new_message = await channel.fetch_message(my_message.id)
 
         users = await new_message.reactions[0].users().flatten()
-        users.pop(users.index(self.client.user))
+        users.pop(users.index(self.bot.user))
         winner = random.choice(users)
 
         try:
@@ -72,5 +72,5 @@ class Giveaway(commands.Cog):
             await ctx.send("Nobody join? Maybe next time. Good luck")
 
 
-def setup(client):
-    client.add_cog(Giveaway(client))
+def setup(bot):
+    bot.add_cog(Giveaway(bot))

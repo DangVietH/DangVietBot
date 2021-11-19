@@ -5,8 +5,8 @@ import asyncio
 
 
 class Misc(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.command(help="Translate a messages")
     async def translate(self, ctx, lang, *, args):
@@ -73,5 +73,5 @@ class Misc(commands.Cog):
             await ctx.send(num1 / num2)
 
 
-def setup(client):
-    client.add_cog(Misc(client))
+def setup(bot):
+    bot.add_cog(Misc(bot))

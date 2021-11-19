@@ -10,8 +10,8 @@ role = db['roles']
 
 
 class Leveling(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -44,5 +44,5 @@ class Leveling(commands.Cog):
             await ctx.send(f"The specified member haven't send a message yet!!")
 
 
-def setup(client):
-    client.add_cog(Leveling(client))
+def setup(bot):
+    bot.add_cog(Leveling(bot))

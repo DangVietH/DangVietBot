@@ -9,8 +9,8 @@ cursor = db["prefix"]
 
 
 class Prefix(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.command(help="Set custom prefix")
     @commands.has_permissions(administrator=True)
@@ -35,5 +35,5 @@ class Prefix(commands.Cog):
             await ctx.send(f"Server prefix set back to default")
 
 
-def setup(client):
-    client.add_cog(Prefix(client))
+def setup(bot):
+    bot.add_cog(Prefix(bot))

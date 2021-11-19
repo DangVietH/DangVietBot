@@ -8,8 +8,8 @@ from discord.ext import commands
 
 
 class RTFM(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
         self.targets = {
             "python": "https://docs.python.org/3",
             "discord.py": "https://discordpy.readthedocs.io/en/master/",
@@ -38,7 +38,7 @@ class RTFM(commands.Cog):
 
     @property
     def session(self):
-        return self.client.http._HTTPClient__session
+        return self.bot.http._HTTPClient__session
 
     async def build(self, target) -> None:
         url = self.targets[target]
@@ -115,5 +115,5 @@ class RTFM(commands.Cog):
         )
 
 
-def setup(client):
-    client.add_cog(RTFM(client))
+def setup(bot):
+    bot.add_cog(RTFM(bot))

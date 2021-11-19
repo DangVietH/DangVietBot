@@ -76,17 +76,17 @@ async def get_prefix(bot, message):
 
 
 intents = discord.Intents.all()
-client = commands.Bot(command_prefix=get_prefix, intents=intents, help_command=CustomHelp(),
-                      description="One bot Many functionality", owner_id=860876181036335104)
+bot = commands.Bot(command_prefix=get_prefix, intents=intents, help_command=CustomHelp(),
+                   description="One bot Many functionality", owner_id=860876181036335104)
 
 
-@client.event
+@bot.event
 async def on_ready():
     print('DHB is online')
-    await client.change_presence(activity=discord.Streaming(name="In development", url="https://www.twitch.tv/dvieth"))
+    await bot.change_presence(activity=discord.Streaming(name="In development", url="https://www.twitch.tv/dvieth"))
 
 
-@client.event
+@bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send('Invalid Command!')
@@ -102,11 +102,11 @@ async def on_command_error(ctx, error):
         await ctx.send(f"{error}")
 
 
-@client.event
+@bot.event
 async def on_guild_join(guild):
     embed = discord.Embed(description=f"""Hello **{guild.name}**. I'm DHB, a multi-purpose bot made by **! DvH#9980**. Thanks for adding me into your server. 
 Begin by typing d!help or @DHB help to see my list of commands 
-Join my [server](https://discord.gg/cnydBRnHU9) if you like too""")
+Join my [server](https://discord.gg/cnydBRnHU9) if you like too""", color=discord.Color.random())
     embed.set_footer(text="Have fun!")
     await guild.system_channel.send(embed=embed)
 
@@ -115,6 +115,6 @@ if __name__ == '__main__':
     # Load extension
     for filename in os.listdir('./cogs'):
         if filename.endswith('.py'):
-            client.load_extension(f'cogs.{filename[: -3]}')
-    client.load_extension('jishaku')
-    client.run(os.environ.get("token"))
+            bot.load_extension(f'cogs.{filename[: -3]}')
+    bot.load_extension('jishaku')
+    bot.run(os.environ.get("token"))

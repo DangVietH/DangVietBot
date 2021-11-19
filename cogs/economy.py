@@ -26,8 +26,8 @@ cursor = db["users"]
 
 
 class Economy(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.command(help="Create your economy account")
     async def create_account(self, ctx):
@@ -93,7 +93,7 @@ class Economy(commands.Cog):
             await ctx.send("Convert the message below to text")
             await ctx.send(' '.join(emojis))
             try:
-                message = await self.client.wait_for('message', timeout=30.0)
+                message = await self.bot.wait_for('message', timeout=30.0)
             except asyncio.TimeoutError:
                 newBal = check['wallet'] + 10
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
@@ -251,5 +251,5 @@ class Economy(commands.Cog):
                     await ctx.send(f"Successfully rob <:DHBuck:901485795410599988> {amount} from {user.mention}")
 
 
-def setup(client):
-    client.add_cog(Economy(client))
+def setup(bot):
+    bot.add_cog(Economy(bot))
