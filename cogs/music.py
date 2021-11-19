@@ -86,6 +86,8 @@ class Music(commands.Cog):
             track = results['tracks'][0]
             embed.title = 'Track Enqueued'
             embed.description = f'[{track["info"]["title"]}]({track["info"]["uri"]})'
+            vid_id = track["info"]["identifier"]
+            embed.set_thumbnail(url=f"https://img.youtube.com/vi/{vid_id}/hqdefault.jpg")
 
             # You can attach additional information to audiotracks through kwargs, however this involves
             # constructing the AudioTrack class yourself.
