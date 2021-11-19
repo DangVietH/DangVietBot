@@ -12,7 +12,7 @@ class MusicError(commands.CommandError):
         super().__init__(message)
 
 
-class MusicCog(commands.Cog):
+class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -183,4 +183,4 @@ class MusicCog(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(MusicCog(bot))
+    bot.add_cog(Music(bot))
