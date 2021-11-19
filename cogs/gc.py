@@ -40,8 +40,7 @@ class GC(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if not message.author.bot:
-            if not message.content.startswith(get_prefix):
-                await self.sendAll(message)
+            return
 
     async def sendAll(self, message: discord.Message):
         pass

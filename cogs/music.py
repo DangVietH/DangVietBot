@@ -166,6 +166,13 @@ class Music(commands.Cog):
             await ctx.message.add_reaction("🎵")
 
     @commands.command(help="Skip song")
+    async def skip(self, ctx):
+        """ Skips the current track. """
+        player = self.bot.music.player_manager.get(ctx.guild.id)
+        await player.skip()
+        await ctx.message.add_reaction("🎵")
+
+    @commands.command(help="Skip song")
     async def resume(self, ctx):
         player = self.bot.music.player_manager.get(ctx.guild.id)
         await player.skip()
