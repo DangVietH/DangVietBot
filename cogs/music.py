@@ -17,7 +17,7 @@ class MusicCog(commands.Cog):
         self.bot = bot
 
         if not hasattr(bot, 'lavalink'):  # This ensures the client isn't overwritten during cog reloads.
-            bot.music = lavalink.Client(bot.user.id)
+            bot.music = lavalink.Client(self.bot.user.id)
             bot.music.add_node('localhost', 2333, 'youshallnotpass', 'us', 'default-node')
             bot.add_listener(bot.music.voice_update_handler, 'on_socket_response')
 
