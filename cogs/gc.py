@@ -1,9 +1,8 @@
 import discord
 from discord.ext import commands
-from main import get_prefix
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
-
+import datetime
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 dbs = cluster["gc"]
@@ -12,6 +11,7 @@ cursor = dbs["channel"]
 
 class GC(commands.Cog):
     """Global chat"""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -40,10 +40,7 @@ class GC(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         if not message.author.bot:
-            return
-
-    async def sendAll(self, message: discord.Message):
-        pass
+            result = await cursor.find_one({"channel"})
 
 
 def setup(bot):

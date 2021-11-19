@@ -61,11 +61,11 @@ class Info(commands.Cog):
 
     @commands.command(help="Bot information")
     async def about(self, ctx):
-        dvh = self.bot.get_user(860876181036335104)
+        dvh = self.bot.get_user(860876181036335104, color=discord.Color.random())
         embed = discord.Embed(title="Bot information")
         embed.add_field(name="Developer", value=f"{dvh.mention}")
         embed.add_field(name="Version", value="0.1.0")
-        embed.add_field(name="Written in", value="Python 3.9.4")
+        embed.add_field(name="Written in", value="Python 3.9.6")
         embed.add_field(name="Library", value="[discord.py-2.0.0a3575+g45d498c1](https://github.com/Rapptz/discord.py)")
         embed.add_field(name="Create at", value="8/13/2021")
         embed.add_field(name="Server's", value=f"{len(self.bot.guilds)}")
