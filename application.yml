@@ -1,6 +1,6 @@
 server: # REST and WS server
-  port: 80
-  address: "lava.darrennathanael.com"
+  port: 2333
+  address: 127.0.0.1
 lavalink:
   server:
     password: "boolookbelow"
