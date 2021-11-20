@@ -57,6 +57,11 @@ class Music(commands.Cog):
             guild = self.bot.get_guild(guild_id)
             await guild.voice_client.disconnect(force=True)
 
+    @commands.command(help="Join VC")
+    async def join(self, ctx):
+        channel = ctx.author.voice.channel
+        await channel.connect()
+
     @commands.command(help="Play music")
     async def play(self, ctx, *, query: str):
         player = self.bot.music.player_manager.get(ctx.guild.id)
