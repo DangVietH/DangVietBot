@@ -16,11 +16,9 @@ class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        if not hasattr(bot, 'lavalink'):  # This ensures the client isn't overwritten during cog reloads.
-            bot.music = lavalink.Client(875589545532485682)
-            bot.music.add_node('lava.link', 80, 'youshallnotpass', 'us', 'default-node')
-            bot.add_listener(bot.music.voice_update_handler, 'on_socket_response')
-
+        bot.music = lavalink.Client(875589545532485682)
+        bot.music.add_node('lavalink.darrennathanael.com', 80, 'boolookbelow', 'us', 'default-node')
+        bot.add_listener(bot.music.voice_update_handler, 'on_socket_response')
         lavalink.add_event_hook(self.track_hook)
 
     def cog_unload(self):
@@ -28,7 +26,7 @@ class Music(commands.Cog):
 
     async def cog_before_invoke(self, ctx):
         await self.ensure_voice(ctx)
-        #  Ensure that the bot and command author share a mutual voicechannel.
+        #  Ensure that the bot and command author share a mutual vc.
 
     async def ensure_voice(self, ctx):
         player = self.bot.music.player_manager.create(ctx.guild.id, endpoint=str(ctx.guild.region))
@@ -89,15 +87,10 @@ class Music(commands.Cog):
             vid_id = track["info"]["identifier"]
             embed.set_thumbnail(url=f"https://img.youtube.com/vi/{vid_id}/hqdefault.jpg")
 
-            # You can attach additional information to audiotracks through kwargs, however this involves
-            # constructing the AudioTrack class yourself.
             track = lavalink.models.AudioTrack(track, ctx.author.id)
             player.add(requester=ctx.author.id, track=track)
 
         await ctx.send(embed=embed)
-
-        # We don't want to call .play() if the player is playing as that will effectively skip
-        # the current track.
         if not player.is_playing:
             await player.play()
 

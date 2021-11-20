@@ -1,9 +1,9 @@
 server: # REST and WS server
   port: 80
-  address: "lava.link"
+  address: "lavalink.darrennathanael.com"
 lavalink:
   server:
-    password: "youshallnotpass"
+    password: "boolookbelow"
     sources:
       youtube: true
       bandcamp: true
