@@ -37,11 +37,6 @@ class GC(commands.Cog):
             await cursor.delete_one(result)
             await ctx.send("Server remove from global chat")
 
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if not message.author.bot:
-            result = await cursor.find_one({"channel"})
-
 
 def setup(bot):
     bot.add_cog(GC(bot))
