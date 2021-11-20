@@ -1,9 +1,9 @@
 server: # REST and WS server
-  port: 80
-  address: "lava.link"
+  port: 443
+  address: "lava.darrennathanael.com"
 lavalink:
   server:
-    password: "bruh"
+    password: "airportgateway"
     sources:
       youtube: true
       bandcamp: true
