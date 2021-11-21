@@ -17,7 +17,7 @@ class Music(commands.Cog):
         self.bot = bot
 
         bot.music = lavalink.Client(875589545532485682)
-        bot.music.add_node('lava.link', 80, 'youshallnotpass', 'us', 'default-node')
+        bot.music.add_node('https://dhblavalink.herokuapp.com/', 80, 'youshallnotpass', 'eu', 'default-node')
         bot.add_listener(bot.music.voice_update_handler, 'on_socket_response')
         lavalink.add_event_hook(self.track_hook)
 
@@ -56,11 +56,6 @@ class Music(commands.Cog):
             guild_id = int(event.player.guild_id)
             guild = self.bot.get_guild(guild_id)
             await guild.voice_client.disconnect(force=True)
-
-    @commands.command(help="Join VC")
-    async def join(self, ctx):
-        channel = ctx.author.voice.channel
-        await channel.connect()
 
     @commands.command(help="Play music")
     async def play(self, ctx, *, query: str):
