@@ -17,7 +17,7 @@ class Music(commands.Cog):
         self.bot = bot
 
         bot.music = lavalink.Client(875589545532485682)
-        bot.music.add_node('dhblavalink.herokuapp.com', 80, 'youshallnotpass', 'eu', 'default-node')
+        bot.music.add_node('lava.darrennathanael.com', 80, 'boolookbelow', 'eu', 'default-node')
         bot.add_listener(bot.music.voice_update_handler, 'on_socket_response')
         lavalink.add_event_hook(self.track_hook)
 
