@@ -17,27 +17,27 @@ class Leveling(commands.Cog):
     async def on_message(self, message):
         if message.guild:
             if not message.author.bot:
-                result = await member.find_one({'user': message.author.id})
+                result = await member.find_one({'guild': message.guild.id, "user": message.author.id})
                 if result is None:
-                    insert = {'user': message.author.id, 'lvl': 0, 'xp': 0}
+                    insert = {'guild': message.guild.id, "user": message.author.id, 'level': 0, 'xp': 0}
                     await member.insert_one(insert)
                 else:
-                    nxp = result['xp'] + 5
-                    await member.update_one({"user": message.author.id}, {"$set": {"xp": nxp}})
-                    lvl_og = result['lvl']
+                    add_exp = result['xp'] + 5
+                    await member.update_one({"guild": message.guild.id, "user": message.author.id}, {"$set": {"xp": add_exp}})
+                    lvl_start = result['level']
                     lvl_end = int(result['xp'] ** (1 / 4))
-                    if lvl_og < lvl_end:
-                        new_lvl = lvl_og + 1
-                        await member.update_one({"user": message.author.id}, {"$set": {"lvl": new_lvl}})
-                        await message.channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**! Noice!!")
+                    if lvl_start < lvl_end:
+                        new_lvl = lvl_start + 1
+                        await member.update_one({"guild": message.guild.id, "user": message.author.id}, {"$set": {"level": new_lvl}})
+                        await message.channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**!!🎉")
 
     @commands.command(help="See your rank")
     async def rank(self, ctx, user: discord.Member = None):
         user = user or ctx.author
-        result = await member.find_one({"user": user.id})
+        result = await member.find_one({'guild': ctx.guild.id, "user": user.id})
         if result is not None:
             embed = discord.Embed(title=user, color=user.color)
-            embed.add_field(name="Level", value=f"#{result['lvl']}")
+            embed.add_field(name="Level", value=f"#{result['level']}")
             embed.add_field(name="XP", value=f"#{result['xp']}")
             await ctx.send(embed=embed)
         else:
