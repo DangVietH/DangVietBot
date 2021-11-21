@@ -1,6 +1,6 @@
 server: # REST and WS server
   port: 80
-  address: 'https://dhblavalink.herokuapp.com/'
+  address: 'dhblavalink.herokuapp.com'
 lavalink:
   server:
     password: "youshallnotpass"
