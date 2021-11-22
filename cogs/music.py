@@ -158,10 +158,10 @@ class Music(commands.Cog):
         await self.bot.wait_until_ready()
 
         await self.bot.wavelink.initiate_node(
-            host="lava.link",
-            port=80,
-            rest_uri="http://lava.link:80",
-            password="anything as a password",
+            host="lavalink.darrennathanael.com",
+            port=2095,
+            rest_uri="http://lavalink.darrennathanael.com:2095",
+            password="whatwasthelastingyousaid",
             identifier="MAIN",
             region="singapore",
         )
