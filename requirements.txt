@@ -8,3 +8,4 @@ wavelink
 aiohttp<3.7.0
 dnspython
 jishaku
+PyNaCl
