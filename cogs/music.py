@@ -114,9 +114,11 @@ class WebPlayer(wavelink.Player):
         track = self.current
 
         embed = discord.Embed(
-            title="Now playing", description=f"[{track.title}]({track.uri})", color=discord.Color(0x2F3136)
+            title=track.title, url=track.uri, color=discord.Color(0x2F3136)
         )
-
+        embed.set_author(
+            name=track.author, url=track.uri, icon_url=self.bot.user.avatar.url
+        )
         embed.set_thumbnail(url=track.thumb)
         embed.add_field(
             name="Length",
