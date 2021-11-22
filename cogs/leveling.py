@@ -39,9 +39,10 @@ class Leveling(commands.Cog):
             embed = discord.Embed(title=user, color=user.color)
             embed.add_field(name="Level", value=f"#{result['level']}")
             embed.add_field(name="XP", value=f"#{result['xp']}")
+            embed.set_thumbnail(url=user.avatar.url)
             await ctx.send(embed=embed)
         else:
-            await ctx.send(f"The specified member haven't send a message yet!!")
+            await ctx.send(f"The specified member haven't send a message in this server!!")
 
 
 def setup(bot):

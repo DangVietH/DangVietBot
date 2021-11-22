@@ -3,10 +3,34 @@ from discord.ext import commands
 import discord
 import asyncio
 
+snipe_message_content = None
+snipe_message_author = None
+
 
 class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):
+        global snipe_message_content
+        global snipe_message_author
+
+        snipe_message_content = message.content
+        snipe_message_author = message.author
+        await asyncio.sleep(60)
+        snipe_message_author = None
+        snipe_message_content = None
+
+    @commands.command(help='See the last deleted message')
+    async def snipe(self, ctx):
+        if snipe_message_content is None:
+            await ctx.send("Nothing to snipe for now")
+        else:
+            embed = discord.Embed(description=f"{snipe_message_content}")
+            embed.set_author(name=f"Sniped the message deleted by : {snipe_message_author}", icon_url=f"{snipe_message_author.avatar.url}")
+            embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
+            await ctx.send(embed=embed)
 
     @commands.command(help="Translate a messages")
     async def translate(self, ctx, lang, *, args):
