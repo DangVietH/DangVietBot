@@ -27,8 +27,8 @@ class Misc(commands.Cog):
         if snipe_message_content is None:
             await ctx.send("Nothing to snipe for now")
         else:
-            embed = discord.Embed(description=f"{snipe_message_content}")
-            embed.set_author(name=f"Sniped the message deleted by : {snipe_message_author}", icon_url=f"{snipe_message_author.avatar.url}")
+            embed = discord.Embed(description=f"{snipe_message_content}", color=discord.Color.random())
+            embed.set_author(name=f"{snipe_message_author}", icon_url=f"{snipe_message_author.avatar.url}")
             embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
             await ctx.send(embed=embed)
 
