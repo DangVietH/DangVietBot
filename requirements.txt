@@ -4,7 +4,7 @@ googletrans==3.1.0a0
 motor==2.5.1
 DateTime==4.3
 git+https://github.com/Rapptz/discord.py
-lavalink==3.1.4
+wavelink
 aiohttp<3.7.0
 dnspython
 jishaku

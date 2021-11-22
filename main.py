@@ -94,6 +94,8 @@ async def on_command_error(ctx, error):
         await ctx.author.send('This command cannot be used in private messages.')
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send('You do not have permission to use this command')
+    elif isinstance(error, commands.NotOwner):
+        await ctx.send("Only the bot developer (**! DvH#9980**) can use this command")
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("You are missing a required argument for this command to work")
     elif isinstance(error, commands.CommandOnCooldown):
