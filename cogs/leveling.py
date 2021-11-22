@@ -45,7 +45,7 @@ class Leveling(commands.Cog):
             percentage = (xp_need / 100) * xp_have
 
             background = Editor(Canvas((934, 282), "#23272a"))
-            profile = await load_image_async(str(member.avatar_url))
+            profile = await load_image_async(str(member.avatar.url))
 
             profile = Editor(profile).resize((150, 150)).circle_image()
 
