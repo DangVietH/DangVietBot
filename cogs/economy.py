@@ -158,17 +158,18 @@ class Economy(commands.Cog):
             if cost > wallet:
                 await ctx.send(f"You don't have enough money to buy {amount} {item_name}")
             else:
-                newBal = wallet - cost
-
                 # insert object into user inventory
-                for thing in check['inventory']:
-                    n = thing['item']
-                    if n == item_name:
-                        new_amt = thing['amount'] + amount
-                        await cursor.update_one({"id": user.id}, {"$inc": {"inventory": {'item': str(item_name), 'amount': new_amt}}})
-                    else:
-                        await cursor.update_one({"id": user.id}, {"push": {"inventory": {'item': str(item_name), 'amount': amount}}})
+                count = 0
+                for x in check['inventory']:
+                    count += 1
+                    if str(x) == item_name:
+                        # find the item in the inventory and add the amount
+                        await cursor.update_one(
+                            {"id": user.id, "job_type": {"$exists": False}},
+                            {"$inc": {f"inventory_amount.{count - 1}": + amount}})
+                await cursor.update_one({"id": ctx.author.id}, {"$push": {f"inventory": str(item_name)}, "$inc": {f"inventory_amount.{count}": + amount}})
 
+                newBal = wallet - cost
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
                 await ctx.send(f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988>  {cost}")
 
