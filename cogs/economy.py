@@ -12,9 +12,9 @@ shop = [{"name": "chicken", "price": 10, "description": "birb machine"},
         {"name": "Sword", "price": 100, "description": "defence"},
         {"name": "Rifle", "price": 500, "description": "shoot"},
         {"name": "Laptop", "price": 1000, "description": "Work"},
-        {"name": "Flying-tonk", "price": 3000, "description": "Fly while shoot"},
+        {"name": "Flying tonk", "price": 3000, "description": "Fly while shoot"},
         {"name": "Mac", "price": 5000, "description": "Luxury"},
-        {"name": "Gaming-PC", "price": 10000, "description": "Epic gamers"},
+        {"name": "Gaming PC", "price": 10000, "description": "Epic gamers"},
         {"name": "platinum", "price": 20000, "description": "Show of your status"},
         {"name": "silver", "price": 50000, "description": "cool kid"},
         {"name": "gold", "price": 200000, "description": "rich kid who like to show off"},
@@ -133,7 +133,7 @@ class Economy(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(help="Buy stuff")
-    async def buy(self, ctx, item_name, amount=1):
+    async def buy(self, ctx, amount=1, *, item_name="chicken"):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
 
@@ -161,6 +161,14 @@ class Economy(commands.Cog):
                 newBal = wallet - cost
 
                 # insert object into user inventory
+                for thing in check['inventory']:
+                    n = thing['item']
+                    if n == item_name:
+                        new_amt = thing['amount'] + amount
+                        await cursor.update_one({"id": user.id}, {"$inc": {"inventory": {'item': str(item_name), 'amount': new_amt}}})
+                    else:
+                        await cursor.update_one({"id": user.id}, {"push": {"inventory": {'item': str(item_name), 'amount': amount}}})
+
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
                 await ctx.send(f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988>  {cost}")
 
@@ -203,7 +211,6 @@ class Economy(commands.Cog):
                 await ctx.message.add_reaction("✅")
 
     @commands.command(help="Transfer money to someone", aliases=['send'])
-    @commands.cooldown(1, 86400, commands.BucketType.user)
     async def transfer(self, ctx, user: discord.Member = None, amount=1):
         check1 = await cursor.find_one({"id": ctx.author.id})
         check2 = await cursor.find_one({"id": user.id})
