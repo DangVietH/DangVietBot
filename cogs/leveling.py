@@ -5,7 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["levelling"]
-member = db['member']
+levelling = db['member']
 role = db['roles']
 
 
@@ -17,24 +17,24 @@ class Leveling(commands.Cog):
     async def on_message(self, message):
         if message.guild:
             if not message.author.bot:
-                stats = await member.find_one({'guild': message.guild.id, "user": message.author.id})
+                stats = await levelling.find_one({'guild': message.guild.id, "user": message.author.id})
                 if stats is None:
                     insert = {'guild': message.guild.id, "user": message.author.id, 'level': 0, 'xp': 0}
-                    await member.insert_one(insert)
+                    await levelling.insert_one(insert)
                 else:
                     add_exp = stats['xp'] + 5
-                    await member.update_one({"guild": message.guild.id, "user": message.author.id}, {"$set": {"xp": add_exp}})
+                    await levelling.update_one({"guild": message.guild.id, "user": message.author.id}, {"$set": {"xp": add_exp}})
                     lvl_start = stats['level']
                     lvl_end = int(stats['xp'] ** (1 / 4))
                     if lvl_start < lvl_end:
                         new_lvl = lvl_start + 1
-                        await member.update_one({"guild": message.guild.id, "user": message.author.id}, {"$set": {"level": new_lvl}})
+                        await levelling.update_one({"guild": message.guild.id, "user": message.author.id}, {"$set": {"level": new_lvl}})
                         await message.channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**!!🎉")
 
     @commands.command(help="See your rank")
     async def rank(self, ctx, user: discord.Member = None):
         user = user or ctx.author
-        stats = await member.find_one({'guild': ctx.guild.id, "user": user.id})
+        stats = await levelling.find_one({'guild': ctx.guild.id, "user": user.id})
         if stats is not None:
             embed = discord.Embed(title=user, color=user.color)
             embed.add_field(name="Level", value=f"#{stats['level']}")
@@ -43,6 +43,11 @@ class Leveling(commands.Cog):
             await ctx.send(embed=embed)
         else:
             await ctx.send(f"The specified member haven't send a message in this server!!")
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        if not member.bot:
+            await levelling.delete_one({"guild": member.guild.id, "user": member.id})
 
 
 def setup(bot):
