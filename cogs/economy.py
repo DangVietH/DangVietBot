@@ -165,9 +165,9 @@ class Economy(commands.Cog):
                     if str(x) == item_name:
                         # find the item in the inventory and add the amount
                         await cursor.update_one(
-                            {"id": user.id, "job_type": {"$exists": False}},
-                            {"$inc": {f"inventory_amount.{count - 1}": + amount}})
-                await cursor.update_one({"id": ctx.author.id}, {"$push": {f"inventory": str(item_name)}, "$inc": {f"inventory_amount.{count}": + amount}})
+                            {"id": user.id},
+                            {"$inc": {f"inventory.{count - 1}": + amount}})
+                await cursor.update_one({"id": ctx.author.id}, {"$push": {f"inventory": str(item_name)}, "$inc": {f"inventory.{count}": + amount}})
 
                 newBal = wallet - cost
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
