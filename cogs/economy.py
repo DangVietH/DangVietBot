@@ -5,10 +5,10 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import asyncio
 
-shop = [{"name": "chicken", "price": 10, "description": "birb machine"},
-        {"name": "parrot", "price": 20, "description": "Juan"},
+shop = [{"name": "chicken", "price": 10, "description": "chicken men-men"},
+        {"name": "parrot", "price": 20, "description": "birb machine"},
         {"name": "watch", "price": 50, "description": "Time"},
-        {"name": "horse", "price": 70, "description": "neigh"},
+        {"name": "horse", "price": 70, "description": "Juan"},
         {"name": "Sword", "price": 100, "description": "defence"},
         {"name": "Rifle", "price": 500, "description": "shoot"},
         {"name": "Laptop", "price": 1000, "description": "Work"},
