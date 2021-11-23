@@ -236,7 +236,7 @@ class Music(commands.Cog, name="music"):
         query = query.strip("<>")
         if not self.URL_REG.match(query):
             #  scsearch when youtube found out soundcloud
-            query = f"ytsearch:{query}"
+            query = f"scsearch:{query}"
 
         tracks = await self.bot.wavelink.get_tracks(query)
 
