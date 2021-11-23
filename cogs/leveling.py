@@ -44,6 +44,13 @@ class Leveling(commands.Cog):
         else:
             await ctx.send(f"The specified member haven't send a message in this server!!")
 
+    # remove data to save storage
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
+        for member in guild.members:
+            if not member.bot:
+                await levelling.delete_one({"guild": guild.id, "user": member.id})
+
     @commands.Cog.listener()
     async def on_member_remove(self, member):
         if not member.bot:

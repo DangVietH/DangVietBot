@@ -3,7 +3,6 @@ import discord
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 
-
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 dbs = cluster["welcome"]
 cursors = dbs["channel"]
@@ -19,7 +18,8 @@ class Welcome(commands.Cog):
     async def welcome_channel(self, ctx, channel: discord.TextChannel):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is None:
-            insert = {"guild": ctx.guild.id, "channel": channel.id, "message": "Welcome {mention}", "dm": f"Have fun at **{ctx.guild.name}**"}
+            insert = {"guild": ctx.guild.id, "channel": channel.id, "message": "Welcome {mention}",
+                      "dm": f"Have fun at **{ctx.guild.name}**"}
             await cursors.insert_one(insert)
             await ctx.send(f"Welcome channel set to {channel.mention}")
         elif result is not None:
@@ -64,12 +64,25 @@ class Welcome(commands.Cog):
         else:
             channel = self.bot.get_channel(result["channel"])
             member_count = member.guild.member_count
-            embed = discord.Embed(title=f"Welcome to {member.guild.name}!", description=str(result["message"]).format(mention=member.mention, count=member_count, name=member.name, guild=member.guild.name, username=member), color=discord.Color.random())
+            embed = discord.Embed(title=f"Welcome to {member.guild.name}!",
+                                  description=str(result["message"]).format(mention=member.mention, count=member_count,
+                                                                            name=member.name, guild=member.guild.name,
+                                                                            username=member),
+                                  color=discord.Color.random())
             embed.set_thumbnail(url=member.avatar.url)
             embed.set_image(url="https://c.tenor.com/XUgZ2mGI-LwAAAAC/welcome-greet.gif")
             await channel.send(embed=embed)
             if not member.bot:
-                await member.send(str(result["dm"]).format(count=member_count, name=member.name, guild=member.guild.name, username=member))
+                await member.send(
+                    str(result["dm"]).format(count=member_count, name=member.name, guild=member.guild.name,
+                                             username=member))
+
+    # remove data to save storage
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
+        for member in guild.members:
+            if not member.bot:
+                await cursors.delete_one({"guild": guild.id})
 
 
 def setup(bot):
