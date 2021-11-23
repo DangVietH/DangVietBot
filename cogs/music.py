@@ -84,7 +84,9 @@ class Music(commands.Cog):
             host="lava.link",
             port="80",
             password="anything as a password",
-            identifier="MAIN"
+            identifier="MAIN",
+            spotify_client_id="358cab3df19f4bfa9d0dd0ebfb7c3afe",
+            spotify_client_secret="70932d35300d41df953aeaedfc4a278d"
         )
         print(f"Node is ready!")
 
