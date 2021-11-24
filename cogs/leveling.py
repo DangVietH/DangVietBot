@@ -48,7 +48,7 @@ class Leveling(commands.Cog):
     async def top(self, ctx):
         stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
         i = 1
-        embed = discord.Embed(title=f"🏆 Leaderboard of {ctx.guild.id}", color=discord.Color.random())
+        embed = discord.Embed(title=f"🏆 Leaderboard of {ctx.guild.name}", color=discord.Color.random())
         async for x in stats:
             try:
                 temp = ctx.guild.get_member(x["user"])
