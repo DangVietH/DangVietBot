@@ -35,8 +35,8 @@ class Economy(commands.Cog):
         if check is None:
             insert = {"id": ctx.author.id, "wallet": 0, "bank": 0, "inventory": []}
             await cursor.insert_one(insert)
-            await ctx.send("Complete")
-        else:
+            await ctx.send("Done, your economy account has been created. **ONLY USE OUR CURRENCY IN THE BOT. IF YOU'RE CAUGHT USING THIS BOT TO TRADE ITEMS, YOU'RE DEAD!!**")
+        else: 
             await ctx.send("You already have an account")
 
     @commands.command(help="See how much money you have", aliases=["bal"])
