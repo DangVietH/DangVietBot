@@ -56,7 +56,7 @@ class Leveling(commands.Cog):
                 templvl = x["level"]
                 xp = "{:,}".format(tempxp)
                 level = "{:,}".format(templvl)
-                embed.add_field(name=f"{i}: {temp}", value=f"**Level:** {level}  **XP:** {xp}", inline=True)
+                embed.add_field(name=f"{i}: {temp}", value=f"**Level:** {level}  **XP:** {xp}", inline=False)
                 i += 1            
             except:
                 pass
