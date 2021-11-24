@@ -56,9 +56,8 @@ class Leveling(commands.Cog):
                 templvl = x["level"]
                 xp = "{:,}".format(tempxp)
                 level = "{:,}".format(templvl)
-                    embed.add_field(name=f"{i}: {temp}", value=f"**Level:** {level}  **XP:** {xp}", inline=True)
-                    i += 1
-                    embed.set_thumbnail(url=ctx.guild.icon_url)            
+                embed.add_field(name=f"{i}: {temp}", value=f"**Level:** {level}  **XP:** {xp}", inline=True)
+                i += 1            
             except:
                 pass
             if i == 20 + 1:
