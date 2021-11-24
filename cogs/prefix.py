@@ -34,6 +34,10 @@ class Prefix(commands.Cog):
             await cursor.delete_one(result)
             await ctx.send(f"Server prefix set back to default")
 
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
+        await cursor.delete_one({"guild": guild.id})
+
 
 def setup(bot):
     bot.add_cog(Prefix(bot))
