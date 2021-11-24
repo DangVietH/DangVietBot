@@ -49,6 +49,7 @@ class Leveling(commands.Cog):
         stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
         i = 1
         embed = discord.Embed(title=f"🏆 Leaderboard of {ctx.guild.id}", color=discord.Color.random())
+        stat_list = await stats.to_list()
         for x in stats:
             try:
                 temp = ctx.guild.get_member(x["user"])
