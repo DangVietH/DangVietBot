@@ -100,6 +100,8 @@ async def on_command_error(ctx, error):
         await ctx.send("You are missing a required argument for this command to work")
     elif isinstance(error, commands.CommandOnCooldown):
         await ctx.send(f'⏱️ This command is on a cooldown. Use it after {round(error.retry_after, 2)}s')
+    else:
+        await ctx.send(f"{error}")
 
 
 @bot.event
