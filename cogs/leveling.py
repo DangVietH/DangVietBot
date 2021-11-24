@@ -46,7 +46,7 @@ class Leveling(commands.Cog):
 
     @commands.command(help="See top 20 users")
     async def top(self, ctx):
-        stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
+        stats = await levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
         embed = discord.Embed(title=f"🏆 Leaderboard of {ctx.guild.name}", color=discord.Color.random())
         i = 1
         for x in stats:
