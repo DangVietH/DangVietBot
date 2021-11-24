@@ -44,6 +44,28 @@ class Leveling(commands.Cog):
         else:
             await ctx.send(f"The specified member haven't send a message in this server!!")
 
+    @commands.command(help="See top 20 users")
+    async def top(self, ctx):
+        stats = await levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
+        embed = discord.Embed(title=f"🏆 Leaderboard of {ctx.guild.name}", color=discord.Color.random())
+        i = 1
+        for x in stats:
+            try:
+                temp = ctx.guild.get_member(x["user"])
+                tempxp = x["xp"]
+                templvl = x["level"]
+                xp = "{:,}".format(tempxp)
+                level = "{:,}".format(templvl)
+                embed.add_field(name=f"**{i}:** {temp.mention}",
+                                value=f"**Level:** {level}  **XP:** `{xp}`\n", inline=False)
+                i += 1
+                embed.set_thumbnail(url=ctx.guild.icon_url)
+            except:
+                pass
+            if i == 20 + 1:
+                break
+        await ctx.send(embed=embed)
+
     # remove data to save storage
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
