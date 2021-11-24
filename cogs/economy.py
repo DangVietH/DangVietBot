@@ -12,9 +12,9 @@ shop = [{"name": "chicken", "price": 10, "description": "chicken men-men"},
         {"name": "Sword", "price": 100, "description": "defence"},
         {"name": "Rifle", "price": 500, "description": "shoot"},
         {"name": "Laptop", "price": 1000, "description": "Work"},
-        {"name": "Flying tonk", "price": 3000, "description": "Fly while shoot"},
+        {"name": "Flying-tonk", "price": 3000, "description": "Fly while shoot"},
         {"name": "Mac", "price": 5000, "description": "Luxury"},
-        {"name": "Gaming PC", "price": 10000, "description": "Epic gamers"},
+        {"name": "Gaming-PC", "price": 10000, "description": "Epic gamers"},
         {"name": "platinum", "price": 20000, "description": "Show of your status"},
         {"name": "silver", "price": 50000, "description": "cool kid"},
         {"name": "gold", "price": 200000, "description": "rich kid who like to show off"},
@@ -133,7 +133,7 @@ class Economy(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(help="Buy stuff")
-    async def buy(self, ctx, amount=1, *, item_name="chicken"):
+    async def buy(self, ctx, item_name, amount=1,):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
 
