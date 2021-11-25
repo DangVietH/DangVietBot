@@ -118,9 +118,7 @@ class DisPlayer(wavelink.Player):
 
         track = self.current
 
-        embed = discord.Embed(
-            title="Now playing", url=f"[{track.title}]({track.uri})", color=discord.Color(0x2F3136)
-        )
+        embed = discord.Embed(title=track.title, url=track.uri, color=discord.Color(0x2F3136))      
         embed.set_thumbnail(url=track.thumb)
         embed.add_field(
             name="Length",
