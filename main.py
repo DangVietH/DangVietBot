@@ -77,7 +77,7 @@ async def get_prefix(bot, message):
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=get_prefix, intents=intents, help_command=CustomHelp(),
-                   description="One bot Many functionality", owner_id=860876181036335104)
+                   description="One bot Many functionality", owner_id=860876181036335104, enable_debug_events=True)
 
 
 @bot.event

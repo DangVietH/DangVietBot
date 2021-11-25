@@ -4,9 +4,9 @@ googletrans==3.1.0a0
 motor==2.5.1
 DateTime==4.3
 git+https://github.com/Pycord-Development/pycord
-wavelink
+lavalink
 aiohttp<3.7.0
 dnspython
-jishaku
+git+https://github.com/Gorialis/jishaku
 PyNaCl
 ffmpeg
