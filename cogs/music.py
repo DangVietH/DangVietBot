@@ -74,7 +74,7 @@ class Music(commands.Cog):
             if c:
                 sc = self.bot.get_channel(c)
                 if sc:
-                    embed = discord.Embed(colour=c.guild.me.top_role.colour, title='Now Playing',
+                    embed = discord.Embed(colour=discord.Color.random(), title='Now Playing',
                                           description=f"[{event.track.title}]({event.track.uri})")
                     embed.set_thumbnail(url=event.track.thumbnail)
                     await sc.send(embed=embed)
