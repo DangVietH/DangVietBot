@@ -69,6 +69,15 @@ class Music(commands.Cog):
                 raise NotConnectedToVoice('You need to be in my vc.')
 
     async def track_hook(self, event):
+        if isinstance(event, lavalink.events.TrackStartEvent):
+            c = event.player.fetch('channel')
+            if c:
+                sc = self.bot.get_channel(c)
+                if sc:
+                    embed = discord.Embed(colour=c.guild.me.top_role.colour, title='Now Playing',
+                                          description=f"[{event.track.title}]({event.track.uri})")
+                    embed.set_thumbnail(url=event.track.thumbnail)
+                    await sc.send(embed=embed)
         if isinstance(event, lavalink.events.QueueEndEvent):
             guild_id = int(event.player.guild_id)
             guild = self.bot.get_guild(guild_id)
