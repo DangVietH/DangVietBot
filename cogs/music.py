@@ -160,11 +160,16 @@ class Music(commands.Cog, name="music"):
     async def start_nodes(self):
         await self.bot.wait_until_ready()
 
-        for node in self.bot.lava_nodes:
-            try:
-                await self.bot.wavelink.initiate_node(**node)
-            except Exception as e:
-                print(e)
+        nodes = {'MAIN': {'host': 'lava.link',
+                          'port': 80,
+                          'rest_uri': 'http://lava.link:80',
+                          'password': 'anything as a password',
+                          'identifier': 'MAIN',
+                          'region': 'singapore'
+                          }}
+
+        for n in nodes.values():
+            await self.bot.wavelink.initiate_node(**n)
 
         for guild in self.bot.guilds:
             if guild.me.voice:
