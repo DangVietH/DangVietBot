@@ -75,8 +75,7 @@ class Music(commands.Cog):
                 sc = self.bot.get_channel(c)
                 if sc:
                     embed = discord.Embed(colour=discord.Color.random(), title='Now Playing',
-                                          description=f"[{event.track.title}]({event.track.uri})")
-                    embed.set_thumbnail(url=event.track.thumbnail)
+                                          description=f"{event.track.title}")
                     await sc.send(embed=embed)
         if isinstance(event, lavalink.events.QueueEndEvent):
             guild_id = int(event.player.guild_id)
