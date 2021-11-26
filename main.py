@@ -116,9 +116,10 @@ Join my [server](https://discord.gg/cnydBRnHU9) if you like too""", color=discor
 if __name__ == '__main__':
     # Load extension
     for folder in os.listdir('./cogs'):
-        for filename in os.listdir(f'./cogs/{folder}/'):
-            if filename.endswith('.py'):
-                bot.load_extension(f'cogs.{folder}.{filename[:-3]}')
+        if not folder.startswith('.DS') or folder.startswith('__init__'):
+            for filename in os.listdir(f'./cogs/{folder}/'):
+                if filename.endswith('.py'):
+                    bot.load_extension(f'cogs.{folder}.{filename[:-3]}')
     bot.load_extension('jishaku')
 
     bot.run(os.environ.get("token"))
