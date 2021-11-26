@@ -166,8 +166,13 @@ class Economy(commands.Cog):
                         # find the item in the inventory and add the amount
                         await cursor.update_one(
                             {"id": user.id},
-                            {"$inc": {f"inventory.{count - 1}": + amount}})
-                await cursor.update_one({"id": ctx.author.id}, {"$push": {f"inventory": str(item_name)}, "$inc": {f"inventory.{count}": + amount}})
+                            {"$inc": {f"inventory_amount.{count - 1}": + amount}})
+                        newBal = wallet - cost
+                        await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
+                        await ctx.send(
+                            f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988>  {cost}")
+
+                await cursor.update_one({"id": ctx.author.id}, {"$push": {f"inventory": str(item_name)}, "$inc": {f"inventory_amount.{count}": + amount}})
 
                 newBal = wallet - cost
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
