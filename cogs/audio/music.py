@@ -188,9 +188,8 @@ class Music(commands.Cog):
             guild = self.bot.get_guild(guild_id)
             await guild.voice_client.disconnect(force=True)
 
-    @commands.command()
+    @commands.command(help="Searches and plays a song from a given query.")
     async def play(self, ctx, *, query: str):
-        """ Searches and plays a song from a given query. """
         # Get the player for this guild from cache.
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         # Remove leading and trailing <>. <> may be used to suppress embedding links in Discord.
@@ -243,9 +242,8 @@ class Music(commands.Cog):
         if not player.is_playing:
             await player.play()
 
-    @commands.command(aliases=['disconnect'])
+    @commands.command(aliases=['disconnect'], help="Disconnects the player from the voice channel and clears its queue.")
     async def leave(self, ctx):
-        """ Disconnects the player from the voice channel and clears its queue. """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.is_connected:
@@ -264,6 +262,24 @@ class Music(commands.Cog):
         await player.stop()
         # Disconnect from the voice channel.
         await ctx.voice_client.disconnect(force=True)
+
+    @commands.command(help="Pause player")
+    async def pause(self, ctx):
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+        if not player.is_playing:
+            await ctx.send("I'm not playing anything")
+        else:
+            await player.set_pause(True)
+
+    @commands.command(help="Resume player")
+    async def resume(self, ctx):
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+        await player.set_pause(False)
+
+    @commands.command(help="Skip the current track")
+    async def skip(self, ctx):
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+        await player.skip()
 
 
 def setup(bot):
