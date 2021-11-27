@@ -5,6 +5,9 @@ import re
 import math
 from discord.ext.commands.errors import CheckFailure
 
+# This cog is based on https://github.com/Devoxin/Lavalink.py/blob/master/examples/music.py
+# Some code base on https://github.com/NiceAesth/Sunny/blob/master/cogs/music.py
+
 
 class NotConnectedToVoice(CheckFailure):
     """User not connected to any voice channel"""
@@ -320,10 +323,11 @@ class Music(commands.Cog):
 
         queue_list = ''
         for index, track in enumerate(playerQueueWithCurrent[start:end], start=start):
-            queue_list += f'`{index + 1}.` [**{track.title}**]({track.uri})\n'
+            queue_list += f'`{index + 1}:` [**{track.title}**]({track.uri})\n'
 
         embed = discord.Embed(colour=discord.Color.random(),
                               description=f'**{len(playerQueueWithCurrent)} tracks**\n\n{queue_list}')
+        embed.set_author(icon_url="https://cdn.discordapp.com/attachments/900197917170737152/912229731766796368/unknown.png", name="Queue")
         embed.set_footer(text=f'Viewing page {page}/{pages}')
         await ctx.send(embed=embed)
 
