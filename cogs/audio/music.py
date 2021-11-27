@@ -2,6 +2,7 @@ import discord
 import lavalink
 from discord.ext import commands
 import re
+import asyncio
 from discord.ext.commands.errors import CheckFailure
 
 
@@ -184,9 +185,12 @@ class Music(commands.Cog):
             # When this track_hook receives a "QueueEndEvent" from lavalink.py
             # it indicates that there are no tracks left in the player's queue.
             # To save on resources, we can tell the bot to disconnect from the vc.
-            guild_id = int(event.player.guild_id)
-            guild = self.bot.get_guild(guild_id)
-            await guild.voice_client.disconnect(force=True)
+            guild = self.bot.get_guild(int(event.player.guild_id))
+            await asyncio.sleep(60)
+            if not event.player.is_playing:
+                schannel = self.bot.get_channel(event.player.fetch('channel'))
+                await schannel.send("Leave vc due to inactivity")
+                await guild.voice_client.disconnect(force=True)
 
     @commands.command(help="Searches and plays a song from a given query.")
     async def play(self, ctx, *, query: str):
