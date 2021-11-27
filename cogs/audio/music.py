@@ -288,6 +288,7 @@ class Music(commands.Cog):
             return await ctx.send("Nothing is playing.")
         else:
             embed = discord.Embed(title="Now Playing", description=f"{player.current.title}", color=discord.Color.random())
+            await ctx.send(embed=embed)
 
 
 def setup(bot):
