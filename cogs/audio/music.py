@@ -185,7 +185,8 @@ class Music(commands.Cog):
             # When this track_hook receives a "QueueEndEvent" from lavalink.py
             # it indicates that there are no tracks left in the player's queue.
             # To save on resources, we can tell the bot to disconnect from the vc.
-            guild = self.bot.get_guild(int(event.player.guild_id))
+            guild_id = int(event.player.guild_id)
+            guild = self.bot.get_guild(guild_id)
             await guild.voice_client.disconnect(force=True)
 
     @commands.command(help="Searches and plays a song from a given query.")
