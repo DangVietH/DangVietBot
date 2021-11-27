@@ -186,11 +186,7 @@ class Music(commands.Cog):
             # it indicates that there are no tracks left in the player's queue.
             # To save on resources, we can tell the bot to disconnect from the vc.
             guild = self.bot.get_guild(int(event.player.guild_id))
-            await asyncio.sleep(60)
-            if not event.player.is_playing:
-                schannel = self.bot.get_channel(event.player.fetch('channel'))
-                await schannel.send("Leave vc due to inactivity")
-                await guild.voice_client.disconnect(force=True)
+            await guild.voice_client.disconnect(force=True)
 
     @commands.command(help="Searches and plays a song from a given query.")
     async def play(self, ctx, *, query: str):
