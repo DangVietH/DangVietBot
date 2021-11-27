@@ -322,7 +322,7 @@ class Music(commands.Cog):
         for index, track in enumerate(playerQueueWithCurrent[start:end], start=start):
             queue_list += f'`{index + 1}.` [**{track.title}**]({track.uri})\n'
 
-        embed = discord.Embed(colour=self.bot.config.color,
+        embed = discord.Embed(colour=discord.Color.random(),
                               description=f'**{len(playerQueueWithCurrent)} tracks**\n\n{queue_list}')
         embed.set_footer(text=f'Viewing page {page}/{pages}')
         await ctx.send(embed=embed)
