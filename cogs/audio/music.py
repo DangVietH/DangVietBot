@@ -2,7 +2,7 @@ import discord
 import lavalink
 from discord.ext import commands
 import re
-import asyncio
+import math
 from discord.ext.commands.errors import CheckFailure
 
 
@@ -290,6 +290,42 @@ class Music(commands.Cog):
         else:
             embed = discord.Embed(title="Now Playing", description=f"{player.current.title}", color=discord.Color.random())
             await ctx.send(embed=embed)
+
+    @commands.command(aliases=['vol'], help="Change bot volume")
+    async def volume(self, ctx, volume: int = 10):
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+        volume = max(1, min(volume, 100))
+
+        await player.set_volume(volume / 2)
+        await ctx.send(f'🔊 Volume set to {player.volume * 2}%')
+
+    @commands.command(help="Loop the current song until the command is invoked again. ")
+    async def loop(self, ctx):
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+        if not player.is_playing:
+            return await ctx.send('Nothing playing.')
+        player.repeat = not player.repeat
+        await ctx.send('Loop ' + ('enabled' if player.repeat else 'disabled'))
+
+    @commands.command(help="Shows the player's queue. ")
+    async def queue(self, ctx, page: int = 1):
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+        playerQueueWithCurrent = [player.current] + player.queue
+        if not playerQueueWithCurrent:
+            return await ctx.send('Nothing queued!')
+        items_per_page = 10
+        pages = math.ceil(len(playerQueueWithCurrent) / items_per_page)
+        start = (page - 1) * items_per_page
+        end = start + items_per_page
+
+        queue_list = ''
+        for index, track in enumerate(playerQueueWithCurrent[start:end], start=start):
+            queue_list += f'`{index + 1}.` [**{track.title}**]({track.uri})\n'
+
+        embed = discord.Embed(colour=self.bot.config.color,
+                              description=f'**{len(playerQueueWithCurrent)} tracks**\n\n{queue_list}')
+        embed.set_footer(text=f'Viewing page {page}/{pages}')
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
