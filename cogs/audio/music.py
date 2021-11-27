@@ -110,7 +110,7 @@ class Music(commands.Cog):
         self.bot = bot
 
         if not hasattr(bot, 'lavalink'):  # This ensures the client isn't overwritten during cog reloads.
-            bot.lavalink = lavalink.Client(bot.user.id)
+            bot.lavalink = lavalink.Client(875589545532485682)
             bot.lavalink.add_node('lava.link', 80, 'anything', 'eu',
                                   'MAIN')  # Host, Port, Password, Region, Name
 
