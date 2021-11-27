@@ -177,7 +177,7 @@ class Music(commands.Cog):
     async def track_hook(self, event):
         if isinstance(event, lavalink.events.TrackStartEvent):
             schannel = self.bot.get_channel(event.player.fetch('channel'))
-            embed = discord.Embed(title="Now playing", description=event.track.title, color=discord.Color.blurple())
+            embed = discord.Embed(title="Now playing", description=event.track.title, color=discord.Color.random())
             await schannel.send(embed=embed)
 
         elif isinstance(event, lavalink.events.QueueEndEvent):
@@ -208,7 +208,7 @@ class Music(commands.Cog):
         if not results or not results['tracks']:
             return await ctx.send('Nothing found!')
 
-        embed = discord.Embed(color=discord.Color.blurple())
+        embed = discord.Embed(color=discord.Color.random())
 
         # Valid loadTypes are:
         #   TRACK_LOADED    - single video/direct URL)
@@ -280,6 +280,14 @@ class Music(commands.Cog):
     async def skip(self, ctx):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         await player.skip()
+
+    @commands.command(help="Shows the currently playing track.")
+    async def np(self, ctx):
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+        if not player.current:
+            return await ctx.send("Nothing is playing.")
+        else:
+            embed = discord.Embed(title="Now Playing", description=f"{player.current.title}", color=discord.Color.random())
 
 
 def setup(bot):

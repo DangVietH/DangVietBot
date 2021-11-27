@@ -8,7 +8,7 @@ class Info(commands.Cog):
 
     @commands.command(help="See bot latency")
     async def ping(self, ctx):
-        await ctx.send(f"🏓**Pong**! My latency is {round(self.bot.latency * 1000)}ms")
+        await ctx.send(f"🏓**Pong!** My latency is {round(self.bot.latency * 1000)}ms")
 
     @commands.command(help="See user info")
     async def whois(self, ctx, user: discord.Member = None):

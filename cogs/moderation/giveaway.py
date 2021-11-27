@@ -11,7 +11,7 @@ class Giveaway(commands.Cog):
 
     @commands.command(help="start Giveaway")
     @commands.has_permissions(administrator=True)
-    async def giveaway(self, ctx):
+    async def gstart(self, ctx):
         giveaway_questions = ['Which channel will I host the giveaway in?', 'What is the prize?',
                               'How long should the giveaway run for (in seconds)?', ]
         giveaway_answers = []
@@ -22,10 +22,10 @@ class Giveaway(commands.Cog):
         for question in giveaway_questions:
             await ctx.send(question)
             try:
-                message = await self.bot.wait_for('message', timeout=30.0, check=check)
+                message = await self.bot.wait_for('message', timeout=60.0, check=check)
             except asyncio.TimeoutError:
                 await ctx.send(
-                    "You didn't answer in time.  Please try again and be sure to send your answer within 30 seconds of the question.")
+                    "You didn't answer in time.  Please try again and be sure to send your answer within a minute of the question.")
                 return
             else:
                 giveaway_answers.append(message.content)
@@ -62,14 +62,25 @@ class Giveaway(commands.Cog):
         users.pop(users.index(self.bot.user))
         winner = random.choice(users)
 
-        try:
+        if winner is not None:
             winning_announcement = discord.Embed(color=discord.Color.red())
             winning_announcement.set_author(name=f'THE GIVEAWAY HAS ENDED!', icon_url='https://i.imgur.com/DDric14.png')
             winning_announcement.add_field(name=f'🎉 Prize: {prize}', value=f'🥳 **Winner**: {winner.mention}\n 🎫 **Number of Entrants**: {len(users)}', inline=False)
             winning_announcement.set_footer(text='Thanks for entering!')
             await channel.send(embed=winning_announcement)
-        except IndexError:
-            await ctx.send("Nobody join? Maybe next time. Good luck")
+        elif winner is None:
+            await ctx.send("Nobody joined? Maybe next time 😉")
+
+    @commands.command(help="Reroll the giveaway")
+    @commands.has_permissions(administrator=True)
+    async def greroll(self, ctx, msg_id):
+        reroll_msg = await ctx.fetch_message(msg_id)
+        if reroll_msg.author.id != self.bot.user.id:
+            return await ctx.send("Invalid Message ID.")
+        users = await reroll_msg.reactions[0].users().flatten()
+        users.pop(users.index(self.bot.user))
+        winner = random.choice(users)
+        await ctx.send(f"The new winner is {winner.mention}!!")
 
 
 def setup(bot):
