@@ -160,7 +160,8 @@ class Economy(commands.Cog):
                 await ctx.send(f"You don't have enough money to buy {amount} {item_name}")
             else:
                 # insert object into user inventory
-                if check['inventory.name'] == item_name:
+                ITEM_EXIST = check.find({"inventory": {"$elemMatch": {"name": str(item_name)}}})
+                if ITEM_EXIST is not None:
                     await cursor.update_one({"id": user.id, 'inventory.name': item_name}, {"$set": {"inventory.$.amount": int(amount)}})
                 else:
                     await cursor.update_one({"id": user.id}, {"$push": {"inventory": {'name': str(item_name), 'amount': int(amount)}}})
