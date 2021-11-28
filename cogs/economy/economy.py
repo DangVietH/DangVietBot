@@ -35,8 +35,9 @@ class Economy(commands.Cog):
         if check is None:
             insert = {"id": ctx.author.id, "wallet": 0, "bank": 0, "pcoin": 0, "inventory": [], "nft": []}
             await cursor.insert_one(insert)
-            await ctx.send("Done, your economy account has been created. **ONLY USE OUR CURRENCY IN THE BOT. IF YOU'RE CAUGHT USING THIS BOT TO TRADE ITEMS, YOU'RE DEAD!!**")
-        else: 
+            await ctx.send(
+                "Done, your economy account has been created. **ONLY USE OUR CURRENCY IN THE BOT. IF YOU'RE CAUGHT USING THIS BOT TO TRADE ITEMS, YOU'RE DEAD!!**")
+        else:
             await ctx.send("You already have an account")
 
     @commands.command(help="See how much money you have", aliases=["bal"])
@@ -133,7 +134,7 @@ class Economy(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(help="Buy stuff")
-    async def buy(self, ctx, item_name, amount=1,):
+    async def buy(self, ctx, item_name, amount=1, ):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
 
@@ -159,7 +160,22 @@ class Economy(commands.Cog):
                 await ctx.send(f"You don't have enough money to buy {amount} {item_name}")
             else:
                 # insert object into user inventory
-                await cursor.update_one({"id": user.id}, {"$push": {"inventory": {'name': str(item_name), 'amount': int(amount)}}})
+                await cursor.update_one({"id": user.id}, {
+                    "inventory": {
+                        "$not": {
+                            "$elemMatch": {
+                                "name": str(item_name)
+                            }
+                        }
+                    }
+                }, {
+                    "$addToSet": {
+                        "visits": {
+                            "name": str(item_name),
+                            'amount': int(amount)
+                        }
+                    }
+                }, {"multi": True})
 
                 newBal = wallet - cost
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
