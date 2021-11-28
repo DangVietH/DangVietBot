@@ -36,7 +36,9 @@ class Prefix(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        await cursor.delete_one({"guild": guild.id})
+        result = await cursor.find_one({"guild": guild.id})
+        if result is not None:
+            await cursor.delete_one({"guild": guild.id})
 
 
 def setup(bot):

@@ -23,6 +23,7 @@ shop = [{"name": "chicken", "price": 10, "description": "chicken men-men"},
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["economy"]
 cursor = db["users"]
+nft = db["nft"]
 
 
 class Economy(commands.Cog):
@@ -159,6 +160,10 @@ class Economy(commands.Cog):
                 await ctx.send(f"You don't have enough money to buy {amount} {item_name}")
             else:
                 # insert object into user inventory
+                if check['inventory.name'] == item_name:
+                    await cursor.update_one({"id": user.id, 'inventory.name': item_name}, {"$set": {"inventory.$.amount": int(amount)}})
+                else:
+                    await cursor.update_one({"id": user.id}, {"$push": {"inventory": {'name': str(item_name), 'amount': int(amount)}}})
 
                 newBal = wallet - cost
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})

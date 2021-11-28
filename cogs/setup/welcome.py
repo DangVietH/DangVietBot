@@ -80,7 +80,9 @@ class Welcome(commands.Cog):
     # remove data to save storage
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        await cursors.delete_one({"guild": guild.id})
+        result = await cursors.find_one({"guild": guild.id})
+        if result is not None:
+            await cursors.delete_one({"guild": guild.id})
 
 
 def setup(bot):
