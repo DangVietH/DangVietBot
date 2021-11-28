@@ -17,7 +17,7 @@ class SoundBoard(commands.Cog):
         else:
             await ctx.message.add_reaction("🔊")
             vc = await ctx.author.voice.channel.connect()
-            vc.play(FFmpegPCMAudio(source="./sounds/mlg-airhorn.mp3"))
+            vc.play(FFmpegPCMAudio("https://www.youtube.com/watch?v=UaUa_0qPPgc", options="q"))
             while vc.is_playing():
                 await asyncio.sleep(5)
             await vc.disconnect()
