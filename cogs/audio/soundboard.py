@@ -15,7 +15,7 @@ class SoundBoard(commands.Cog):
         if not ctx.author.voice:
             await ctx.send(NOT_CONNECTED_TO_VOICE)
         else:
-            ctx.message.add_reaction("🔊")
+            await ctx.message.add_reaction("🔊")
             vc = await ctx.author.voice.channel.connect()
             vc.play(FFmpegPCMAudio(source="./sounds/mlg-airhorn.mp3"))
             while vc.is_playing():
