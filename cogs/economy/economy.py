@@ -179,7 +179,7 @@ class Economy(commands.Cog):
                                         }, upsert=True)
 
                 # if exist
-                og_amount = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)}, {'inventory.$.amount'})
+                og_amount = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)}, {'inventory.amount'})
                 new_amount = int(og_amount) + amount
                 await cursor.update_one({"id": user.id, "inventory.name": str(item_name)}, {"$set": {"inventory.$.amount": int(new_amount)}})
 
