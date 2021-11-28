@@ -19,7 +19,7 @@ class SoundBoard(commands.Cog):
             vc = await ctx.author.voice.channel.connect()
             vc.play(FFmpegPCMAudio(source="./sounds/mlg-airhorn.mp3"))
             while vc.is_playing():
-                await asyncio.sleep(1)
+                await asyncio.sleep(5)
             await vc.disconnect()
 
 
