@@ -33,7 +33,7 @@ class Economy(commands.Cog):
     async def create_account(self, ctx):
         check = await cursor.find_one({"id": ctx.author.id})
         if check is None:
-            insert = {"id": ctx.author.id, "wallet": 0, "bank": 0, "inventory": [], "nft": []}
+            insert = {"id": ctx.author.id, "wallet": 0, "bank": 0, "pcoin": 0, "inventory": [], "nft": []}
             await cursor.insert_one(insert)
             await ctx.send("Done, your economy account has been created. **ONLY USE OUR CURRENCY IN THE BOT. IF YOU'RE CAUGHT USING THIS BOT TO TRADE ITEMS, YOU'RE DEAD!!**")
         else: 
@@ -159,7 +159,7 @@ class Economy(commands.Cog):
                 await ctx.send(f"You don't have enough money to buy {amount} {item_name}")
             else:
                 # insert object into user inventory
-                ITEM_EXIST = await check.find_one({"inventory": {"$elemMatch": {"name": str(item_name)}}})
+                ITEM_EXIST = await cursor.find({"inventory": {"$elemMatch": {"name": str(item_name)}}})
                 if ITEM_EXIST is not None:
                     await cursor.update_one({"id": user.id, 'inventory.name': item_name}, {"$set": {"inventory.$.amount": int(amount)}})
                 else:
