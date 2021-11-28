@@ -175,7 +175,7 @@ class Economy(commands.Cog):
                                                     'amount': int(amount)
                                                 }
                                             }
-                                        }, {"upsert": True})
+                                        }, upsert=True)
 
                 newBal = wallet - cost
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
