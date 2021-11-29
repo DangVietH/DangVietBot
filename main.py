@@ -116,7 +116,7 @@ Join my [server](https://discord.gg/cnydBRnHU9) if you like too""", color=discor
 if __name__ == '__main__':
     # Load extension
     for folder in os.listdir('./cogs'):
-        if os.path.isdir(folder):
+        if not folder.startswith('.DS'):
             bot.load_extension(f'cogs.{folder}')
     bot.load_extension('jishaku')
 
