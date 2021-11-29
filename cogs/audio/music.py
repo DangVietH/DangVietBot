@@ -114,7 +114,7 @@ class Music(commands.Cog):
         self.bot = bot
 
         if not hasattr(bot, 'lavalink'):  # This ensures the client isn't overwritten during cog reloads.
-            bot.lavalink = lavalink.Client(875589545532485682)
+            bot.lavalink = lavalink.Client(875589545532485682)  # bot id
             bot.lavalink.add_node('lava.link', 80, 'anything', 'eu',
                                   'MAIN')  # Host, Port, Password, Region, Name
 
@@ -330,7 +330,3 @@ class Music(commands.Cog):
         embed.set_author(icon_url="https://cdn.discordapp.com/attachments/900197917170737152/912229731766796368/unknown.png", name="Queue")
         embed.set_footer(text=f'Viewing page {page}/{pages}')
         await ctx.send(embed=embed)
-
-
-def setup(bot):
-    bot.add_cog(Music(bot))

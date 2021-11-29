@@ -102,7 +102,3 @@ class Admin(commands.Cog):
         channel = channel or ctx.channel
         await channel.set_permissions(ctx.guild.default_role, send_messages=True)
         await ctx.send('Channel unlocked.')
-
-
-def setup(bot):
-    bot.add_cog(Admin(bot))

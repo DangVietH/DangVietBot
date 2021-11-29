@@ -81,7 +81,3 @@ class Giveaway(commands.Cog):
         users.pop(users.index(self.bot.user))
         winner = random.choice(users)
         await ctx.send(f"The new winner is {winner.mention}!!")
-
-
-def setup(bot):
-    bot.add_cog(Giveaway(bot))

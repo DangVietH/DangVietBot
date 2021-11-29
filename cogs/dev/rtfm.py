@@ -115,7 +115,3 @@ class RTFM(commands.Cog):
                 color=discord.Color.green(),
             )
         )
-
-
-def setup(bot):
-    bot.add_cog(RTFM(bot))

@@ -95,7 +95,3 @@ class Misc(commands.Cog):
             await ctx.send(num1 * num2)
         elif op == "/":
             await ctx.send(num1 / num2)
-
-
-def setup(bot):
-    bot.add_cog(Misc(bot))

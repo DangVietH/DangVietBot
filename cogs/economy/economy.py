@@ -270,7 +270,3 @@ class Economy(commands.Cog):
                     await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
                     await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
                     await ctx.send(f"Successfully rob <:DHBuck:901485795410599988> {amount} from {user.mention}")
-
-
-def setup(bot):
-    bot.add_cog(Economy(bot))

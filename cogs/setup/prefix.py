@@ -39,7 +39,3 @@ class Prefix(commands.Cog):
         result = await cursor.find_one({"guild": guild.id})
         if result is not None:
             await cursor.delete_one({"guild": guild.id})
-
-
-def setup(bot):
-    bot.add_cog(Prefix(bot))

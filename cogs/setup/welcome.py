@@ -83,7 +83,3 @@ class Welcome(commands.Cog):
         result = await cursors.find_one({"guild": guild.id})
         if result is not None:
             await cursors.delete_one({"guild": guild.id})
-
-
-def setup(bot):
-    bot.add_cog(Welcome(bot))

@@ -79,7 +79,3 @@ class Info(commands.Cog):
     async def invite(self, ctx):
         embed = discord.Embed(title='Invite?', description="[here](https://discord.com/api/oauth2/authorize?client_id=875589545532485682&permissions=8&scope=bot%20applications.commands)")
         await ctx.send(embed=embed)
-
-
-def setup(bot):
-    bot.add_cog(Info(bot))

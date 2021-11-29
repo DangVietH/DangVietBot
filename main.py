@@ -101,7 +101,7 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.CommandOnCooldown):
         await ctx.send(f'⏱️ This command is on a cooldown. Use it after {round(error.retry_after, 2)}s')
     else:
-        await ctx.send(f"{error} \nIf this is an unknown error, contact me at `! DvH#9980`")
+        await ctx.send(f"{error} \n\nIf this is an unknown error, contact me at `! DvH#9980`")
 
 
 @bot.event
@@ -116,10 +116,8 @@ Join my [server](https://discord.gg/cnydBRnHU9) if you like too""", color=discor
 if __name__ == '__main__':
     # Load extension
     for folder in os.listdir('./cogs'):
-        if not folder.startswith('.DS') or folder.startswith('__init__'):
-            for filename in os.listdir(f'./cogs/{folder}/'):
-                if filename.endswith('.py'):
-                    bot.load_extension(f'cogs.{folder}.{filename[:-3]}')
+        if os.path.isdir(folder):
+            bot.load_extension(f'cogs.{folder}')
     bot.load_extension('jishaku')
 
     bot.run(os.environ.get("token"))

@@ -110,7 +110,3 @@ class Reaction(commands.Cog):
                     member = await(guild.fetch_member(payload.user_id))
                     if member is not None:
                         await member.remove_roles(role)
-
-
-def setup(bot):
-    bot.add_cog(Reaction(bot))

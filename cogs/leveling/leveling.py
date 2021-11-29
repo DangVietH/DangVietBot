@@ -79,7 +79,3 @@ class Leveling(commands.Cog):
             result = await levelling.find_one({"guild": member.guild.id, "user": member.id})
             if result is not None:
                 await levelling.delete_one({"guild": member.guild.id, "user": member.id})
-
-
-def setup(bot):
-    bot.add_cog(Leveling(bot))

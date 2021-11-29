@@ -31,7 +31,3 @@ class SocketFix(commands.Cog):
 
         msg = json.loads(msg)
         self.bot.dispatch('socket_custom_receive', msg)
-
-
-def setup(bot):
-    bot.add_cog(SocketFix(bot))

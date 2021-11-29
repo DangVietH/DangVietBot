@@ -37,7 +37,3 @@ class Game(commands.Cog):
                 await ctx.send(f"Well, that was weird. We tied.\nYour choice: {user_choice}\nMy choice: {comp_choice}")
         else:
             await ctx.send('It must be rock paper scissors')
-
-
-def setup(bot):
-    bot.add_cog(Game(bot))
