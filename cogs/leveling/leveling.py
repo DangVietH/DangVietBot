@@ -68,10 +68,10 @@ class Leveling(commands.Cog):
     async def gtop(self, ctx):
         stats = levelling.find().sort("xp", -1)
         i = 1
-        embed = discord.Embed(title=f"🏆 Leaderboard of {ctx.guild.name}", color=discord.Color.random())
+        embed = discord.Embed(title=f"🌐 Global Leaderboard", color=discord.Color.random())
         async for x in stats:
             try:
-                temp = ctx.guild.get_member(x["user"])
+                temp = self.bot.get_member(x["user"])
                 tempxp = x["xp"]
                 templvl = x["level"]
                 server = self.bot.get_guild(x['guild'])

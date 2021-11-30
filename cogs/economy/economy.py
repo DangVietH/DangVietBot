@@ -192,7 +192,7 @@ class Economy(commands.Cog):
         if check is None:
             await ctx.send("You don't have an economy account. Please execute d!create_account to create one")
         else:
-            embed = discord.Embed(title=f"🧳 {ctx.author.id}'s Inventory", color=discord.Color.random())
+            embed = discord.Embed(title=f"🧳 {ctx.author}'s Inventory", color=discord.Color.random())
             items = check['inventory']
             if len(items) < 1:
                 await ctx.send("You didn't have anything")
