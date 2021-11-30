@@ -8,7 +8,7 @@ class Owner(commands.Cog):
 
     @commands.command(help="Load a cog")
     @commands.is_owner()
-    async def cog_load(self, ctx, *, cog):
+    async def load(self, ctx, *, cog):
         try:
             self.bot.load_extension(f"cogs.{cog}")
         except Exception as e:
@@ -18,7 +18,7 @@ class Owner(commands.Cog):
 
     @commands.command(help="Unload a cog")
     @commands.is_owner()
-    async def cog_unload(self, ctx, *, cog):
+    async def unload(self, ctx, *, cog):
         try:
             self.bot.unload_extension(f"cogs.{cog}")
         except Exception as e:
@@ -28,7 +28,7 @@ class Owner(commands.Cog):
 
     @commands.command(help="Reload a cog")
     @commands.is_owner()
-    async def cog_reload(self, ctx, *, cog):
+    async def reload(self, ctx, *, cog):
         try:
             self.bot.reload_extension(f"cogs.{cog}")
         except Exception as e:
