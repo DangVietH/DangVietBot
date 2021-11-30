@@ -71,7 +71,7 @@ class Leveling(commands.Cog):
         embed = discord.Embed(title=f"🌐 Global Leaderboard", color=discord.Color.random())
         async for x in stats:
             try:
-                temp = self.bot.get_all_member(x["user"])
+                temp = self.bot.get_user(x["user"])
                 tempxp = x["xp"]
                 templvl = x["level"]
                 server = self.bot.get_guild(x['guild'])
