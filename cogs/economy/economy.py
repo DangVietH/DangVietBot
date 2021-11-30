@@ -18,7 +18,8 @@ shop = [{"name": "chicken", "price": 10, "description": "chicken men-men"},
         {"name": "platinum", "price": 20000, "description": "Show of your status"},
         {"name": "silver", "price": 50000, "description": "cool kid"},
         {"name": "gold", "price": 200000, "description": "rich kid who like to show off"},
-        {"name": "diamonds", "price": 600000, "description": "extreme rich kid"}]
+        {"name": "diamonds", "price": 600000, "description": "extreme rich kid"},
+        {"name": "robber_shield", "price": 1200000, "description": "Limit the amount the robber can rob"}]
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["economy"]
@@ -122,7 +123,7 @@ class Economy(commands.Cog):
 
     @commands.command(help="Shopping list", aliases=["shoplist", 'sl'])
     async def shop(self, ctx):
-        embed = discord.Embed(title="Shop", color=discord.Color.green())
+        embed = discord.Embed(title="🏪 Shop", color=discord.Color.green())
 
         for item in shop:
             name = item["name"]
@@ -274,6 +275,15 @@ class Economy(commands.Cog):
             if total_check < 10000:
                 await ctx.send("You need <:DHBuck:901485795410599988> 10000 to rob someone")
             else:
+                victim_items = check2['inventory']
+                for item in victim_items:
+                    if item['name'] == "robber_shield":
+                        author_update = check1['wallet'] + 10
+                        user_update = check2['wallet'] - 10
+                        await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
+                        await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
+                        await ctx.send("Your victim has a robber shield, so you can only rob <:DHBuck:901485795410599988> 10 from him")
+
                 if amount > check2['wallet']:
                     await ctx.send(
                         'You tried to rob him, but he caught you and force you to pay <:DHB_coin:901485795410599988> 1000')
@@ -281,6 +291,7 @@ class Economy(commands.Cog):
                     user_update = check2['bank'] + amount
                     await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
                     await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
+
                 else:
                     author_update = check1['wallet'] + amount
                     user_update = check2['wallet'] - amount
