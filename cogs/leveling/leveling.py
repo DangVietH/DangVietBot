@@ -77,7 +77,7 @@ class Leveling(commands.Cog):
                 server = self.bot.get_guild(x['guild'])
                 xp = "{:,}".format(tempxp)
                 level = "{:,}".format(templvl)
-                embed.add_field(name=f"{i}: {temp}", value=f"**Server:** {server.name} **Level:** {level}  **XP:** {xp}", inline=False)
+                embed.add_field(name=f"{i}: {temp}", value=f"**Server:** {server.name}  **Level:** {level}  **XP:** {xp}", inline=False)
                 i += 1
             except:
                 pass
