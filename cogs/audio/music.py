@@ -6,7 +6,7 @@ import math
 from discord.ext.commands.errors import CheckFailure
 
 # This cog is based on https://github.com/Devoxin/Lavalink.py/blob/master/examples/music.py
-# Some code base on https://github.com/NiceAesth/Sunny/blob/master/cogs/music.py
+# The code for queue taken from https://github.com/NiceAesth/Sunny/blob/master/cogs/music.py
 
 
 class NotConnectedToVoice(CheckFailure):
@@ -323,7 +323,7 @@ class Music(commands.Cog):
 
         queue_list = ''
         for index, track in enumerate(playerQueueWithCurrent[start:end], start=start):
-            queue_list += f'`{index + 1}:` [**{track.title}**]({track.uri})\n'
+            queue_list += f'**{index + 1}:** [**{track.title}**]({track.uri})\n'
 
         embed = discord.Embed(colour=discord.Color.random(),
                               description=f'**{len(playerQueueWithCurrent)} tracks**\n\n{queue_list}')

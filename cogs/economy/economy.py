@@ -186,6 +186,23 @@ class Economy(commands.Cog):
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
                 await ctx.send(f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988>  {cost}")
 
+    @commands.command(help="See your items", aliases=["bag"])
+    async def inventory(self, ctx):
+        check = await cursor.find_one({"id": ctx.author.id})
+        if check is None:
+            await ctx.send("You don't have an economy account. Please execute d!create_account to create one")
+        else:
+            embed = discord.Embed(title=f"🧳 {ctx.author.id}'s Inventory", color=discord.Color.random())
+            items = check['inventory']
+            if len(items) < 1:
+                await ctx.send("You didn't have anything")
+            else:
+                for item in items:
+                    name = item['name']
+                    amount = item['amount']
+                    embed.add_field(name=name, value=f"**Amount:** {amount}")
+                await ctx.send(embed=embed)
+
     @commands.command(help="Deposit your money into the bank", aliases=['dep'])
     async def deposit(self, ctx, amount=1):
         user = ctx.author

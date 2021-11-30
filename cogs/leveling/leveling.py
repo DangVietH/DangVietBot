@@ -63,6 +63,27 @@ class Leveling(commands.Cog):
             if i == 20 + 1:
                 break
         await ctx.send(embed=embed)
+
+    @commands.command(help="See the top 20 users globally")
+    async def gtop(self, ctx):
+        stats = levelling.find().sort("xp", -1)
+        i = 1
+        embed = discord.Embed(title=f"🏆 Leaderboard of {ctx.guild.name}", color=discord.Color.random())
+        async for x in stats:
+            try:
+                temp = ctx.guild.get_member(x["user"])
+                tempxp = x["xp"]
+                templvl = x["level"]
+                server = self.bot.get_guild(x['guild'])
+                xp = "{:,}".format(tempxp)
+                level = "{:,}".format(templvl)
+                embed.add_field(name=f"{i}: {temp}", value=f"**Server:** {server.name} **Level:** {level}  **XP:** {xp}", inline=False)
+                i += 1
+            except:
+                pass
+            if i == 20 + 1:
+                break
+        await ctx.send(embed=embed)
     
     # remove data to save storage
     @commands.Cog.listener()
