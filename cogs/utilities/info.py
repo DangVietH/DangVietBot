@@ -66,15 +66,12 @@ class Info(commands.Cog):
     @commands.command(help="Bot information")
     async def about(self, ctx):
         embed = discord.Embed(title="Bot information", color=discord.Color.random())
-        for user in self.bot.guilds:
-            total_user = len(user)
         embed.add_field(name="Developer", value=f"! DvH")
         embed.add_field(name="Version", value="0.1.0")
         embed.add_field(name="Written in", value="Python 3.9.6")
         embed.add_field(name="Library", value="[pycord 2.0](https://github.com/Pycord-Development/pycord)")
         embed.add_field(name="Create at", value="8/13/2021")
         embed.add_field(name="Server's", value=f"{len(self.bot.guilds)}")
-        embed.add_field(name="Users", value=f"{total_user}")
         await ctx.send(embed=embed)
 
     @commands.command(help="Invite the bot")
