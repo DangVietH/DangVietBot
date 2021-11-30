@@ -179,7 +179,11 @@ class Economy(commands.Cog):
                                         }, upsert=True)
 
                 # if exist
-                await cursor.update_one({"id": user.id, "inventory.name": str(item_name)}, {"$inc": {"inventory.$.amount": int(amount)}})
+                if amount == 1:
+                    await cursor.update_one({"id": user.id, "inventory.name": str(item_name)}, {"$inc": {"inventory.$.amount": 1}})
+                else:
+                    await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                                            {"$inc": {"inventory.$.amount": int(amount)}})
 
                 # get ye money
                 newBal = wallet - cost
