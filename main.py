@@ -89,7 +89,7 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
-        await ctx.send('Invalid Command!')
+        return None
     elif isinstance(error, commands.NoPrivateMessage):
         await ctx.author.send('This command cannot be used in private messages.')
     elif isinstance(error, commands.MissingPermissions):
