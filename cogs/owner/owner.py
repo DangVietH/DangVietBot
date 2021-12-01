@@ -43,9 +43,9 @@ class Owner(commands.Cog):
         if presence == "game":
             await self.bot.change_presence(activity=discord.Game(name=msg))
         elif presence == "watch":
-            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=msg))
-        elif presence == "listen":
             await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=msg))
+        elif presence == "listen":
+            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=msg))
         elif presence == "stream":
             await self.bot.change_presence(activity=discord.Streaming(name=msg, url="https://www.twitch.tv/dvieth"))
         else:
