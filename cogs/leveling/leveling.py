@@ -40,7 +40,7 @@ class Leveling(commands.Cog):
 
     @commands.command(help="Disable levelling")
     @commands.has_permissions(administrator=True)
-    async def diable_level(self, ctx):
+    async def disable_level(self, ctx):
         check = await disable.find_one({"guild": ctx.guild.id})
         if check is not None:
             await ctx.send("Bruh")
