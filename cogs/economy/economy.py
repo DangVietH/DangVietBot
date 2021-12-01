@@ -137,7 +137,7 @@ class Economy(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(help="Buy stuff")
-    async def buy(self, ctx, item_name, amount=1, ):
+    async def buy(self, ctx, item_name, amount=1):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
 
