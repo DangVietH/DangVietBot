@@ -86,8 +86,8 @@ class Admin(commands.Cog):
 
     @commands.command(help="Clear all messages in that channel")
     @commands.has_permissions(manage_messages=True)
-    async def clear_all(self, ctx, amount=None):
-        await ctx.channel.purge(limit=amount)
+    async def clear_all(self, ctx):
+        await ctx.channel.purge(limit=None)
 
     @commands.command(help="Lock channel")
     @commands.has_permissions(administrator=True)
