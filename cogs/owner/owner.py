@@ -41,13 +41,13 @@ class Owner(commands.Cog):
     @commands.command(help="Change the bot's status")
     async def setstatus(self, ctx, presence, *, msg):
         if presence == "game":
-            await self.bot.change_presence(activity=discord.Game(name=msg))
+            await self.bot.change_presence(activity=discord.Game(name=str(msg).format(server=len(self.bot.guilds))))
         elif presence == "watch":
-            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=msg))
+            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=str(msg).format(server=len(self.bot.guilds))))
         elif presence == "listen":
-            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=msg))
+            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=str(msg).format(server=len(self.bot.guilds))))
         elif presence == "stream":
-            await self.bot.change_presence(activity=discord.Streaming(name=msg, url="https://www.twitch.tv/dvieth"))
+            await self.bot.change_presence(activity=discord.Streaming(name=str(msg).format(server=len(self.bot.guilds)), url="https://www.twitch.tv/dvieth"))
         else:
             await ctx.send('Invalid status')
         await ctx.message.add_reaction('👌')
