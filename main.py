@@ -77,13 +77,13 @@ async def get_prefix(bot, message):
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=get_prefix, intents=intents, help_command=CustomHelp(),
-                   description="One bot Many functionality", owner_id=860876181036335104, enable_debug_events=True)
+                   description="One bot Many functionality", owner_id=860876181036335104, enable_debug_events=True,
+                   activity=discord.Streaming(name="d!help", url="https://www.twitch.tv/dvieth"))
 
 
 @bot.event
 async def on_ready():
     print('DHB is online')
-    await bot.change_presence(activity=discord.Streaming(name="d!help", url="https://www.twitch.tv/dvieth"))
 
 
 @bot.event

@@ -1,4 +1,5 @@
 from discord.ext import commands
+import discord
 
 
 class Owner(commands.Cog):
@@ -35,3 +36,18 @@ class Owner(commands.Cog):
             await ctx.send(f'**ERROR:** {type(e).__name__} - {e}')
         else:
             await ctx.send('👌')
+
+    @commands.is_owner()
+    @commands.command(help="Change the bot's status")
+    async def setstatus(self, ctx, presence, *, msg):
+        if presence == "game":
+            await self.bot.change_presence(activity=discord.Game(name=msg))
+        elif presence == "watch":
+            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=msg))
+        elif presence == "listen":
+            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=msg))
+        elif presence == "stream":
+            await self.bot.change_presence(activity=discord.Streaming(name=msg, url="https://www.twitch.tv/dvieth"))
+        else:
+            await ctx.send('Invalid status')
+        await ctx.message.add_reaction('👌')
