@@ -6,6 +6,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["levelling"]
 levelling = db['member']
+disable = db['disable']
 role = db['roles']
 
 
@@ -17,19 +18,51 @@ class Leveling(commands.Cog):
     async def on_message(self, message):
         if message.guild:
             if not message.author.bot:
-                stats = await levelling.find_one({'guild': message.guild.id, "user": message.author.id})
-                if stats is None:
-                    insert = {'guild': message.guild.id, "user": message.author.id, 'level': 0, 'xp': 0}
-                    await levelling.insert_one(insert)
+                is_disabled = await disable.find_one({"guild": message.guild.id})
+                if is_disabled is None:
+                    stats = await levelling.find_one({'guild': message.guild.id, "user": message.author.id})
+                    if stats is None:
+                        insert = {'guild': message.guild.id, "user": message.author.id, 'level': 0, 'xp': 0}
+                        await levelling.insert_one(insert)
+                    else:
+                        add_exp = stats['xp'] + 5
+                        await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
+                                                   {"$set": {"xp": add_exp}})
+                        lvl_start = stats['level']
+                        lvl_end = int(stats['xp'] ** (1 / 4))
+                        if lvl_start < lvl_end:
+                            new_lvl = lvl_start + 1
+                            await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
+                                                       {"$set": {"level": new_lvl}})
+                            await message.channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**!!🎉")
                 else:
-                    add_exp = stats['xp'] + 5
-                    await levelling.update_one({"guild": message.guild.id, "user": message.author.id}, {"$set": {"xp": add_exp}})
-                    lvl_start = stats['level']
-                    lvl_end = int(stats['xp'] ** (1 / 4))
-                    if lvl_start < lvl_end:
-                        new_lvl = lvl_start + 1
-                        await levelling.update_one({"guild": message.guild.id, "user": message.author.id}, {"$set": {"level": new_lvl}})
-                        await message.channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**!!🎉")
+                    return None
+
+    @commands.command(help="Disable levelling")
+    @commands.has_permissions(administrator=True)
+    async def diable_level(self, ctx):
+        check = await disable.find_one({"guild": ctx.guild.id})
+        if check is not None:
+            await ctx.send("Bruh")
+        else:
+            insert = {"guild": ctx.guild.id}
+            await disable.insert_one(insert)
+            for member in ctx.guild.members:
+                if not member.bot:
+                    result = await levelling.find_one({"guild": ctx.guild.id, "user": member.id})
+                    if result is not None:
+                        await levelling.delete_one({"guild": ctx.guild.id, "user": member.id})
+            await ctx.send('Levelling disabled')
+
+    @commands.command(help="Re-enable levelling")
+    @commands.has_permissions(administrator=True)
+    async def renable_level(self, ctx):
+        check = await disable.find_one({"guild": ctx.guild.id})
+        if check is not None:
+            await disable.delete_one(check)
+            await ctx.send('Levelling re-enable')
+        else:
+            await ctx.send('Leveling already enabled')
 
     @commands.command(help="See your rank")
     async def rank(self, ctx, user: discord.Member = None):
