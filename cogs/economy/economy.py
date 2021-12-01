@@ -25,6 +25,8 @@ cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["economy"]
 cursor = db["users"]
 
+NO_ACCOUNT = "You don't have an economy account. Please use the create_account command to create one"
+
 
 class Economy(commands.Cog):
     def __init__(self, bot):
@@ -46,7 +48,7 @@ class Economy(commands.Cog):
         user = user or ctx.author
         check = await cursor.find_one({"id": user.id})
         if check is None:
-            await ctx.send("You don't have an economy account. Please execute d!create_account to create one")
+            await ctx.send(NO_ACCOUNT)
         else:
             wallet = check['wallet']
             bank = check['bank']
@@ -64,7 +66,7 @@ class Economy(commands.Cog):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
         if check is None:
-            await ctx.send("You don't have an economy account. Please execute d!create_account to create one")
+            await ctx.send(NO_ACCOUNT)
         else:
             random_money = random.randint(1, 1000)
             newBal = check['wallet'] + random_money
@@ -82,7 +84,7 @@ class Economy(commands.Cog):
 
         check = await cursor.find_one({"id": user.id})
         if check is None:
-            await ctx.send("You don't have an economy account. Please execute d!create_account to create one")
+            await ctx.send(NO_ACCOUNT)
         else:
             emojis = []
             sentence = f"{name[random.randint(0, len(name) - 1)]} {verbs[random.randint(0, len(verbs) - 1)]} {noun[random.randint(0, len(noun) - 1)]}"
@@ -140,7 +142,7 @@ class Economy(commands.Cog):
         check = await cursor.find_one({"id": user.id})
 
         if check is None:
-            await ctx.send("You don't have an economy account. Please execute d!create_account to create one")
+            await ctx.send(NO_ACCOUNT)
         else:
             item_name = item_name.lower()
             name_ = None
@@ -191,7 +193,7 @@ class Economy(commands.Cog):
     async def inventory(self, ctx):
         check = await cursor.find_one({"id": ctx.author.id})
         if check is None:
-            await ctx.send("You don't have an economy account. Please execute d!create_account to create one")
+            await ctx.send(NO_ACCOUNT)
         else:
             embed = discord.Embed(title=f"🧳 {ctx.author}'s Inventory", color=discord.Color.random())
             items = check['inventory']
@@ -210,7 +212,7 @@ class Economy(commands.Cog):
         check = await cursor.find_one({"id": user.id})
 
         if check is None:
-            await ctx.send("You don't have an economy account. Please execute d!create_account to create one")
+            await ctx.send(NO_ACCOUNT)
         else:
             wallet = check['wallet']
             bank = check['bank']
@@ -229,7 +231,7 @@ class Economy(commands.Cog):
         check = await cursor.find_one({"id": user.id})
 
         if check is None:
-            await ctx.send("You don't have an economy account. Please execute d!create_account to create one")
+            await ctx.send(NO_ACCOUNT)
         else:
             wallet = check['wallet']
             bank = check['bank']
@@ -249,7 +251,7 @@ class Economy(commands.Cog):
         if check2 is None:
             await ctx.send("They don't have an economy account")
         elif check1 is None:
-            await ctx.send("You don't have an economy account. Please execute d!create_account to create one")
+            await ctx.send(NO_ACCOUNT)
         else:
             if amount > check1['wallet']:
                 await ctx.send("You didn't have enough money in your bank to give someone")
@@ -269,7 +271,7 @@ class Economy(commands.Cog):
         if check2 is None:
             await ctx.send("They don't have an economy account")
         elif check1 is None:
-            await ctx.send("You don't have an economy account. Please execute d!create_account to create one")
+            await ctx.send(NO_ACCOUNT)
         else:
             total_check = check1['wallet'] + check1['bank']
             if total_check < 10000:
