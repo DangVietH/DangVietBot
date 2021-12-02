@@ -110,11 +110,10 @@ class Leveling(commands.Cog):
             page += 1
             await message.add_reaction("⬅️")
             await message.add_reaction("➡️")
-            await message.add_reaction("⏹")
 
             while True:
                 def check(reaction, userz):
-                    return userz == ctx.author and str(reaction.emoji) in ["⬅️", "➡️", "⏹"] and reaction.message.id == message.id
+                    return userz == ctx.author and str(reaction.emoji) in ["⬅️", "➡️"] and reaction.message.id == message.id
 
                 try:
                     reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
@@ -140,7 +139,6 @@ class Leveling(commands.Cog):
                             await message.edit(embed=embed)
                             await message.remove_reaction("⬅️", user)
                             await message.remove_reaction("➡️", user)
-                            await message.remove_reaction("⏹", user)
 
                     elif str(reaction.emoji) == "➡️":
                         if page == len(pages):
@@ -166,17 +164,10 @@ class Leveling(commands.Cog):
                             await message.edit(embed=embed)
                             await message.remove_reaction("⬅️", user)
                             await message.remove_reaction("➡️", user)
-                            await message.remove_reaction("⏹", user)
-
-                    elif str(reaction.emoji) == "⏹️":
-                        await message.clear_reaction("⬅️")
-                        await message.clear_reaction("➡️")
-                        await message.clear_reaction("⏹")
 
                 except asyncio.TimeoutError:
                     await message.clear_reaction("⬅️")
                     await message.clear_reaction("➡️")
-                    await message.clear_reaction("⏹")
 
     @commands.command(help="See the top 20 users globally")
     async def gtop(self, ctx):
@@ -211,12 +202,10 @@ class Leveling(commands.Cog):
             page += 1
             await message.add_reaction("⬅️")
             await message.add_reaction("➡️")
-            await message.add_reaction("⏹")
 
             while True:
                 def check(reaction, userz):
-                    return userz == ctx.author and str(reaction.emoji) in ["⬅️", "➡️",
-                                                                           "⏹"] and reaction.message.id == message.id
+                    return userz == ctx.author and str(reaction.emoji) in ["⬅️", "➡️"] and reaction.message.id == message.id
 
                 try:
                     reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
@@ -244,7 +233,6 @@ class Leveling(commands.Cog):
                             await message.edit(embed=embed)
                             await message.remove_reaction("⬅️", user)
                             await message.remove_reaction("➡️", user)
-                            await message.remove_reaction("⏹", user)
 
                     elif str(reaction.emoji) == "➡️":
                         if page == len(pages):
@@ -271,17 +259,10 @@ class Leveling(commands.Cog):
                             await message.edit(embed=embed)
                             await message.remove_reaction("⬅️", user)
                             await message.remove_reaction("➡️", user)
-                            await message.remove_reaction("⏹", user)
-
-                    elif str(reaction.emoji) == "⏹️":
-                        await message.clear_reaction("⬅️")
-                        await message.clear_reaction("➡️")
-                        await message.clear_reaction("⏹")
 
                 except asyncio.TimeoutError:
                     await message.clear_reaction("⬅️")
                     await message.clear_reaction("➡️")
-                    await message.clear_reaction("⏹")
 
     # remove data to save storage
     @commands.Cog.listener()
