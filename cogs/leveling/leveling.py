@@ -9,6 +9,7 @@ db = cluster["levelling"]
 levelling = db['member']
 disable = db['disable']
 role = db['roles']
+upchannel = db['channel']
 
 # pagination code bade on https://github.com/KumosLab/Discord-Economy-Bot/blob/main/Commands/leaderboard.py
 
@@ -37,7 +38,12 @@ class Leveling(commands.Cog):
                             new_lvl = lvl_start + 1
                             await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
                                                        {"$set": {"level": new_lvl}})
-                            await message.channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**!!🎉")
+                            lvl_channel = await upchannel.find_one({"guild": message.guild.id})
+                            if lvl_channel is None:
+                                await message.channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**!!🎉")
+                            else:
+                                channel = self.bot.get_channel(lvl_channel["channel"])
+                                await channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**!!🎉")
                 else:
                     return None
 
@@ -263,6 +269,18 @@ class Leveling(commands.Cog):
                 except asyncio.TimeoutError:
                     await message.clear_reaction("⬅️")
                     await message.clear_reaction("➡️")
+
+    @commands.command(help="Setup level up channel if you like to")
+    @commands.has_permissions(administrator=True)
+    async def lvl_channel(self, ctx, channel: discord.TextChannel):
+        result = await upchannel.find_one({"guild": ctx.guild.id})
+        if result is None:
+            insert = {"guild": ctx.guild.id, "channel": channel.id}
+            await upchannel.insert_one(insert)
+            await ctx.send(f"Level up channel set to {channel.mention}")
+        elif result is not None:
+            await upchannel.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
+            await ctx.send(f"Level up channel updated to {channel.mention}")
 
     # remove data to save storage
     @commands.Cog.listener()
