@@ -181,23 +181,107 @@ class Leveling(commands.Cog):
     @commands.command(help="See the top 20 users globally")
     async def gtop(self, ctx):
         stats = levelling.find().sort("xp", -1)
-        i = 1
-        embed = discord.Embed(title=f"🌐 Global Leaderboard", color=discord.Color.random())
+        embed = discord.Embed(title="🌏 Global Leaderboard", color=discord.Color.random())
+        user = []
+        lvl = []
+        xp = []
+        guild = []
         async for x in stats:
-            try:
-                temp = self.bot.get_user(x["user"])
-                tempxp = x["xp"]
-                templvl = x["level"]
-                server = self.bot.get_guild(x['guild'])
-                xp = "{:,}".format(tempxp)
-                level = "{:,}".format(templvl)
-                embed.add_field(name=f"{i}: {temp}", value=f"**Server:** {server.name}  **Level:** {level}  **XP:** {xp}", inline=False)
-                i += 1
-            except:
-                pass
-            if i == 20 + 1:
-                break
-        await ctx.send(embed=embed)
+            user.append(x['user'])
+            lvl.append(x['level'])
+            xp.append(x['xp'])
+            guild.append(x['guild'])
+
+        pagination = list(zip(user, lvl, xp, guild))
+        pages = [pagination[i:i + 10] for i in range(0, len(pagination), 10)]
+        page = 0
+        num = 0
+        user_list = []
+        lvl_list = []
+        xp_list = []
+        guild_list = []
+        for i in pages:
+            embed.clear_fields()
+            for users, lvl, xp, guild in i:
+                num += 1
+                server = self.bot.get_guild(guild)
+                embed.add_field(name=f"{num}: {self.bot.get_user(users)}", value=f"**Server:** {server}  **Level:** {lvl}  **XP:** {xp}", inline=False)
+            embed.set_footer(text=f"Page {page + 1}/{len(pages)}")
+            message = await ctx.send(embed=embed)
+            page += 1
+            await message.add_reaction("⬅️")
+            await message.add_reaction("➡️")
+            await message.add_reaction("⏹")
+
+            while True:
+                def check(reaction, userz):
+                    return userz == ctx.author and str(reaction.emoji) in ["⬅️", "➡️",
+                                                                           "⏹"] and reaction.message.id == message.id
+
+                try:
+                    reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
+
+                    if str(reaction.emoji) == "⬅️":
+                        if page == 1:
+                            pass
+                        else:
+                            page -= 1
+                            embed.clear_fields()
+                            for users, lvl, xp, guild in pages[page - 1]:
+                                num -= 1
+                                user_list.append(users)
+                                lvl_list.append(lvl)
+                                xp_list.append(xp)
+                                guild_list.append(guild)
+                            for x in range(0, 10):
+                                embed.add_field(name=f"{x + 1 + num - len(user_list)}: {self.bot.get_user(user_list[x])}",
+                                                value=f"**Server:** {self.bot.get_guild(guild_list[x])} **Level:** {lvl_list[x]}  **XP:** {xp_list[x]}", inline=False)
+                            user_list.clear()
+                            lvl_list.clear()
+                            xp_list.clear()
+                            guild_list.clear()
+                            embed.set_footer(text=f"Page {page}/{len(pages)}")
+                            await message.edit(embed=embed)
+                            await message.remove_reaction("⬅️", user)
+                            await message.remove_reaction("➡️", user)
+                            await message.remove_reaction("⏹", user)
+
+                    elif str(reaction.emoji) == "➡️":
+                        if page == len(pages):
+                            pass
+                        else:
+                            page += 1
+                            embed.clear_fields()
+                            for users, lvl, xp, guild in pages[page - 1]:
+                                num += 1
+                                user_list.append(users)
+                                lvl_list.append(lvl)
+                                xp_list.append(xp)
+                                guild_list.append(guild)
+                                embed.add_field(name=f"{num}: {self.bot.get_user(users)}",
+                                                value=f"**Server:** {self.bot.get_guild(guild)} **Level:** {lvl}  **XP:** {xp}", inline=False)
+                            if len(user_list) != 10:
+                                get_ten = 10 - len(user_list)
+                                num += get_ten
+                            user_list.clear()
+                            lvl_list.clear()
+                            xp_list.clear()
+                            guild_list.clear()
+                            embed.set_footer(text=f"Page {page}/{len(pages)}")
+                            await message.edit(embed=embed)
+                            await message.remove_reaction("⬅️", user)
+                            await message.remove_reaction("➡️", user)
+                            await message.remove_reaction("⏹", user)
+
+                    elif str(reaction.emoji) == "⏹️":
+                        await message.clear_reaction("⬅️")
+                        await message.clear_reaction("➡️")
+                        await message.clear_reaction("⏹")
+
+                except asyncio.TimeoutError:
+                    await message.clear_reaction("⬅️")
+                    await message.clear_reaction("➡️")
+                    await message.clear_reaction("⏹")
 
     # remove data to save storage
     @commands.Cog.listener()
