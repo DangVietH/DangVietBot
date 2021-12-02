@@ -36,7 +36,7 @@ class Economy(commands.Cog):
     async def create_account(self, ctx):
         check = await cursor.find_one({"id": ctx.author.id})
         if check is None:
-            insert = {"id": ctx.author.id, "wallet": 0, "bank": 0, "pcoin": 0, "inventory": [], "nft": []}
+            insert = {"id": ctx.author.id, "wallet": 0, "bank": 0, "pcoin": 0, "inventory": []}
             await cursor.insert_one(insert)
             await ctx.send(
                 "Done, your economy account has been created. **ONLY USE OUR CURRENCY IN THE BOT. IF YOU'RE CAUGHT USING THIS BOT TO TRADE ITEMS, YOU'RE DEAD!!**")
@@ -162,28 +162,12 @@ class Economy(commands.Cog):
             if cost > wallet:
                 await ctx.send(f"You don't have enough money to buy {amount} {item_name}")
             else:
-                # insert object into user inventory
-                # if not exist
-                await cursor.update_one({"id": user.id,
-                                         "inventory": {
-                                             "$not": {
-                                                 "$elemMatch": {
-                                                     "name": str(item_name)
-                                                 }
-                                             }
-                                         }
-                                         }, {
-                                            "$addToSet": {
-                                                "inventory": {
-                                                    "name": str(item_name),
-                                                    'amount': int(amount)
-                                                }
-                                            }
-                                        }, upsert=True)
-
-                # if exist
-                await cursor.update_one({"id": user.id, "inventory.name": str(item_name)}, {"$inc": {"inventory.$.amount": int(amount)}})
-
+                for item in check['inventory']:
+                    if item['name'] == str(item_name):
+                        await cursor.update_one({"id": user.id, "inventory.name": str(item_name)}, {"$set": {"inventory.$.amount": int(amount)}})
+                    else:
+                        await cursor.update_one({"id": user.id},
+                                                {"$push": {"inventory": {"name": item_name, "amount": int(amount)}}})
                 # get ye money
                 newBal = wallet - cost
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})

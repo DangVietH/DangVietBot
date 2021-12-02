@@ -67,17 +67,9 @@ class Admin(commands.Cog):
 
     @commands.command(help="Unban member")
     @commands.has_permissions(administrator=True)
-    async def unban(self, ctx, *, member):
-        banned_users = await ctx.guild.bans()
-        member_name, member_discriminator = member.split("#")
-
-        for ban_entry in banned_users:
-            user = ban_entry.user
-
-            if (user.name, user.discriminator) == (member_name, member_discriminator):
-                await ctx.guild.unban(user)
-                await ctx.send(f'Unbanned {user.mention}')
-                return
+    async def unban(self, ctx, *, member_id):
+        await ctx.guild.unban(discord.Object(id=member_id))
+        await ctx.send("Successfully unban him")
 
     @commands.command(help="Clear messages in a certain amount", aliases=['purge'])
     @commands.has_permissions(manage_messages=True)
