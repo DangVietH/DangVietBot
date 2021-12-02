@@ -4,22 +4,7 @@ import random
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import asyncio
-
-shop = [{"name": "chicken", "price": 10, "description": "chicken men-men"},
-        {"name": "parrot", "price": 20, "description": "birb machine"},
-        {"name": "watch", "price": 50, "description": "Time"},
-        {"name": "horse", "price": 70, "description": "Juan"},
-        {"name": "Sword", "price": 100, "description": "defence"},
-        {"name": "Rifle", "price": 500, "description": "shoot"},
-        {"name": "Laptop", "price": 1000, "description": "Work"},
-        {"name": "Flying-tonk", "price": 3000, "description": "Fly while shoot"},
-        {"name": "Mac", "price": 5000, "description": "Luxury"},
-        {"name": "Gaming-PC", "price": 10000, "description": "Epic gamers"},
-        {"name": "platinum", "price": 20000, "description": "Show of your status"},
-        {"name": "silver", "price": 50000, "description": "cool kid"},
-        {"name": "gold", "price": 200000, "description": "rich kid who like to show off"},
-        {"name": "diamonds", "price": 600000, "description": "extreme rich kid"},
-        {"name": "robber_shield", "price": 1200000, "description": "Limit the amount the robber can rob"}]
+from cogs.economy.shopping_list import shop
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["economy"]
@@ -162,12 +147,26 @@ class Economy(commands.Cog):
             if cost > wallet:
                 await ctx.send(f"You don't have enough money to buy {amount} {item_name}")
             else:
-                for item in check['inventory']:
-                    if item['name'] == str(item_name):
-                        await cursor.update_one({"id": user.id, "inventory.name": str(item_name)}, {"$set": {"inventory.$.amount": int(amount)}})
-                    else:
-                        await cursor.update_one({"id": user.id},
-                                                {"$push": {"inventory": {"name": item_name, "amount": int(amount)}}})
+                await cursor.update_one({"id": user.id,
+                                         "inventory": {
+                                             "$not": {
+                                                 "$elemMatch": {
+                                                     "name": str(item_name)
+                                                 }
+                                             }
+                                         }
+                                         }, {
+                                            "$addToSet": {
+                                                "inventory": {
+                                                    "name": str(item_name),
+                                                    'amount': int(amount)
+                                                }
+                                            }
+                                        }, upsert=True)
+
+                # if exist
+                await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                                        {"$set": {"inventory.$.amount": int(amount)}})
                 # get ye money
                 newBal = wallet - cost
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
