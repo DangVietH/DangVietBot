@@ -2,12 +2,15 @@ import discord
 from discord.ext import commands
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
+import asyncio
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["levelling"]
 levelling = db['member']
 disable = db['disable']
 role = db['roles']
+
+# pagination code bade on https://github.com/KumosLab/Discord-Economy-Bot/blob/main/Commands/leaderboard.py
 
 
 class Leveling(commands.Cog):
@@ -90,12 +93,112 @@ class Leveling(commands.Cog):
                 xp = "{:,}".format(tempxp)
                 level = "{:,}".format(templvl)
                 embed.add_field(name=f"{i}: {temp}", value=f"**Level:** {level}  **XP:** {xp}", inline=False)
-                i += 1            
+                i += 1
             except:
                 pass
             if i == 20 + 1:
                 break
         await ctx.send(embed=embed)
+
+    @commands.command(help="Leaderboard but with page")
+    async def ptop(self, ctx):
+        stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
+        embed = discord.Embed(title=f"🏆 Leaderboard of {ctx.guild.name}", color=discord.Color.random())
+        user = []
+        lvl = []
+        xp = []
+        async for x in stats:
+            user.append(x['user'])
+            lvl.append(x['level'])
+            xp.append(x['xp'])
+
+        pagination = list(zip(user, lvl, xp))
+        pages = [pagination[i:i + 10] for i in range(0, len(pagination), 10)]
+        page = 0
+        num = 0
+        user_list = []
+        lvl_list = []
+        xp_list = []
+        for i in pages:
+            embed.clear_fields()
+            for users, lvl, xp in i:
+                num += 1
+                him = ctx.guild.get_member(users)
+                embed.add_field(name=f"{num}: {him}", value=f"**Level:** {lvl}  **XP:** {xp}", inline=False)
+            embed.set_footer(text=f"Page {page + 1}/{len(pages)}")
+            message = await ctx.send(embed=embed)
+            page += 1
+            await message.add_reaction("⬅️")
+            await message.add_reaction("➡️")
+            await message.add_reaction("⏹")
+
+            while True:
+                def check(reaction, userz):
+                    return userz == ctx.author and str(reaction.emoji) in ["⬅️", "➡️", "⏹"] and reaction.message.id == message.id
+
+                try:
+                    reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
+
+                    if str(reaction.emoji) == "⬅️":
+                        if page == 1:
+                            pass
+                        else:
+                            page -= 1
+                            embed.clear_fields()
+                            for users, lvl, xp in pages[page - 1]:
+                                num -= 1
+                                user_list.append(users)
+                                lvl_list.append(lvl)
+                                xp_list.append(xp)
+                            for x in range(0, 10):
+                                him = ctx.guild.get_member(user_list[x])
+                                embed.add_field(name=f"{x + 1 + num - len(user_list)}: {him}", value=f"**Level:** {lvl_list[x]}  **XP:** {xp_list[x]}", inline=False)
+                            user_list.clear()
+                            lvl_list.clear()
+                            xp_list.clear()
+                            embed.set_footer(text=f"Page {page}/{len(pages)}")
+                            await message.edit(embed=embed)
+                            await message.remove_reaction("⬅️", user)
+                            await message.remove_reaction("➡️", user)
+                            await message.remove_reaction("⏹", user)
+
+                    elif str(reaction.emoji) == "➡️":
+                        if page == len(pages):
+                            pass
+                        else:
+                            page += 1
+                            embed.clear_fields()
+                            for users, lvl, xp in pages[page - 1]:
+                                num += 1
+                                user_list.append(users)
+                                lvl_list.append(lvl)
+                                xp_list.append(xp)
+                                him = ctx.guild.get_member(users)
+                                embed.add_field(name=f"{num}: {him}",
+                                                value=f"**Level:** {lvl}  **XP:** {xp}", inline=False)
+                            if len(user_list) != 10:
+                                get_ten = 10 - len(user_list)
+                                num += get_ten
+                            user_list.clear()
+                            lvl_list.clear()
+                            xp_list.clear()
+                            embed.set_footer(text=f"Page {page}/{len(pages)}")
+                            await message.edit(embed=embed)
+                            await message.remove_reaction("⬅️", user)
+                            await message.remove_reaction("➡️", user)
+                            await message.remove_reaction("⏹", user)
+
+                    elif str(reaction.emoji) == "⏹️":
+                        await message.remove_reaction("⬅️")
+                        await message.remove_reaction("➡️")
+                        await message.remove_reaction("⏹")
+                        return
+
+                except asyncio.TimeoutError:
+                    await message.remove_reaction("⬅️")
+                    await message.remove_reaction("➡️")
+                    await message.remove_reaction("⏹")
+                    return
 
     @commands.command(help="See the top 20 users globally")
     async def gtop(self, ctx):
@@ -117,7 +220,7 @@ class Leveling(commands.Cog):
             if i == 20 + 1:
                 break
         await ctx.send(embed=embed)
-    
+
     # remove data to save storage
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
