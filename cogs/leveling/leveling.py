@@ -80,28 +80,8 @@ class Leveling(commands.Cog):
         else:
             await ctx.send(f"The specified member haven't send a message in this server!!")
 
-    @commands.command(help="See the top 20 users in your server")
+    @commands.command(help="See server ranks")
     async def top(self, ctx):
-        stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
-        i = 1
-        embed = discord.Embed(title=f"🏆 Leaderboard of {ctx.guild.name}", color=discord.Color.random())
-        async for x in stats:
-            try:
-                temp = ctx.guild.get_member(x["user"])
-                tempxp = x["xp"]
-                templvl = x["level"]
-                xp = "{:,}".format(tempxp)
-                level = "{:,}".format(templvl)
-                embed.add_field(name=f"{i}: {temp}", value=f"**Level:** {level}  **XP:** {xp}", inline=False)
-                i += 1
-            except:
-                pass
-            if i == 20 + 1:
-                break
-        await ctx.send(embed=embed)
-
-    @commands.command(help="Leaderboard but with page")
-    async def ptop(self, ctx):
         stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
         embed = discord.Embed(title=f"🏆 Leaderboard of {ctx.guild.name}", color=discord.Color.random())
         user = []
@@ -189,16 +169,14 @@ class Leveling(commands.Cog):
                             await message.remove_reaction("⏹", user)
 
                     elif str(reaction.emoji) == "⏹️":
-                        await message.remove_reaction("⬅️")
-                        await message.remove_reaction("➡️")
-                        await message.remove_reaction("⏹")
-                        return
+                        await message.clear_reaction("⬅️")
+                        await message.clear_reaction("➡️")
+                        await message.clear_reaction("⏹")
 
                 except asyncio.TimeoutError:
-                    await message.remove_reaction("⬅️")
-                    await message.remove_reaction("➡️")
-                    await message.remove_reaction("⏹")
-                    return
+                    await message.clear_reaction("⬅️")
+                    await message.clear_reaction("➡️")
+                    await message.clear_reaction("⏹")
 
     @commands.command(help="See the top 20 users globally")
     async def gtop(self, ctx):
