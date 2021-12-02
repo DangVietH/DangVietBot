@@ -21,7 +21,7 @@ class Economy(commands.Cog):
     async def create_account(self, ctx):
         check = await cursor.find_one({"id": ctx.author.id})
         if check is None:
-            insert = {"id": ctx.author.id, "wallet": 0, "bank": 0, "pcoin": 0, "inventory": []}
+            insert = {"id": ctx.author.id, "wallet": 0, "bank": 0, "inventory": []}
             await cursor.insert_one(insert)
             await ctx.send(
                 "Done, your economy account has been created. **ONLY USE OUR CURRENCY IN THE BOT. IF YOU'RE CAUGHT USING THIS BOT TO TRADE ITEMS, YOU'RE DEAD!!**")

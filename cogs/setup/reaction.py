@@ -1,4 +1,3 @@
-import discord
 import asyncio
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -82,7 +81,7 @@ class Reaction(commands.Cog):
                     if chose_emoji == emojis[i]:
                         selected_role = roles[i]
 
-                        role = discord.utils.get(guild.roles, name=selected_role)
+                        role = guild.get_role(selected_role)
 
                         await payload.member.add_roles(role)
 
@@ -106,7 +105,7 @@ class Reaction(commands.Cog):
                 if chose_emoji == emojis[i]:
                     selected_role = roles[i]
 
-                    role = discord.utils.get(guild.roles, name=selected_role)
+                    role = guild.get_role(selected_role)
                     member = await(guild.fetch_member(payload.user_id))
                     if member is not None:
                         await member.remove_roles(role)
