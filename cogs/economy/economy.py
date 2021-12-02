@@ -153,10 +153,6 @@ class Economy(commands.Cog):
                                             {"$push": {"inventory": {"name": item_name, "amount": int(amount)}}})
                 else:
                     await cursor.update_one({"id": user.id, "inventory.name": str(item_name)}, {"$inc": {"inventory.$.amount": int(amount)}})
-
-                # if exist
-                await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
-                                        {"$set": {"inventory.$.amount": int(amount)}})
                 # get ye money
                 newBal = wallet - cost
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
