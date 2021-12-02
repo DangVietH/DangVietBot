@@ -15,11 +15,11 @@ class Reaction(commands.Cog):
         self.bot = bot
 
     @commands.command(help="Set up reaction role")
-    @commands.is_owner()
+    @commands.has_permissions(manage_messages=True)
     async def self_react(self, ctx):
         await ctx.send("Answer These Question In Next 10Min!")
 
-        questions = ["Enter Message: ", "Enter Emojis: ", "Enter Roles (name): ", "Enter Channel: "]
+        questions = ["Enter Message: ", "Enter Emojis: ", "Enter Roles (id): ", "Enter Channel: "]
         answers = []
 
         def check(user):
@@ -49,7 +49,7 @@ class Reaction(commands.Cog):
             await bot_msg.add_reaction(emoji)
 
     @commands.command(help="Delete reaction role system. This does not delete the message.")
-    @commands.is_owner()
+    @commands.has_permissions(manage_messages=True)
     async def del_react(self, ctx, msg_id: int):
         check = await cursor.find_one({"id": msg_id})
         if msg_id == check['id']:
