@@ -26,7 +26,7 @@ class Leveling(commands.Cog):
                 if is_disabled is None:
                     stats = await levelling.find_one({'guild': message.guild.id, "user": message.author.id})
                     if stats is None:
-                        insert = {'guild': message.guild.id, "user": message.author.id, 'level': 0, 'xp': 0}
+                        insert = {'guild': message.guild.id, "user": message.author.id, 'level': 0, 'xp': 5}
                         await levelling.insert_one(insert)
                     else:
                         add_exp = stats['xp'] + 5
