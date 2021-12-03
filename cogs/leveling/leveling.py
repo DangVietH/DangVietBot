@@ -78,9 +78,17 @@ class Leveling(commands.Cog):
         user = user or ctx.author
         stats = await levelling.find_one({'guild': ctx.guild.id, "user": user.id})
         if stats is not None:
+            ranking = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
+            rank = 0
+            async for x in ranking:
+                rank += 1
+                if stats['user'] == x['user']:
+                    break
+
             embed = discord.Embed(title=user, color=user.color)
             embed.add_field(name="Level", value=f"#{stats['level']}")
             embed.add_field(name="XP", value=f"#{stats['xp']}")
+            embed.add_field(name="Rank", value=f"#{rank}")
             embed.set_thumbnail(url=user.avatar.url)
             await ctx.send(embed=embed)
         else:
