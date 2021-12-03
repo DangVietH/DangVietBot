@@ -45,8 +45,7 @@ class Giveaway(commands.Cog):
         await ctx.send(
             f'The giveaway for {prize} will begin shortly.\nPlease direct your attention to {channel.mention}, this giveaway will end in {time} seconds.')
 
-        give = discord.Embed(color=discord.Color.green())
-        give.set_author(name=f'GIVEAWAY TIME!', icon_url='https://i.imgur.com/VaX0pfM.png')
+        give = discord.Embed(color=discord.Color.green(), title="🎉 GIVEAWAY TIME! 🎉")
         give.add_field(name=f'{ctx.author.name} is giving away: {prize}!',
                        value=f'React with 🎁 to enter!\n Ends in {round(time / 60, 2)} minutes!', inline=False)
         end = datetime.datetime.utcnow() + datetime.timedelta(seconds=time)
@@ -63,8 +62,7 @@ class Giveaway(commands.Cog):
         winner = random.choice(users)
 
         if winner is not None:
-            winning_announcement = discord.Embed(color=discord.Color.red())
-            winning_announcement.set_author(name=f'THE GIVEAWAY HAS ENDED!', icon_url='https://i.imgur.com/DDric14.png')
+            winning_announcement = discord.Embed(color=discord.Color.red(), title="🥳 THE GIVEAWAY HAS ENDED!")
             winning_announcement.add_field(name=f'🎉 Prize: {prize}', value=f'🥳 **Winner**: {winner.mention}\n 🎫 **Number of Entrants**: {len(users)}', inline=False)
             winning_announcement.set_footer(text='Thanks for entering!')
             await channel.send(embed=winning_announcement)

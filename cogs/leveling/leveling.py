@@ -226,7 +226,7 @@ class Leveling(commands.Cog):
 
                     if str(reaction.emoji) == "⬅️":
                         if page == 1:
-                            pass
+                            await message.remove_reaction("⬅️", user)
                         else:
                             page -= 1
                             embed.clear_fields()
@@ -250,7 +250,7 @@ class Leveling(commands.Cog):
 
                     elif str(reaction.emoji) == "➡️":
                         if page == len(pages):
-                            pass
+                            await message.remove_reaction("➡️", user)
                         else:
                             page += 1
                             embed.clear_fields()

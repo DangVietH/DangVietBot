@@ -86,8 +86,8 @@ class Economy(commands.Cog):
             except asyncio.TimeoutError:
                 newBal = check['wallet'] + 10
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
-                embed = discord.Embed(title="BAD WORK",
-                                      description="You didn't complete in time? You only receive <:DHBuck:901485795410599988> 10 because of that!!🤦",
+                embed = discord.Embed(title="🤦 BAD WORK 🤦",
+                                      description="You didn't complete in time? You only receive <:DHBuck:901485795410599988> 10 because of that!!",
                                       color=discord.Color.red())
                 await ctx.send(embed=embed)
             else:
@@ -103,8 +103,8 @@ class Economy(commands.Cog):
                     low_money = random.randint(10, 100)
                     newBal = check['wallet'] + low_money
                     await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
-                    embed = discord.Embed(title="BAD WORK",
-                                          description=f"You didn't answer correctly. You only receive <:DHBuck:901485795410599988> {low_money}🤦",
+                    embed = discord.Embed(title="🤦 BAD WORK 🤦",
+                                          description=f"You didn't answer correctly. You only receive <:DHBuck:901485795410599988> {low_money}",
                                           color=discord.Color.red())
                     await message.reply(embed=embed)
 

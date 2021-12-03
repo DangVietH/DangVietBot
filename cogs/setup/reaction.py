@@ -43,7 +43,7 @@ class Reaction(commands.Cog):
 
         bot_msg = await channel.send(answers[0])
 
-        insert = {"id": bot_msg.id, "emojis": emojis, "roles": int(roles)}
+        insert = {"id": bot_msg.id, "emojis": emojis, "roles": roles}
         await cursor.insert_one(insert)
         for emoji in emojis:
             await bot_msg.add_reaction(emoji)
@@ -81,7 +81,7 @@ class Reaction(commands.Cog):
                     if chose_emoji == emojis[i]:
                         selected_role = roles[i]
 
-                        role = guild.get_role(selected_role)
+                        role = guild.get_role(int(selected_role))
 
                         await payload.member.add_roles(role)
 
@@ -105,7 +105,7 @@ class Reaction(commands.Cog):
                 if chose_emoji == emojis[i]:
                     selected_role = roles[i]
 
-                    role = guild.get_role(selected_role)
+                    role = guild.get_role(int(selected_role))
                     member = await(guild.fetch_member(payload.user_id))
                     if member is not None:
                         await member.remove_roles(role)
