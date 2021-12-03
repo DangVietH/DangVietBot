@@ -24,7 +24,7 @@ class Economy(commands.Cog):
             insert = {"id": ctx.author.id, "wallet": 0, "bank": 0, "inventory": []}
             await cursor.insert_one(insert)
             await ctx.send(
-                "Done, your economy account has been created. **ONLY USE OUR CURRENCY IN THE BOT. IF YOU'RE CAUGHT USING THIS BOT TO TRADE ITEMS, YOU'RE DEAD!!**")
+                "Done, your economy account has been created. **ONLY USE OUR CURRENCY IN THE BOT. IF YOU'RE CAUGHT USING THIS BOT TO TRADE REAL LIFE ITEMS, YOU'RE DEAD!!**")
         else:
             await ctx.send("You already have an account")
 
@@ -152,11 +152,48 @@ class Economy(commands.Cog):
                     await cursor.update_one({"id": user.id},
                                             {"$push": {"inventory": {"name": item_name, "amount": int(amount)}}})
                 else:
-                    await cursor.update_one({"id": user.id, "inventory.name": str(item_name)}, {"$inc": {"inventory.$.amount": int(amount)}})
+                    await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                                            {"$inc": {"inventory.$.amount": int(amount)}})
                 # get ye money
                 newBal = wallet - cost
                 await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
                 await ctx.send(f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988>  {cost}")
+
+    @commands.command(help="Sell your items")
+    async def sell(self, ctx, item_name, amount=1):
+        user = ctx.author
+        check = await cursor.find_one({"id": user.id})
+
+        if check is None:
+            await ctx.send(NO_ACCOUNT)
+        else:
+            item_name = item_name.lower()
+            inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
+            if item_name != inventory_check:
+                await ctx.send("You don't have that item in your inventory")
+            else:
+                iamount = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)},
+                                                {"inventory.$.amount"})
+                if amount > iamount:
+                    await ctx.send("Too much!!")
+                else:
+                    if amount == iamount:
+                        await cursor.update_one({"id": user.id},
+                                                {"$pull": {"inventory": {"name": item_name}}})
+                    else:
+                        await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                                                {"$inc": {"inventory.$.amount": -amount}})
+                    price = 0
+                    for item in shop:
+                        name = item["name"].lower()
+                        if name == item_name:
+                            price = item["price"]
+                            break
+                    newA = price * amount
+                    newBal = check['wallet'] + newA
+                    await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
+                    await ctx.send(
+                        f"You just sold {amount} {item_name} and earn <:DHBuck:901485795410599988> {newA}")
 
     @commands.command(help="See your items", aliases=["bag"])
     async def inventory(self, ctx):
@@ -253,7 +290,8 @@ class Economy(commands.Cog):
                         user_update = check2['wallet'] - 10
                         await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
                         await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
-                        await ctx.send("Your victim has a robber shield, so you can only rob <:DHBuck:901485795410599988> 10 from him")
+                        await ctx.send(
+                            "Your victim has a robber shield, so you can only rob <:DHBuck:901485795410599988> 10 from him")
 
                 if amount > check2['wallet']:
                     await ctx.send(

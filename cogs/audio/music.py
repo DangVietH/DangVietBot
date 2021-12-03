@@ -6,7 +6,6 @@ import math
 from discord.ext.commands.errors import CheckFailure
 
 # This cog is based on https://github.com/Devoxin/Lavalink.py/blob/master/examples/music.py
-# The code for queue taken from https://github.com/NiceAesth/Sunny/blob/master/cogs/music.py
 
 
 class NotConnectedToVoice(CheckFailure):
