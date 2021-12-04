@@ -188,11 +188,12 @@ class Economy(commands.Cog):
                 if await cursor.find_one({"id": user.id, "inventory.name": str(item_name)}) < amount:
                     await ctx.send("Too much")
                 else:
-                    if await cursor.find_one({"id": user.id, "inventory.name": str(item_name)}, {"inventory.$.amount"}) < amount:
+                    if await cursor.find_one({"id": user.id, "inventory.name": str(item_name)},
+                                             {"$elemMatch ": {"inventory.$.amount"}}) < amount:
                         await ctx.send(f"You don't have enough {item_name} in your inventory")
                     else:
                         if await cursor.find_one({"id": user.id, "inventory.name": str(item_name)},
-                                                 {"inventory.$.amount"}) == amount:
+                                                 {"$elemMatch ": {"inventory.$.amount"}}) == amount:
                             await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": str(item_name)}}})
                         else:
                             await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
