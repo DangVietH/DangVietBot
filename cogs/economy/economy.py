@@ -184,14 +184,20 @@ class Economy(commands.Cog):
 
             inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
             if inventory_check is None:
-                await ctx.send("Not in your inventory")
+                await ctx.send("That item wasn't in your inventory")
             else:
-                await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
-                                        {"$inc": {"inventory.$.amount": -amount}})
-                newBal = check['wallet'] + amount * price
-                await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
-                await ctx.send(
-                    f"You just sold {amount} {item_name} and get <:DHBuck:901485795410599988> {amount * price}")
+                iamount = inventory_check['amount']
+                if amount > iamount:
+                    await ctx.send("Too much amount")
+                else:
+                    await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                                            {"$inc": {"inventory.$.amount": -amount}})
+                    if iamount == 0:
+                        await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {str(item_name)}}})
+                    newBal = check['wallet'] + amount * price
+                    await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
+                    await ctx.send(
+                        f"You just sold {amount} {item_name} and get <:DHBuck:901485795410599988> {amount * price}")
 
     @commands.command(help="See your items", aliases=["bag"])
     async def inventory(self, ctx):

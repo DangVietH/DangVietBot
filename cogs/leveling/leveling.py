@@ -187,7 +187,7 @@ class Leveling(commands.Cog):
     async def gtop(self, ctx):
         stats = levelling.find().sort("xp", -1)
         embed = discord.Embed(color=discord.Color.random())
-        embed.set_author(icon_url="https://cdn.discordapp.com/attachments/900197917170737152/916598584005238794/world.png", name="🇺🇳 Global Leaderboard")
+        embed.set_author(icon_url="https://cdn.discordapp.com/attachments/900197917170737152/916598584005238794/world.png", name="Global Leaderboard")
         user = []
         lvl = []
         xp = []
