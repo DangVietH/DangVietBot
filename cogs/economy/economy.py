@@ -181,11 +181,11 @@ class Economy(commands.Cog):
             if name_ is None:
                 await ctx.send("That item didn't exist")
 
-            for thing in check['inventory']:
-                if thing['name'].lower() == item_name:
-                    await ctx.send("Exist")
-                else:
-                    await ctx.send("Not in your inventory")
+            inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
+            if inventory_check is None:
+                await ctx.send("Not in your inventory")
+            else:
+                await ctx.send("Exist")
 
     @commands.command(help="See your items", aliases=["bag"])
     async def inventory(self, ctx):
