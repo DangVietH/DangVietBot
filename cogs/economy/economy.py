@@ -160,6 +160,7 @@ class Economy(commands.Cog):
                 await ctx.send(f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988>  {cost}")
 
     @commands.command(help="Sell your items")
+    @commands.is_owner()
     async def sell(self, ctx, item_name, amount=1):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
@@ -185,23 +186,12 @@ class Economy(commands.Cog):
             if inventory_check is None:
                 await ctx.send("Not in your inventory")
             else:
-                if await cursor.find_one({"id": user.id, "inventory.name": str(item_name)}) < amount:
-                    await ctx.send("Too much")
-                else:
-                    if await cursor.find_one({"id": user.id, "inventory.name": str(item_name)},
-                                             {"$elemMatch ": {"inventory.$.amount"}}) < amount:
-                        await ctx.send(f"You don't have enough {item_name} in your inventory")
-                    else:
-                        if await cursor.find_one({"id": user.id, "inventory.name": str(item_name)},
-                                                 {"$elemMatch ": {"inventory.$.amount"}}) == amount:
-                            await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": str(item_name)}}})
-                        else:
-                            await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
-                                                    {"$inc": {"inventory.$.amount": -amount}})
-                        newBal = check['wallet'] + amount * price
-                        await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
-                        await ctx.send(
-                            f"You just sold {amount} {item_name} and get <:DHBuck:901485795410599988> {amount * price}")
+                await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                                        {"$inc": {"inventory.$.amount": -amount}})
+                newBal = check['wallet'] + amount * price
+                await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
+                await ctx.send(
+                    f"You just sold {amount} {item_name} and get <:DHBuck:901485795410599988> {amount * price}")
 
     @commands.command(help="See your items", aliases=["bag"])
     async def inventory(self, ctx):

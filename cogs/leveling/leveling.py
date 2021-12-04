@@ -183,7 +183,7 @@ class Leveling(commands.Cog):
                     await message.clear_reaction("⬅️")
                     await message.clear_reaction("➡️")
 
-    @commands.command(help="See the top 20 users globally")
+    @commands.command(help="See global rank")
     async def gtop(self, ctx):
         stats = levelling.find().sort("xp", -1)
         embed = discord.Embed(title="🌏 Global Leaderboard", color=discord.Color.random())

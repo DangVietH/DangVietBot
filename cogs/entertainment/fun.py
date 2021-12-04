@@ -145,17 +145,17 @@ class Fun(commands.Cog):
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def hack(self, ctx, member: discord.Member = None):
         if member is None:
-            await ctx.send("I don't see someone to hack, mabye later?")
+            await ctx.send("I don't see someone to hack, maybe later?")
         else:
             msg = await ctx.send("`$python hack.py`")
             await asyncio.sleep(2)
             msg2 = await msg.edit(content="Get user.id")
             await asyncio.sleep(2)
-            msg3 = await msg2.edit(content="open discord.bson")
+            msg3 = await msg2.edit(content="open users.bson")
             await asyncio.sleep(2)
             msg4 = await msg3.edit(content=f"Find user.id in line {random.randint(1, 350000000)}")
             await asyncio.sleep(2)
-            msg5 = await msg4.edit(content=f"email: `{member.name}.gmail.com`\npassword: `********`")
+            msg5 = await msg4.edit(content=f"email: `{member.name}.gmail.com`\npassword: `********` \nip address: `1.2.7:500`")
             await asyncio.sleep(2)
             msg6 = await msg5.edit(content="Checking user activity")
             await asyncio.sleep(2)
@@ -165,6 +165,6 @@ class Fun(commands.Cog):
             await asyncio.sleep(2)
             await msg8.edit(content=f"Finish hacking {member}")
 
-    @commands.command(help="no")
+    @commands.command(help="god please NO")
     async def sus(self, ctx):
         await ctx.send("Did someone say sus 😱😱😱 HOLY FUCKING SHIT‼️‼️‼️‼️ IS THAT A MOTHERFUCKING AMONG US REFERENCE??????!!!!!!!!!!11!1!1!1!1!1!1! 😱😱😱😱😱😱😱 AMONG US IS THE BEST FUCKING GAME 🔥🔥🔥🔥💯💯💯💯 RED IS SO SUSSSSS 🕵️🕵️🕵️🕵️🕵️🕵️🕵️🟥🟥🟥🟥🟥 COME TO MEDBAY AND WATCH ME SCAN 🏥🏥🏥🏥🏥🏥🏥🏥 🏥🏥🏥🏥 WHY IS NO ONE FIXING O2 🤬😡🤬😡🤬😡🤬🤬😡🤬🤬😡 OH YOUR CREWMATE? NAME EVERY TASK 🔫😠🔫😠🔫😠🔫😠🔫😠 Where Any sus!❓ ❓ Where!❓ ❓ Where! Any sus!❓ Where! ❓ Any sus!❓ ❓ Any sus! ❓ ❓ ❓ ❓ Where!Where!Where! Any sus!Where!Any sus Where!❓ Where! ❓ Where!Any sus❓ ❓ Any sus! ❓ ❓ ❓ ❓ ❓ ❓ Where! ❓ Where! ❓ Any sus!❓ ❓ ❓ ❓ Any sus! ❓ ❓ Where!❓ Any sus! ❓ ❓ Where!❓ ❓ Where! ❓ Where!Where! ❓ ❓ ❓ ❓ ❓ ❓ ❓ Any sus!❓ ❓ ❓ Any sus!❓ ❓ ❓ ❓ Where! ❓ Where! Where!Any sus!Where! Where! ❓ ❓ ❓ ❓ ❓ ❓ I think it was purple!👀👀👀👀👀👀👀👀👀👀It wasnt me I was in vents!!!!!!!!!!!!!!😂🤣😂🤣😂🤣😂😂😂🤣🤣🤣😂😂😂")

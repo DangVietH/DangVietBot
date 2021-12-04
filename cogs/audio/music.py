@@ -294,12 +294,13 @@ class Music(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(aliases=['vol'], help="Change bot volume")
-    async def volume(self, ctx, volume: int = 10):
+    async def volume(self, ctx, volume: int = None):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         volume = max(1, min(volume, 100))
+        if volume is None:
+            await ctx.send(f'🔊 Volume set to {player.volume * 2}%')
 
         await player.set_volume(volume / 2)
-        await ctx.send(f'🔊 Volume set to {player.volume * 2}%')
 
     @commands.command(help="Loop the current song until the command is invoked again. ")
     async def loop(self, ctx):
