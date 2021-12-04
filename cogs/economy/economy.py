@@ -168,32 +168,24 @@ class Economy(commands.Cog):
             await ctx.send(NO_ACCOUNT)
         else:
             item_name = item_name.lower()
-            inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
-            if item_name != inventory_check:
-                await ctx.send("You don't have that item in your inventory")
-            else:
-                iamount = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)},
-                                                {"inventory.$.amount"})
-                if amount > iamount:
-                    await ctx.send("Too much!!")
+            name_ = None
+            price = None
+
+            for item in shop:
+                name = item["name"].lower()
+                if name == item_name:
+                    name_ = name
+                    price = item["price"]
+                    break
+
+            if name_ is None:
+                await ctx.send("That item didn't exist")
+
+            for thing in check['inventory']:
+                if thing['name'].lower() == item_name:
+                    await ctx.send("Exist")
                 else:
-                    if amount == iamount:
-                        await cursor.update_one({"id": user.id},
-                                                {"$pull": {"inventory": {"name": item_name}}})
-                    else:
-                        await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
-                                                {"$inc": {"inventory.$.amount": -amount}})
-                    price = 0
-                    for item in shop:
-                        name = item["name"].lower()
-                        if name == item_name:
-                            price = item["price"]
-                            break
-                    newA = price * amount
-                    newBal = check['wallet'] + newA
-                    await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
-                    await ctx.send(
-                        f"You just sold {amount} {item_name} and earn <:DHBuck:901485795410599988> {newA}")
+                    await ctx.send("Not in your inventory")
 
     @commands.command(help="See your items", aliases=["bag"])
     async def inventory(self, ctx):
@@ -296,8 +288,8 @@ class Economy(commands.Cog):
                 if amount > check2['wallet']:
                     await ctx.send(
                         'You tried to rob him, but he caught you and force you to pay <:DHB_coin:901485795410599988> 1000')
-                    author_update = check1['wallet'] - amount
-                    user_update = check2['bank'] + amount
+                    author_update = check1['wallet'] - 1000
+                    user_update = check2['bank'] + 1000
                     await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
                     await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
 
