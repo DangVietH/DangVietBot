@@ -180,13 +180,13 @@ class Economy(commands.Cog):
                     break
 
             if name_ is None:
-                await ctx.send("That item didn't exist")
+                await ctx.send("That item wasn't in your inventory")
 
             inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
             if inventory_check is None:
                 await ctx.send("That item wasn't in your inventory")
             else:
-                iamount = inventory_check['inventory.amount']
+                iamount = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)}, {"$getField": "inventory.$.amount"})
                 if amount > iamount:
                     await ctx.send("Too much amount")
                 else:
@@ -287,15 +287,13 @@ class Economy(commands.Cog):
             if total_check < 10000:
                 await ctx.send("You need <:DHBuck:901485795410599988> 10000 to rob someone")
             else:
-                victim_items = check2['inventory']
-                for item in victim_items:
-                    if item['name'] == "robber_shield":
-                        author_update = check1['wallet'] + 10
-                        user_update = check2['wallet'] - 10
-                        await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
-                        await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
-                        await ctx.send(
-                            "Your victim has a robber shield, so you can only rob <:DHBuck:901485795410599988> 10 from him")
+                anti_rob_1 = await cursor.find_one({"id": user.id, "inventory.name": "robber_shield"})
+                if anti_rob_1 is not None:
+                    author_update = check1['wallet'] + 10
+                    user_update = check2['wallet'] - 10
+                    await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
+                    await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
+                    await ctx.send(f"You tried to rob him but you only got <:DHBuck:901485795410599988> 10")
 
                 if amount > check2['wallet']:
                     await ctx.send(

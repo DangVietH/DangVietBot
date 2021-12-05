@@ -40,12 +40,6 @@ class Fun(commands.Cog):
     async def on_ready(self):
         await gen_meme()
 
-    @commands.command(help="rick roll your friends")
-    @commands.cooldown(1, 3600, commands.BucketType.user)
-    async def rick(self, ctx, member: discord.Member):
-        await member.send("https://tenor.com/view/dance-moves-dancing-singer-groovy-gif-17029825")
-        await ctx.send("Complete")
-
     @commands.command(aliases=["iqrate"], help="Accurately rate your IQ without taking a test")
     async def iq(self, ctx):
         iq = random.randint(0, 1000)
