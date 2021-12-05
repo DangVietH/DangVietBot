@@ -87,7 +87,7 @@ class Leveling(commands.Cog):
 
             embed = discord.Embed(title=user, color=user.color)
             embed.add_field(name="Level", value=f"#{stats['level']}")
-            embed.add_field(name="XP", value=f"#{stats['xp']}")
+            embed.add_field(name="XP", value=f"#{stats['xp']}/{stats['level'] - int(stats['xp'] ** (1 / 4))}")
             embed.add_field(name="Rank", value=f"#{rank}")
             embed.set_thumbnail(url=user.avatar.url)
             await ctx.send(embed=embed)
