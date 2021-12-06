@@ -147,7 +147,7 @@ class Admin(commands.Cog):
 
     @commands.group(invoke_without_command=True, help="Modlog and case")
     async def modlog(self, ctx):
-        await ctx.invoke(self.bot.get_command('help'), command_or_cog='tag')
+        await ctx.send("modlog channel: set up modlog channel\nmodlog remove: end modlog system")
 
     @modlog.command(help="Set up channel")
     @commands.has_permissions(administrator=True)
@@ -162,13 +162,13 @@ class Admin(commands.Cog):
                 await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
                 await ctx.send(f"Modlog channel updated to {channel.mention}")
 
-    @modlog.command(help="Remove modlog channel if you like to")
+    @modlog.command(help="Remove modlog system if you like to")
     @commands.has_permissions(administrator=True)
     async def remove(self, ctx):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is not None:
             await cursors.delete_one(result)
-            await ctx.send("Modlog channel has been remove")
+            await ctx.send("Modlog system has been remove")
         else:
             await ctx.send("You don't have a Modlog channel")
 
