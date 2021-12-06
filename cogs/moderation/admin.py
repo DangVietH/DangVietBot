@@ -30,12 +30,12 @@ class Admin(commands.Cog):
 
             await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
             num_of_case = await cases.find_one({"guild": ctx.guild.id})['num']
-            await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "type": "warning", "reason": str(reason)}}})
+            await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "type": "warning", "Mod": f"{ctx.author}", "reason": str(reason)}}})
 
             result = await cursors.find_one({"guild": ctx.guild.id})
             if result is not None:
                 channel = self.bot.get_channel(result["channel"])
-                embed = discord.Embed(title=f"Case #{num_of_case}: Warn!", description=f"Reason: {reason}", color=discord.Color.red())
+                embed = discord.Embed(title=f"Case #{num_of_case}: Warn!", description=f"**Mod:**{ctx.author} **Reason:** {reason}", color=discord.Color.red())
                 await channel.send(embed=embed)
 
     @commands.command(help="Mute member")
@@ -59,12 +59,12 @@ class Admin(commands.Cog):
         await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
         num_of_case = await cases.find_one({"guild": ctx.guild.id})['num']
         await cases.update_one({"guild": ctx.guild.id},
-                               {"$push": {"cases": {"Number": int(num_of_case), "type": "mute", "reason": str(reason)}}})
+                               {"$push": {"cases": {"Number": int(num_of_case), "type": "mute", "Mod": f"{ctx.author}", "reason": str(reason)}}})
 
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is not None:
             channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Mute!", description=f"Reason: {reason}", color=discord.Color.red())
+            embed = discord.Embed(title=f"Case #{num_of_case}: Mute!", description=f"**Mod:**{ctx.author} **Reason:** {reason}", color=discord.Color.red())
             await channel.send(embed=embed)
 
     @commands.command(help="Unmute member")
@@ -88,12 +88,12 @@ class Admin(commands.Cog):
         await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
         num_of_case = await cases.find_one({"guild": ctx.guild.id})['num']
         await cases.update_one({"guild": ctx.guild.id},
-                               {"$push": {"cases": {"Number": int(num_of_case), "type": "kick", "reason": str(reason)}}})
+                               {"$push": {"cases": {"Number": int(num_of_case), "type": "kick", "Mod": f"{ctx.author}", "reason": str(reason)}}})
 
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is not None:
             channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Kick!", description=f"Reason: {reason}", color=discord.Color.red())
+            embed = discord.Embed(title=f"Case #{num_of_case}: Kick!", description=f"**Mod:**{ctx.author} **Reason:** {reason}", color=discord.Color.red())
             await channel.send(embed=embed)
 
     @commands.command(help="Ban member")
@@ -107,12 +107,12 @@ class Admin(commands.Cog):
         await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
         num_of_case = await cases.find_one({"guild": ctx.guild.id})['num']
         await cases.update_one({"guild": ctx.guild.id},
-                               {"$push": {"cases": {"Number": int(num_of_case), "type": "ban", "reason": str(reason)}}})
+                               {"$push": {"cases": {"Number": int(num_of_case), "type": "ban", "Mod": f"{ctx.author}", "reason": str(reason)}}})
 
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is not None:
             channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Ban!", description=f"Reason: {reason}", color=discord.Color.red())
+            embed = discord.Embed(title=f"Case #{num_of_case}: Ban!", description=f"**Mod:**{ctx.author} **Reason:** {reason}", color=discord.Color.red())
             await channel.send(embed=embed)
 
     @commands.command(help="Unban member")
@@ -180,7 +180,7 @@ class Admin(commands.Cog):
             await ctx.send("Looks like all your server members are good people 🥰")
         embed = discord.Embed(title=f"{ctx.guild.name} caselist", description=f"Total case: {results['num']}", color=discord.Color.red())
         for case in total_cases:
-            embed.add_field(name=f"Case {case['Number']}", value=f"**Type:** {case['type']}\n**Reason:** {case['reason']}")
+            embed.add_field(name=f"Case {case['Number']}", value=f"**Type:** {case['type']}\n **Mod:**{case['Mod']}\n**Reason:** {case['reason']}")
         await ctx.send(embed=embed)
 
     @commands.Cog.listener()
