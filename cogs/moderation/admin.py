@@ -28,9 +28,9 @@ class Admin(commands.Cog):
             emb = discord.Embed(description=f"You have been warned in **{guild.name}** for: **{reason}**", color=discord.Color.red())
             await member.send(embed=emb)
 
-            await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-            num_of_case = await cases.find_one({"guild": ctx.guild.id})['num']
+            num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
             await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "type": "warning", "Mod": f"{ctx.author}", "reason": str(reason)}}})
+            await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
             result = await cursors.find_one({"guild": ctx.guild.id})
             if result is not None:
@@ -56,10 +56,10 @@ class Admin(commands.Cog):
         await ctx.send(f"Muted {member.mention} for reason {reason}")
         await member.send(f"You were muted in **{guild.name}** for {reason}")
 
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-        num_of_case = await cases.find_one({"guild": ctx.guild.id})['num']
+        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
         await cases.update_one({"guild": ctx.guild.id},
                                {"$push": {"cases": {"Number": int(num_of_case), "type": "mute", "Mod": f"{ctx.author}", "reason": str(reason)}}})
+        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is not None:
@@ -85,10 +85,10 @@ class Admin(commands.Cog):
         await member.kick(reason=reason)
         await ctx.send(f'{member.mention} has been kick for {reason}')
 
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-        num_of_case = await cases.find_one({"guild": ctx.guild.id})['num']
+        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
         await cases.update_one({"guild": ctx.guild.id},
                                {"$push": {"cases": {"Number": int(num_of_case), "type": "kick", "Mod": f"{ctx.author}", "reason": str(reason)}}})
+        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is not None:
@@ -104,10 +104,10 @@ class Admin(commands.Cog):
         await member.ban(reason=reason)
         await ctx.send(f'{member.mention} has been **BANNED** for {reason}')
 
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-        num_of_case = await cases.find_one({"guild": ctx.guild.id})['num']
+        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
         await cases.update_one({"guild": ctx.guild.id},
                                {"$push": {"cases": {"Number": int(num_of_case), "type": "ban", "Mod": f"{ctx.author}", "reason": str(reason)}}})
+        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is not None:
@@ -175,11 +175,10 @@ class Admin(commands.Cog):
     @commands.command(help="Look at your server cases")
     async def caselist(self, ctx):
         results = await cases.find_one({"guild": ctx.guild.id})
-        total_cases = results['cases']
-        if len(total_cases) < 1:
-            await ctx.send("Looks like all your server members are good people 🥰")
         embed = discord.Embed(title=f"{ctx.guild.name} caselist", description=f"Total case: {results['num']}", color=discord.Color.red())
-        for case in total_cases:
+        if len(results['cases']) < 1:
+            await ctx.send("Looks like all your server members are good people 🥰")
+        for case in results['cases']:
             embed.add_field(name=f"Case {case['Number']}", value=f"**Type:** {case['type']}\n **Mod:**{case['Mod']}\n**Reason:** {case['reason']}")
         await ctx.send(embed=embed)
 
