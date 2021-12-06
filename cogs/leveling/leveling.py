@@ -32,8 +32,8 @@ class Leveling(commands.Cog):
                         add_exp = stats['xp'] + 5
                         await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
                                                    {"$set": {"xp": add_exp}})
-                        lvl_end = stats['xp'] / 10
-                        if stats['xp'] == lvl_end:
+                        lvl_end = int(stats['xp'] ** (1 / 4))
+                        if stats['level'] < lvl_end:
                             new_lvl = stats['level'] + 1
                             await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
                                                        {"$set": {"level": new_lvl}})
