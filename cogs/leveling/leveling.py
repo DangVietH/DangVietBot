@@ -32,10 +32,9 @@ class Leveling(commands.Cog):
                         add_exp = stats['xp'] + 5
                         await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
                                                    {"$set": {"xp": add_exp}})
-                        lvl_start = stats['level']
-                        lvl_end = int(stats['xp'] ** (1 / 4))
-                        if lvl_start < lvl_end:
-                            new_lvl = lvl_start + 1
+                        lvl_end = stats['xp'] / 10
+                        if stats['xp'] == lvl_end:
+                            new_lvl = stats['level'] + 1
                             await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
                                                        {"$set": {"level": new_lvl}})
                             lvl_channel = await upchannel.find_one({"guild": message.guild.id})
@@ -87,7 +86,7 @@ class Leveling(commands.Cog):
 
             embed = discord.Embed(title=user, color=user.color)
             embed.add_field(name="Level", value=f"#{stats['level']}")
-            embed.add_field(name="XP", value=f"#{stats['xp']}/{stats['xp'] ** 1/4}")
+            embed.add_field(name="XP", value=f"#{stats['xp']}")
             embed.add_field(name="Rank", value=f"#{rank}")
             embed.set_thumbnail(url=user.avatar.url)
             await ctx.send(embed=embed)
