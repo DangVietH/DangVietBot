@@ -296,9 +296,9 @@ class Music(commands.Cog):
     @commands.command(aliases=['vol'], help="Change bot volume")
     async def volume(self, ctx, volume: int = None):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
-        volume = max(1, min(volume, 100))
         if volume is None:
             await ctx.send(f'🔊 Volume set to {player.volume * 2}%')
+        volume = max(1, min(volume, 100))
 
         await player.set_volume(volume / 2)
 

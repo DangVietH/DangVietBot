@@ -11,7 +11,7 @@ disable = db['disable']
 role = db['roles']
 upchannel = db['channel']
 
-# pagination code bade on https://github.com/KumosLab/Discord-Economy-Bot/blob/main/Commands/leaderboard.py
+# pagination code bade on https://github.com/KumosLab/Discord-Economy-Bot/blob/main/Commands/leaderboard.py, which is under Apache-2.0 License
 
 
 class Leveling(commands.Cog):
@@ -39,7 +39,7 @@ class Leveling(commands.Cog):
                                                        {"$set": {"level": new_lvl}})
                             lvl_channel = await upchannel.find_one({"guild": message.guild.id})
                             if lvl_channel is None:
-                                await message.channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**!!🎉")
+                                await message.channel.send(f"🎉 {message.author.mention} has reached level **{new_lvl}**!!🎉")
                             else:
                                 channel = self.bot.get_channel(lvl_channel["channel"])
                                 await channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**!!🎉")
