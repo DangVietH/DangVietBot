@@ -183,6 +183,9 @@ class Admin(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.Cog.listener()
-    async def on_guild_join(self, guild):
-        insert = {"guild": guild.id, "num": 0, "cases": []}
-        await cursors.insert_one(insert)
+    async def on_ready(self):
+        for guild in self.bot.guilds:
+            results = await cases.find_one({"guild": guild.id})
+            if results is None:
+                insert = {"guild": guild.id, "num": 0, "cases": []}
+                await cases.insert_one(insert)
