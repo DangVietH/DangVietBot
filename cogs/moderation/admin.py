@@ -108,8 +108,10 @@ class Admin(commands.Cog):
             await channel.send(embed=embed)
 
         check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-        if check_user_case is not None:
-            await user_case.delete_one(check_user_case)
+        if check_user_case is None:
+            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+        else:
+            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Ban member")
     @commands.has_permissions(ban_members=True)
@@ -130,8 +132,10 @@ class Admin(commands.Cog):
             await channel.send(embed=embed)
 
         check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-        if check_user_case is not None:
-            await user_case.delete_one(check_user_case)
+        if check_user_case is None:
+            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+        else:
+            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Unban member")
     @commands.has_permissions(administrator=True)
