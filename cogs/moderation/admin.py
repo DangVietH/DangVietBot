@@ -39,6 +39,12 @@ class Admin(commands.Cog):
                 embed = discord.Embed(title=f"Case #{num_of_case}: Warn!", description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}", color=discord.Color.red())
                 await channel.send(embed=embed)
 
+            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+            if check_user_case is None:
+                await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+            else:
+                await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+
     @commands.command(help="Mute member")
     @commands.has_permissions(administrator=True)
     async def mute(self, ctx, member: discord.Member, *, reason=None):
@@ -66,6 +72,12 @@ class Admin(commands.Cog):
             channel = self.bot.get_channel(result["channel"])
             embed = discord.Embed(title=f"Case #{num_of_case}: Mute!", description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}", color=discord.Color.red())
             await channel.send(embed=embed)
+
+        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+        if check_user_case is None:
+            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+        else:
+            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Unmute member")
     @commands.has_permissions(administrator=True)
@@ -95,6 +107,10 @@ class Admin(commands.Cog):
             embed = discord.Embed(title=f"Case #{num_of_case}: Kick!", description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}", color=discord.Color.red())
             await channel.send(embed=embed)
 
+        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+        if check_user_case is not None:
+            await user_case.delete_one(check_user_case)
+
     @commands.command(help="Ban member")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason=None):
@@ -112,6 +128,10 @@ class Admin(commands.Cog):
             channel = self.bot.get_channel(result["channel"])
             embed = discord.Embed(title=f"Case #{num_of_case}: Ban!", description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}", color=discord.Color.red())
             await channel.send(embed=embed)
+
+        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+        if check_user_case is not None:
+            await user_case.delete_one(check_user_case)
 
     @commands.command(help="Unban member")
     @commands.has_permissions(administrator=True)
@@ -170,15 +190,35 @@ class Admin(commands.Cog):
         else:
             await ctx.send("You don't have a Modlog channel")
 
-    @commands.command(help="Look at your server cases")
-    async def caselist(self, ctx):
-        results = await cases.find_one({"guild": ctx.guild.id})
-        embed = discord.Embed(title=f"{ctx.guild.name} caselist", description=f"Total case: {results['num']}", color=discord.Color.red())
-        if len(results['cases']) < 1:
-            await ctx.send("Looks like all your server members are good people 🥰")
-        for case in results['cases']:
-            embed.add_field(name=f"Case {case['Number']}", value=f"**Type:** {case['type']}\n **User:** {self.bot.get_user(int(case['user']))}\n**Mod:**{self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}")
-        await ctx.send(embed=embed)
+    @commands.command(help="Look at your server cases", aliases=["case"])
+    async def caselist(self, ctx, member: discord.Member = None):
+        if member is None:
+            results = await cases.find_one({"guild": ctx.guild.id})
+            embed = discord.Embed(title=f"{ctx.guild.name} caselist", description=f"Total case: {results['num']}",
+                                  color=discord.Color.red())
+            if len(results['cases']) < 1:
+                await ctx.send("Looks like all your server members are good people 🥰")
+            for case in results['cases']:
+                embed.add_field(name=f"Case {case['Number']}",
+                                value=f"**Type:** {case['type']}\n **User:** {self.bot.get_user(int(case['user']))}\n**Mod:**{self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}")
+            await ctx.send(embed=embed)
+        else:
+            user_check = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+            if user_check is None:
+                await ctx.send("Looks like a good person 🥰")
+            else:
+                embed = discord.Embed(title=f"{self.bot.get_user(int(user_check['user']))} cases", description=f"Total case: {user_check['total_cases']}", color=discord.Color.red())
+                await ctx.send(embed=embed)
+
+    @commands.command(help="Remove that member cases")
+    @commands.has_permissions(administrator=True)
+    async def forgive(self, ctx, member: discord.Member):
+        user_check = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+        if user_check is None:
+            await ctx.send("Looks like a good person already 🥰")
+        else:
+            await user_case.delete_one(user_check)
+            await ctx.send("🕊 You forgive him!!")
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -192,3 +232,22 @@ class Admin(commands.Cog):
     async def on_guild_join(self, guild):
         insert = {"guild": guild.id, "num": 0, "cases": []}
         await cases.insert_one(insert)
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
+        await cases.delete_one({"guild": guild.id})
+        channel_check = await cursors.find_one({"guild": guild.id})
+        if channel_check is not None:
+            await cursors.delete_one(channel_check)
+        for member in guild.members:
+            if not member.bot:
+                result = await user_case.find_one({"guild": guild.id, "user": member.id})
+                if result is not None:
+                    await user_case.delete_one(result)
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        if not member.bot:
+            result = await user_case.find_one({"guild": member.guild.id, "user": member.id})
+            if result is not None:
+                await user_case.delete_one(result)

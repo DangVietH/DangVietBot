@@ -11,7 +11,7 @@ disable = db['disable']
 role = db['roles']
 upchannel = db['channel']
 
-# pagination code bade on https://github.com/KumosLab/Discord-Economy-Bot/blob/main/Commands/leaderboard.py, which is under Apache-2.0 License
+# pagination code bade on https://github.com/KumosLab/Discord-Economy-Bot/blob/main/Commands/leaderboard.py
 
 
 class Leveling(commands.Cog):
