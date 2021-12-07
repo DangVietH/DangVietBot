@@ -212,6 +212,8 @@ class Admin(commands.Cog):
                 await ctx.send("Looks like a good person 🥰")
             else:
                 embed = discord.Embed(title=f"{self.bot.get_user(int(user_check['user']))} cases", description=f"Total case: {user_check['total_cases']}", color=discord.Color.red())
+                case_check = await cases.find_one({"guild": ctx.guild.id, "cases.user": f"{member.id}"})
+                embed.add_field(name="List of cases", value=f"{case_check}")
                 await ctx.send(embed=embed)
 
     @commands.command(help="Remove that member cases")
