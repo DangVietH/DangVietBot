@@ -6,6 +6,7 @@ import asyncpraw
 import random
 import asyncio
 import os
+from cogs.entertainment.afk import afks
 
 
 reddit = asyncpraw.Reddit(client_id="WS8DpWseFlxeec8_v2sjrw",
@@ -158,6 +159,25 @@ class Fun(commands.Cog):
             msg8 = await msg7.edit(content="Report to the local government for breaking the law")
             await asyncio.sleep(2)
             await msg8.edit(content=f"Finish hacking {member}")
+
+    @commands.command(help="See you in a bit")
+    async def afk(self, ctx, *, reason):
+        if ctx.author.id in afks.keys():
+            afks.pop(ctx.author.id)
+        await ctx.author.edit(nick=f"[AFK] {ctx.author}")
+        afks[ctx.author.id] = reason
+        await ctx.send(f"You're now afk because of: {reason}")
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.id in afks.keys():
+            afks.pop(message.author.id)
+            await message.author.edit(nick=message.author.display_name)
+            await message.channel.send(f"Welcome back {message.author.mention}. I remove your afk!")
+        for ids, reason in afks.items():
+            member = self.bot.get_user(ids)
+            if member in message.raw_mentions:
+                await message.reply(f"{member} is AFK because: {reason}")
 
     @commands.command(help="god please NO")
     async def sus(self, ctx):
