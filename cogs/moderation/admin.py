@@ -7,6 +7,7 @@ cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 modlogdb = cluster["moderation"]
 cursors = modlogdb['modlog']
 cases = modlogdb['cases']
+user_case = modlogdb['user']
 
 
 class Admin(commands.Cog):
@@ -29,7 +30,7 @@ class Admin(commands.Cog):
             await member.send(embed=emb)
 
             num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-            await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "user": f"{member}", "type": "warning", "Mod": f"{ctx.author}", "reason": str(reason)}}})
+            await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "warning", "Mod": f"{ctx.author.id}", "reason": str(reason)}}})
             await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
             result = await cursors.find_one({"guild": ctx.guild.id})
@@ -57,8 +58,7 @@ class Admin(commands.Cog):
         await member.send(f"You were muted in **{guild.name}** for {reason}")
 
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-        await cases.update_one({"guild": ctx.guild.id},
-                               {"$push": {"cases": {"Number": int(num_of_case), "type": "mute", "user": f"{member}", "Mod": f"{ctx.author}", "reason": str(reason)}}})
+        await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "mute", "Mod": f"{ctx.author.id}", "reason": str(reason)}}})
         await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
         result = await cursors.find_one({"guild": ctx.guild.id})
@@ -86,8 +86,7 @@ class Admin(commands.Cog):
         await ctx.send(f'{member.mention} has been kick for {reason}')
 
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-        await cases.update_one({"guild": ctx.guild.id},
-                               {"$push": {"cases": {"Number": int(num_of_case), "type": "kick", "user": f"{member}", "Mod": f"{ctx.author}", "reason": str(reason)}}})
+        await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "kick", "Mod": f"{ctx.author.id}", "reason": str(reason)}}})
         await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
         result = await cursors.find_one({"guild": ctx.guild.id})
@@ -105,8 +104,7 @@ class Admin(commands.Cog):
         await ctx.send(f'{member.mention} has been **BANNED** for {reason}')
 
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-        await cases.update_one({"guild": ctx.guild.id},
-                               {"$push": {"cases": {"Number": int(num_of_case), "type": "ban", "user": f"{member}", "Mod": f"{ctx.author}", "reason": str(reason)}}})
+        await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "ban", "Mod": f"{ctx.author.id}", "reason": str(reason)}}})
         await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
         result = await cursors.find_one({"guild": ctx.guild.id})
@@ -179,7 +177,7 @@ class Admin(commands.Cog):
         if len(results['cases']) < 1:
             await ctx.send("Looks like all your server members are good people 🥰")
         for case in results['cases']:
-            embed.add_field(name=f"Case {case['Number']}", value=f"**Type:** {case['type']}\n **User:** {case['user']}\n**Mod:**{case['Mod']}\n**Reason:** {case['reason']}")
+            embed.add_field(name=f"Case {case['Number']}", value=f"**Type:** {case['type']}\n **User:** {self.bot.get_user(case['user'])}\n**Mod:**{self.bot.get_user(case['Mod'])}\n**Reason:** {case['reason']}")
         await ctx.send(embed=embed)
 
     @commands.Cog.listener()
