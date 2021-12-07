@@ -177,7 +177,7 @@ class Admin(commands.Cog):
         if len(results['cases']) < 1:
             await ctx.send("Looks like all your server members are good people 🥰")
         for case in results['cases']:
-            embed.add_field(name=f"Case {case['Number']}", value=f"**Type:** {case['type']}\n **User:** {self.bot.get_user(case['user'])}\n**Mod:**{self.bot.get_user(case['Mod'])}\n**Reason:** {case['reason']}")
+            embed.add_field(name=f"Case {case['Number']}", value=f"**Type:** {case['type']}\n **User:** {self.bot.get_user(int(case['user']))}\n**Mod:**{self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}")
         await ctx.send(embed=embed)
 
     @commands.Cog.listener()
