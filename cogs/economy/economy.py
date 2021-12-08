@@ -187,12 +187,12 @@ class Economy(commands.Cog):
                 await ctx.send("That item wasn't in your inventory")
             else:
                 iamount = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)}, {"inventory.$": 1})
-                if amount > iamount:
+                if amount > iamount['amount']:
                     await ctx.send("Too much amount")
                 else:
                     await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
                                             {"$inc": {"inventory.$.amount": -amount}})
-                    if iamount == 0:
+                    if iamount['amount'] == 0:
                         await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {str(item_name)}}})
                     newBal = check['wallet'] + amount * price
                     await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
