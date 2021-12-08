@@ -186,7 +186,7 @@ class Economy(commands.Cog):
             if inventory_check is None:
                 await ctx.send("That item wasn't in your inventory")
             else:
-                iamount = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)}, {"inventory.amount"})
+                iamount = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)}, {"inventory.$": 1})
                 if amount > iamount:
                     await ctx.send("Too much amount")
                 else:

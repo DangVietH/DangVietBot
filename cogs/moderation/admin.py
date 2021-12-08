@@ -213,9 +213,7 @@ class Admin(commands.Cog):
             else:
                 embed = discord.Embed(title=f"{self.bot.get_user(int(user_check['user']))} cases", description=f"Total case: {user_check['total_cases']}", color=discord.Color.red())
                 case_check = await cases.find_one({"guild": ctx.guild.id, "cases.user": f"{member.id}"})
-                case_list = [case_check]
-                for his_case in case_list:
-                    embed.add_field(name=f"{his_case['Number']}", value=f"**Type:** {his_case['type']} **Mod:** {his_case['Mod']} **Reason:** {his_case['reason']}")
+                embed.add_field(name="List of cases", value=f"{case_check}")
                 await ctx.send(embed=embed)
 
     @commands.command(help="Remove that member cases")
