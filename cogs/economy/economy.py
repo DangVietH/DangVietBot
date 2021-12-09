@@ -80,7 +80,7 @@ class Economy(commands.Cog):
                 else:
                     emojis.append("  ")
             await ctx.send("Convert the message below to text")
-            await ctx.send(' '.join(emojis))
+            await ctx.send(''.join(emojis))
             try:
                 message = await self.bot.wait_for('message', timeout=30.0)
             except asyncio.TimeoutError:

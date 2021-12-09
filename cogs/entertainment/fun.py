@@ -107,7 +107,7 @@ class Fun(commands.Cog):
                 emojis.append(f":regional_indicator_{s.lower()}:")
             else:
                 emojis.append(s)
-        await ctx.send(' '.join(emojis))
+        await ctx.send(''.join(emojis))
 
     @commands.command(name="8ball", help="ask anything")
     async def _8ball(self, ctx, *, question):

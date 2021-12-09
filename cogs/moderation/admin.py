@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
+import asyncio
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 modlogdb = cluster["moderation"]
@@ -79,6 +80,70 @@ class Admin(commands.Cog):
         else:
             await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
+    @commands.command(help="Mute member but with a timer")
+    @commands.has_permissions(ban_members=True)
+    async def tempmute(self, ctx, member: discord.User, time, *, reason=None):
+        def convert(time):
+            pos = ['s', 'm', 'h', 'd']
+
+            time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
+
+            unit = time[-1]
+
+            if unit not in pos:
+                return -1
+            try:
+                val = int(time[:-1])
+            except:
+                return -2
+
+            return val * time_dict[unit]
+
+        converted_time = convert(time)
+        if converted_time == -1:
+            await ctx.send("You didn't answer the time correctly")
+
+        if converted_time == -2:
+            await ctx.send("Time must be an integer")
+
+        guild = ctx.guild
+        mutedRole = discord.utils.get(guild.roles, name="DHB_muted")
+        if not mutedRole:
+            mutedRole = await guild.create_role(name="DHB_muted")
+
+            for channel in guild.channels:
+                await channel.set_permissions(mutedRole,
+                                              speak=False,
+                                              send_messages=False,
+                                              read_message_history=True,
+                                              read_messages=False)
+        await member.add_roles(mutedRole, reason=reason)
+        await ctx.send(f"Temporarily muted {member.mention} for reason {reason}")
+        await member.send(f"You were temporarily muted in **{guild.name}** for {reason}")
+
+        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
+            "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "mute", "Mod": f"{ctx.author.id}",
+                      "reason": str(reason)}}})
+        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
+
+        result = await cursors.find_one({"guild": ctx.guild.id})
+        if result is not None:
+            channel = self.bot.get_channel(result["channel"])
+            embed = discord.Embed(title=f"Case #{num_of_case}: Mute!",
+                                  description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}",
+                                  color=discord.Color.red())
+            await channel.send(embed=embed)
+
+        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+        if check_user_case is None:
+            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+        else:
+            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+
+        await asyncio.sleep(converted_time)
+        await member.remove_roles(mutedRole)
+
     @commands.command(help="Unmute member")
     @commands.has_permissions(administrator=True)
     async def unmute(self, ctx, member: discord.Member):
@@ -137,9 +202,59 @@ class Admin(commands.Cog):
         else:
             await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
+    @commands.command(help="Ban member but temporarily")
+    @commands.has_permissions(ban_members=True)
+    async def tempban(self, ctx, member: discord.User, time, *, reason=None):
+        def convert(time):
+            pos = ['s', 'm', 'h', 'd']
+
+            time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
+
+            unit = time[-1]
+
+            if unit not in pos:
+                return -1
+            try:
+                val = int(time[:-1])
+            except:
+                return -2
+
+            return val * time_dict[unit]
+        converted_time = convert(time)
+        if converted_time == -1:
+            await ctx.send("You didn't answer the time correctly")
+
+        if converted_time == -2:
+            await ctx.send("Time must be an integer")
+
+        if not member.bot:
+            await member.send(f"You've been temporarily banned from **{ctx.guild.name}** for {reason}. Don't worry, it will be a short time!!")
+        await ctx.guild.ban(member)
+        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
+            "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "ban", "Mod": f"{ctx.author.id}",
+                      "reason": str(reason)}}})
+        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
+
+        result = await cursors.find_one({"guild": ctx.guild.id})
+        if result is not None:
+            channel = self.bot.get_channel(result["channel"])
+            embed = discord.Embed(title=f"Case #{num_of_case}: Ban!",
+                                  description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}",
+                                  color=discord.Color.red())
+            await channel.send(embed=embed)
+
+        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+        if check_user_case is None:
+            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+        else:
+            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+        await asyncio.sleep(converted_time)
+        await ctx.guild.unban(member)
+
     @commands.command(help="Unban member")
     @commands.has_permissions(administrator=True)
-    async def unban(self, ctx, *, member_id):
+    async def unban(self, ctx, *, member_id: int):
         await ctx.guild.unban(discord.Object(id=member_id))
         await ctx.send("Successfully unban him")
 
