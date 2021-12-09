@@ -82,7 +82,7 @@ class Admin(commands.Cog):
 
     @commands.command(help="Mute member but with a timer")
     @commands.has_permissions(ban_members=True)
-    async def tempmute(self, ctx, member: discord.User, time, *, reason=None):
+    async def tempmute(self, ctx, member: discord.Member, time, *, reason=None):
         def convert(time):
             pos = ['s', 'm', 'h', 'd']
 
