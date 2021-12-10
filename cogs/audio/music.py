@@ -298,9 +298,10 @@ class Music(commands.Cog):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         if volume is None:
             await ctx.send(f'🔊 Volume set to {player.volume * 2}%')
-        volume = max(1, min(volume, 100))
+        else:
+            volume = max(1, min(volume, 100))
 
-        await player.set_volume(volume / 2)
+            await player.set_volume(volume / 2)
 
     @commands.command(help="Loop the current song until the command is invoked again. ")
     async def loop(self, ctx):
@@ -327,6 +328,6 @@ class Music(commands.Cog):
 
         embed = discord.Embed(colour=discord.Color.random(),
                               description=f'**{len(playerQueueWithCurrent)} tracks**\n\n{queue_list}')
-        embed.set_author(icon_url="https://cdn.discordapp.com/attachments/900197917170737152/912229731766796368/unknown.png", name="Queue")
+        embed.set_author(icon_url="https://cdn.discordapp.com/attachments/900197917170737152/912229731766796368/unknown.png", name=f"Queue of {ctx.guild.name}")
         embed.set_footer(text=f'Viewing page {page}/{pages}')
         await ctx.send(embed=embed)

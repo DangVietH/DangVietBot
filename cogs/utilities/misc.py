@@ -1,4 +1,3 @@
-from googletrans import Translator
 from discord.ext import commands
 import discord
 import asyncio
@@ -31,12 +30,6 @@ class Misc(commands.Cog):
             embed.set_author(name=f"{snipe_message_author}", icon_url=f"{snipe_message_author.avatar.url}")
             embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
             await ctx.send(embed=embed)
-
-    @commands.command(help="Translate a messages")
-    async def translate(self, ctx, lang, *, args):
-        t = Translator()
-        a = t.translate(args, dest=lang)
-        await ctx.send(a.text)
 
     @commands.command(help="Remind your task", aliases=["reminder"])
     async def remind(self, ctx, time, *, task):

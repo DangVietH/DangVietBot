@@ -106,47 +106,47 @@ class Admin(commands.Cog):
         if converted_time == -1:
             await ctx.send("You didn't answer the time correctly")
 
-        if converted_time == -2:
+        elif converted_time == -2:
             await ctx.send("Time must be an integer")
-
-        guild = ctx.guild
-        mutedRole = discord.utils.get(guild.roles, name="DHB_muted")
-        if not mutedRole:
-            mutedRole = await guild.create_role(name="DHB_muted")
-
-            for channel in guild.channels:
-                await channel.set_permissions(mutedRole,
-                                              speak=False,
-                                              send_messages=False,
-                                              read_message_history=True,
-                                              read_messages=False)
-        await member.add_roles(mutedRole, reason=reason)
-        await ctx.send(f"Temporarily muted {member.mention} for reason {reason}")
-        await member.send(f"You were temporarily muted in **{guild.name}** for {reason}")
-
-        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
-            "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "mute", "Mod": f"{ctx.author.id}",
-                      "reason": str(reason)}}})
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Temporary Mute!",
-                                  description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}",
-                                  color=discord.Color.red())
-            await channel.send(embed=embed)
-
-        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-        if check_user_case is None:
-            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
         else:
-            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+            guild = ctx.guild
+            mutedRole = discord.utils.get(guild.roles, name="DHB_muted")
+            if not mutedRole:
+                mutedRole = await guild.create_role(name="DHB_muted")
 
-        current_time = datetime.datetime.now()
-        final_time = current_time + datetime.timedelta(seconds=converted_time)
-        await timer.insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id})
+                for channel in guild.channels:
+                    await channel.set_permissions(mutedRole,
+                                                  speak=False,
+                                                  send_messages=False,
+                                                  read_message_history=True,
+                                                  read_messages=False)
+            await member.add_roles(mutedRole, reason=reason)
+            await ctx.send(f"Temporarily muted {member.mention} for reason {reason}")
+            await member.send(f"You were temporarily muted in **{guild.name}** for {reason}")
+
+            num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+            await cases.update_one({"guild": ctx.guild.id}, {"$push": {
+                "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "mute", "Mod": f"{ctx.author.id}",
+                          "reason": str(reason)}}})
+            await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
+
+            result = await cursors.find_one({"guild": ctx.guild.id})
+            if result is not None:
+                channel = self.bot.get_channel(result["channel"])
+                embed = discord.Embed(title=f"Case #{num_of_case}: Temporary Mute!",
+                                      description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}",
+                                      color=discord.Color.red())
+                await channel.send(embed=embed)
+
+            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+            if check_user_case is None:
+                await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+            else:
+                await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+
+            current_time = datetime.datetime.now()
+            final_time = current_time + datetime.timedelta(seconds=converted_time)
+            await timer.insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id})
 
     @commands.command(help="Unmute member")
     @commands.has_permissions(administrator=True)
@@ -228,35 +228,36 @@ class Admin(commands.Cog):
         if converted_time == -1:
             await ctx.send("You didn't answer the time correctly")
 
-        if converted_time == -2:
+        elif converted_time == -2:
             await ctx.send("Time must be an integer")
-
-        if not member.bot:
-            await member.send(f"You've been temporarily banned from **{ctx.guild.name}** for {reason}. Don't worry, it will be a short time!!")
-        await ctx.guild.ban(member)
-        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
-            "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "ban", "Mod": f"{ctx.author.id}",
-                      "reason": str(reason)}}})
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Temporary Ban!",
-                                  description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}",
-                                  color=discord.Color.red())
-            await channel.send(embed=embed)
-
-        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-        if check_user_case is None:
-            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
         else:
-            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+            if not member.bot:
+                await member.send(
+                    f"You've been temporarily banned from **{ctx.guild.name}** for {reason}. Don't worry, it will be a short time!!")
+            await ctx.guild.ban(member)
+            num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+            await cases.update_one({"guild": ctx.guild.id}, {"$push": {
+                "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "ban", "Mod": f"{ctx.author.id}",
+                          "reason": str(reason)}}})
+            await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
-        current_time = datetime.datetime.now()
-        final_time = current_time + datetime.timedelta(seconds=converted_time)
-        await timer.insert_one({"guild": ctx.guild.id, "type": "ban", "time": final_time, "user": member.id})
+            result = await cursors.find_one({"guild": ctx.guild.id})
+            if result is not None:
+                channel = self.bot.get_channel(result["channel"])
+                embed = discord.Embed(title=f"Case #{num_of_case}: Temporary Ban!",
+                                      description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}",
+                                      color=discord.Color.red())
+                await channel.send(embed=embed)
+
+            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+            if check_user_case is None:
+                await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+            else:
+                await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+
+            current_time = datetime.datetime.now()
+            final_time = current_time + datetime.timedelta(seconds=converted_time)
+            await timer.insert_one({"guild": ctx.guild.id, "type": "ban", "time": final_time, "user": member.id})
 
     @tasks.loop(seconds=10)
     async def time_checker(self):
