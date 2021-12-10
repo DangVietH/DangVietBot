@@ -379,6 +379,8 @@ class Admin(commands.Cog):
                 insert = {"guild": guild.id, "num": 0, "cases": []}
                 await cases.insert_one(insert)
 
+        self.time_checker.start()
+
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         insert = {"guild": guild.id, "num": 0, "cases": []}
