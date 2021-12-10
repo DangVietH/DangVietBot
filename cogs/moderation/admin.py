@@ -207,7 +207,7 @@ class Admin(commands.Cog):
             await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Ban member but temporarily")
-    @commands.is_owner()
+    @commands.has_permissions(ban_members=True)
     async def tempban(self, ctx, member: discord.User, time, *, reason=None):
         def convert(time):
             pos = ['s', 'm', 'h', 'd']
