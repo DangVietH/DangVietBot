@@ -4,7 +4,7 @@ motor==2.5.1
 DateTime==4.3
 git+https://github.com/Pycord-Development/pycord
 git+https://github.com/Devoxin/Lavalink.py
-aiohttp<3.7.0
+aiohttp
 dnspython
 git+https://github.com/Gorialis/jishaku
 PyNaCl
