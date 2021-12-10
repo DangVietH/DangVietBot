@@ -84,7 +84,7 @@ class Admin(commands.Cog):
             await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Mute member but with a timer")
-    @commands.has_permissions(ban_members=True)
+    @commands.is_owner()
     async def tempmute(self, ctx, member: discord.Member, time, *, reason=None):
         def convert(time):
             pos = ['s', 'm', 'h', 'd']
@@ -207,7 +207,7 @@ class Admin(commands.Cog):
             await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Ban member but temporarily")
-    @commands.has_permissions(ban_members=True)
+    @commands.is_owner()
     async def tempban(self, ctx, member: discord.User, time, *, reason=None):
         def convert(time):
             pos = ['s', 'm', 'h', 'd']
