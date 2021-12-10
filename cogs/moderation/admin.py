@@ -1,14 +1,17 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from motor.motor_asyncio import AsyncIOMotorClient
+import datetime
 import os
-import asyncio
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 modlogdb = cluster["moderation"]
 cursors = modlogdb['modlog']
 cases = modlogdb['cases']
 user_case = modlogdb['user']
+
+timerdb = cluster["timer"]
+timer = timerdb['mod']
 
 
 class Admin(commands.Cog):
@@ -130,7 +133,7 @@ class Admin(commands.Cog):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is not None:
             channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Mute!",
+            embed = discord.Embed(title=f"Case #{num_of_case}: Temporary Mute!",
                                   description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}",
                                   color=discord.Color.red())
             await channel.send(embed=embed)
@@ -141,8 +144,9 @@ class Admin(commands.Cog):
         else:
             await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
-        await asyncio.sleep(converted_time)
-        await member.remove_roles(mutedRole)
+        current_time = datetime.datetime.now()
+        final_time = current_time + datetime.timedelta(seconds=converted_time)
+        await timer.insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id})
 
     @commands.command(help="Unmute member")
     @commands.has_permissions(administrator=True)
@@ -239,7 +243,7 @@ class Admin(commands.Cog):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is not None:
             channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Ban!",
+            embed = discord.Embed(title=f"Case #{num_of_case}: Temporary Ban!",
                                   description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}",
                                   color=discord.Color.red())
             await channel.send(embed=embed)
@@ -249,8 +253,34 @@ class Admin(commands.Cog):
             await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
         else:
             await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
-        await asyncio.sleep(converted_time)
-        await ctx.guild.unban(member)
+
+        current_time = datetime.datetime.now()
+        final_time = current_time + datetime.timedelta(seconds=converted_time)
+        await timer.insert_one({"guild": ctx.guild.id, "type": "ban", "time": final_time, "user": member.id})
+
+    @tasks.loop(seconds=10)
+    async def time_checker(self):
+        try:
+            all_timer = timer.find({})
+            current_time = datetime.datetime.now()
+            async for x in all_timer:
+                if current_time >= x['time']:
+                    if x['type'] == "mute":
+                        server = self.bot.get_guild(int(x['guild']))
+                        member = server.get_member(int(x['user']))
+                        await member.remove_roles("DHB_muted")
+
+                        await timer.delete_one({"user": member.id})
+                    elif x['type'] == "ban":
+                        server = self.bot.get_guild(int(x['guild']))
+                        user = self.bot.get_user(int(x['user']))
+                        await server.unban(user)
+
+                        await timer.delete_one({"user": user.id})
+                else:
+                    pass
+        except Exception:
+            pass
 
     @commands.command(help="Unban member")
     @commands.has_permissions(administrator=True)
