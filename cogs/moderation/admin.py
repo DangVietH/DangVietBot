@@ -122,7 +122,7 @@ class Admin(commands.Cog):
                                                   read_messages=False)
             await member.add_roles(mutedRole, reason=reason)
             await ctx.send(f"Temporarily muted {member.mention} for reason {reason}")
-            await member.send(f"You were temporarily muted in **{guild.name}** for {reason}")
+            await member.send(f"You were muted for {converted_time} seconds in **{guild.name}** for {reason}")
 
             num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
             await cases.update_one({"guild": ctx.guild.id}, {"$push": {
@@ -146,7 +146,7 @@ class Admin(commands.Cog):
 
             current_time = datetime.datetime.now()
             final_time = current_time + datetime.timedelta(seconds=converted_time)
-            await timer.insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id})
+            await timer.insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id, "role": mutedRole.id})
 
     @commands.command(help="Unmute member")
     @commands.has_permissions(administrator=True)
@@ -233,7 +233,7 @@ class Admin(commands.Cog):
         else:
             if not member.bot:
                 await member.send(
-                    f"You've been temporarily banned from **{ctx.guild.name}** for {reason}. Don't worry, it will be a short time!!")
+                    f"You've been banned for {converted_time} seconds from **{ctx.guild.name}** for {reason}. Don't worry, it will be a short time!!")
             await ctx.guild.ban(member)
             num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
             await cases.update_one({"guild": ctx.guild.id}, {"$push": {
@@ -269,7 +269,7 @@ class Admin(commands.Cog):
                     if x['type'] == "mute":
                         server = self.bot.get_guild(int(x['guild']))
                         member = server.get_member(int(x['user']))
-                        mutedRole = discord.utils.get(server.roles, name="DHB_muted")
+                        mutedRole = server.get_role(int(x['role']))
                         await member.remove_roles(mutedRole)
 
                         await timer.delete_one({"user": member.id})
