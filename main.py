@@ -7,16 +7,20 @@ from motor.motor_asyncio import AsyncIOMotorClient
 class CustomHelp(commands.HelpCommand):
     async def send_bot_help(self, mapping):
         embed = discord.Embed(title='DHB Commands',
-                              description=f"{self.context.bot.description}. Feel free to join [my server](https://discord.gg/cnydBRnHU9)",
+                              description=f"{self.context.bot.description}",
                               color=discord.Color.random())
+
         for cog, command in mapping.items():
             command_signatures = [self.get_command_signature(c) for c in command]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "No Category")
                 embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
         embed.set_footer(
-            text="Type d!help command for more info on a command. \nYou can also type d!help command for more info on a command.")
-        await self.get_destination().send(embed=embed)
+            text="Type d!help command for more info on a command. \nYou can also type d!help command for more info on a command. \nWritten in <:python:886981924650881055>  ")
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9', emoji="<:discord:919231987062018088>"))
+        view.add_item(discord.ui.Button(label='Github', url='https://github.com/DangVietH/DHB', emoji="<:github:919231769058897960>"))
+        await self.get_destination().send(embed=embed, view=view)
 
     async def send_cog_help(self, cog_):
         embed = discord.Embed(title='{0.qualified_name} Commands'.format(cog_), color=discord.Color.random())

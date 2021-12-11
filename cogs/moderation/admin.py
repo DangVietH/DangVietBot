@@ -14,6 +14,23 @@ timerdb = cluster["timer"]
 timer = timerdb['mod']
 
 
+def convert(time):
+    pos = ['s', 'm', 'h', 'd']
+
+    time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
+
+    unit = time[-1]
+
+    if unit not in pos:
+        return -1
+    try:
+        val = int(time[:-1])
+    except:
+        return -2
+
+    return val * time_dict[unit]
+
+
 class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -86,22 +103,6 @@ class Admin(commands.Cog):
     @commands.command(help="Mute member but with a timer")
     @commands.has_permissions(administrator=True)
     async def tempmute(self, ctx, member: discord.Member, time, *, reason=None):
-        def convert(time):
-            pos = ['s', 'm', 'h', 'd']
-
-            time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
-
-            unit = time[-1]
-
-            if unit not in pos:
-                return -1
-            try:
-                val = int(time[:-1])
-            except:
-                return -2
-
-            return val * time_dict[unit]
-
         converted_time = convert(time)
         if converted_time == -1:
             await ctx.send("You didn't answer the time correctly")
@@ -209,21 +210,6 @@ class Admin(commands.Cog):
     @commands.command(help="Ban member but temporarily")
     @commands.has_permissions(ban_members=True)
     async def tempban(self, ctx, member: discord.User, time, *, reason=None):
-        def convert(time):
-            pos = ['s', 'm', 'h', 'd']
-
-            time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
-
-            unit = time[-1]
-
-            if unit not in pos:
-                return -1
-            try:
-                val = int(time[:-1])
-            except:
-                return -2
-
-            return val * time_dict[unit]
         converted_time = convert(time)
         if converted_time == -1:
             await ctx.send("You didn't answer the time correctly")
