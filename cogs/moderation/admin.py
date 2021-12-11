@@ -84,7 +84,7 @@ class Admin(commands.Cog):
             await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Mute member but with a timer")
-    @commands.is_owner()
+    @commands.has_permissions(administrator=True)
     async def tempmute(self, ctx, member: discord.Member, time, *, reason=None):
         def convert(time):
             pos = ['s', 'm', 'h', 'd']
