@@ -16,8 +16,9 @@ class CustomHelp(commands.HelpCommand):
                 cog_name = getattr(cog, "qualified_name", "No Category")
                 embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
         embed.set_footer(
-            text="Type d!help command for more info on a command. \nYou can also type d!help command for more info on a command. \nWritten in <:python:886981924650881055>  ")
+            text="Type d!help command for more info on a command. \nYou can also type d!help command for more info on a command.")
         view = discord.ui.View()
+        view.add_item(discord.ui.Button(label='Invite', url='https://bit.ly/3daeOIe', emoji="<:DHB:919240847206277150>"))
         view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9', emoji="<:discord:919231987062018088>"))
         view.add_item(discord.ui.Button(label='Github', url='https://github.com/DangVietH/DHB', emoji="<:github:919231769058897960>"))
         await self.get_destination().send(embed=embed, view=view)
