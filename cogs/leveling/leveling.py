@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
@@ -92,6 +92,10 @@ class Leveling(commands.Cog):
             await ctx.send(embed=embed)
         else:
             await ctx.send(f"The specified member haven't send a message in this server!!")
+
+    @commands.command(help="See server ranks but use ext.menus")
+    async def mtop(self, ctx):
+        stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
 
     @commands.command(help="See server ranks")
     async def top(self, ctx):

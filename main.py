@@ -5,6 +5,13 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 
 class CustomHelp(commands.HelpCommand):
+
+    def get_ending_note(self):
+        return f'Use {self.clean_prefix}{self.invoked_with} [command] for more info on a command. \nYou can also type {self.clean_prefix}{self.invoked_with} [category] for more info on a category'
+
+    def get_command_signature(self, command):
+        return f'{command.qualified_name} {command.signature}'
+
     async def send_bot_help(self, mapping):
         embed = discord.Embed(title='DHB Commands',
                               description=f"{self.context.bot.description}",
@@ -15,8 +22,7 @@ class CustomHelp(commands.HelpCommand):
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "No Category")
                 embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
-        embed.set_footer(
-            text="Type d!help command for more info on a command. \nYou can also type d!help command for more info on a command.")
+        embed.set_footer(text=self.get_ending_note())
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label='Invite', url='https://bit.ly/3daeOIe', emoji="<:DHB:919240847206277150>"))
         view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9', emoji="<:discord:919231987062018088>"))
@@ -33,8 +39,7 @@ class CustomHelp(commands.HelpCommand):
             embed.add_field(name=command.name,
                             value=f"```{command.short_doc}```" or 'No description Provided', inline=False)
 
-        embed.set_footer(
-            text="Type d!help command for more info on a command. \nYou can also type d!help command for more info on a command.")
+        embed.set_footer(text=self.get_ending_note())
         await self.get_destination().send(embed=embed)
 
     async def send_group_help(self, group):
@@ -48,8 +53,7 @@ class CustomHelp(commands.HelpCommand):
                 embed.add_field(name=command.name,
                                 value=f"```{command.short_doc}```" or 'No description Provided', inline=False)
 
-        embed.set_footer(
-            text="Type d!help command for more info on a command. \nYou can also type d!help command for more info on a command.")
+        embed.set_footer(text=self.get_ending_note())
         await self.get_destination().send(embed=embed)
 
     async def send_command_help(self, command):
@@ -59,8 +63,7 @@ class CustomHelp(commands.HelpCommand):
         if command.aliases:
             embed.add_field(name="Aliases", value=f"```{command.aliases}```", inline=False)
         embed.add_field(name="Usage", value=f"```{self.get_command_signature(command)}```", inline=False)
-        embed.set_footer(
-            text="Type d!help command for more info on a command. \nYou can also type d!help command for more info on a command.")
+        embed.set_footer(text=self.get_ending_note())
         await self.get_destination().send(embed=embed)
 
 
