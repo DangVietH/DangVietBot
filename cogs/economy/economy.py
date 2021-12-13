@@ -5,6 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import asyncio
 from cogs.economy.shopping_list import shop
+from cogs.economy.joblist import jobs as jobz
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["economy"]
@@ -21,7 +22,7 @@ class Economy(commands.Cog):
     async def create_account(self, ctx):
         check = await cursor.find_one({"id": ctx.author.id})
         if check is None:
-            insert = {"id": ctx.author.id, "wallet": 0, "bank": 0, "inventory": []}
+            insert = {"id": ctx.author.id, "job": None, "nFired": 0, "wallet": 0, "bank": 0, "inventory": []}
             await cursor.insert_one(insert)
             await ctx.send(
                 "Done, your economy account has been created. **ONLY USE OUR CURRENCY IN THE BOT. IF YOU'RE CAUGHT USING THIS BOT TO TRADE REAL LIFE ITEMS, YOU'RE DEAD!!**")
@@ -107,6 +108,67 @@ class Economy(commands.Cog):
                                           description=f"You didn't answer correctly. You only receive <:DHBuck:901485795410599988> {low_money}",
                                           color=discord.Color.red())
                     await message.reply(embed=embed)
+
+    @commands.group(help="Apply for a job")
+    async def job(self, ctx):
+        await ctx.send("d!help job")
+
+    @job.command(help="List of jobs to pick")
+    async def list(self, ctx):
+        embed = discord.Embed(title="🛠 Job list", color=discord.Color.green())
+        for item in jobz:
+            embed.add_field(name=item['name'], value=f"**Salary:** {item['salary']}  **Money Needed:** {item['required_item']}", inline=False)
+        await ctx.send(embed=embed)
+
+    @job.command(help="Apply a job")
+    @commands.cooldown(1, 3600, commands.BucketType.user)
+    async def apply(self, ctx, *, jobs):
+        user = ctx.author
+        check = await cursor.find_one({"id": user.id})
+
+        if check is None:
+            await ctx.send(NO_ACCOUNT)
+        else:
+            name_ = None
+            jobs = jobs.lower()
+            for item in jobz:
+                if item['name'] == jobs:
+                    name_ = item['name']
+                    break
+            if name_ is None:
+                await ctx.send("That job didn't exist")
+            else:
+                if check['job'] is not None:
+                    await ctx.send("You already have a job!")
+                else:
+                    await cursor.update_one({"id": user.id}, {"$set": {"job": f"{jobs}"}})
+                    await ctx.send(f"Complete! Now you're a {jobs}")
+
+    @job.command(help="Apply a job")
+    @commands.cooldown(1, 3600, commands.BucketType.user)
+    async def resign(self, ctx, *, jobs):
+        user = ctx.author
+        check = await cursor.find_one({"id": user.id})
+
+        if check is None:
+            await ctx.send(NO_ACCOUNT)
+        else:
+            name_ = None
+            jobs = jobs.lower()
+            for item in jobz:
+                if item['name'] == jobs:
+                    name_ = item['name']
+                    break
+            if name_ is None:
+                await ctx.send("That job didn't exist")
+            else:
+                if check['job'] is None:
+                    await ctx.send("You don't have a job")
+                elif check['job'] == jobs:
+                    await cursor.update_one({"id": user.id}, {"$set": {"job": None}})
+                    await ctx.send(f"You resign from working as a {jobs}")
+                else:
+                    await ctx.send("You do not work as that job")
 
     @commands.command(help="Shopping list", aliases=["shoplist", 'sl'])
     async def shop(self, ctx):
