@@ -36,7 +36,7 @@ class Prefix(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if self.bot.user.mentioned_in(message):
+        if message.content.startwith("dprefix"):
             result = await cursor.find_one({"guild": message.guild.id})
             if result is not None:
                 await message.channel.send(f'Prefix for this server is {result["prefix"]}')
