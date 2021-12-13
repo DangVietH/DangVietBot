@@ -7,7 +7,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 class CustomHelp(commands.HelpCommand):
 
     def get_ending_note(self):
-        return f'Use {self.clean_prefix}{self.invoked_with} [command] for more info on a command. \nYou can also type {self.clean_prefix}{self.invoked_with} [category] for more info on a category'
+        return f'Use help [command] for more info on a command. \nYou can also type help [category] for more info on a category'
 
     def get_command_signature(self, command):
         return f'{command.qualified_name} {command.signature}'
