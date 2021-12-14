@@ -123,7 +123,7 @@ class Leveling(commands.Cog):
             to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = LeaderboardMenuButton(
+        pages = menus.ButtonMenuPages(
             sources=LeaderboardPageSource(data),
             clear_buttons_after=True
         )
