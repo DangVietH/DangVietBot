@@ -14,12 +14,51 @@ upchannel = db['channel']
 # pagination code bade on https://github.com/KumosLab/Discord-Economy-Bot/blob/main/Commands/leaderboard.py
 
 
-class LeaderboardPageSource(menus.ListPageSource):
+class MenuButtons(menus.MenuPages, inherit_buttons=False):
+    @menus.button('⏪')
+    async def first_page(self, payload):
+        await self.show_page(0)
+
+    @menus.button('◀️')
+    async def previous_page(self, payload):
+        await self.show_checked_page(self.current_page - 1)
+
+    @menus.button('▶️')
+    async def next_page(self, payload):
+        await self.show_checked_page(self.current_page + 1)
+
+    @menus.button('⏩')
+    async def last_page(self, payload):
+        max_pages = self._source.get_max_pages()
+        last_page = max(max_pages - 1, 0)
+        await self.show_page(last_page)
+
+    @menus.button('⏹')
+    async def on_stop(self, payload):
+        self.stop()
+
+
+class GuildLeaderboardPageSource(menus.ListPageSource):
     def __init__(self, data):
         super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(title=f"🏆 Leaderboard of {menu.ctx.author.guild.name}")
+        embed = discord.Embed(title=f"🏆 Leaderboard of {menu.ctx.author.guild.name}", color=discord.Color.green())
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=True)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
+class GlobalLeaderboardPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.green())
+        embed.set_author(
+            icon_url="https://cdn.discordapp.com/attachments/900197917170737152/916598584005238794/world.png",
+            name="Global Leaderboard")
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=True)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
@@ -115,10 +154,7 @@ class Leveling(commands.Cog):
             to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = menus.ButtonMenuPages(
-            sources=LeaderboardPageSource(data),
-            clear_buttons_after=True
-        )
+        pages = MenuButtons(GuildLeaderboardPageSource(data))
         await pages.start(ctx)
 
     @commands.command(help="See server ranks")
