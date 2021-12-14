@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, menus
 
 
-class TestMenu(menus.Menu, inherit_buttons=False):
+class TestMenu(menus.MenuPages, inherit_buttons=False):
     @menus.button('⏪')
     async def first_page(self, payload):
         await self.show_page(0)
