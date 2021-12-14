@@ -41,7 +41,7 @@ class MenuButtons(discord.ui.View, menus.MenuPages):
     async def previous_page(self, payload):
         await self.show_checked_page(self.current_page - 1)
 
-    @discord.ui.button('⏹', style=discord.ButtonStyle.green)
+    @discord.ui.button(emoji='⏹', style=discord.ButtonStyle.green)
     async def on_stop(self, payload):
         self.stop()
 
