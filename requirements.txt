@@ -2,9 +2,9 @@ requests==2.26.0
 asyncpraw==7.5.0
 motor==2.5.1
 DateTime==4.3
-git+https://github.com/Rapptz/discord.py
+git+https://github.com/nextcord/nextcord
 git+https://github.com/Devoxin/Lavalink.py
-git+https://github.com/Rapptz/discord-ext-menus
+git+https://github.com/nextcord/nextcord-ext-menus
 aiohttp
 dnspython
 git+https://github.com/Gorialis/jishaku

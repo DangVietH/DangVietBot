@@ -1,7 +1,7 @@
 import warnings
-import discord
+import nextcord as discord
+from nextcord.ext import commands
 import cogs.rtfm.rtfm_utils as rtfm
-from discord.ext import commands
 
 # directly taken and modify from https://github.com/BruceCodesGithub/OG-Robocord/blob/main/cogs/rtfm.py
 

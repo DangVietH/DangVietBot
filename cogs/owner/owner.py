@@ -1,5 +1,5 @@
-from discord.ext import commands
-import discord
+import nextcord as discord
+from nextcord.ext import commands
 
 
 class Owner(commands.Cog):

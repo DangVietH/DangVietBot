@@ -1,5 +1,5 @@
-import discord
-from discord.ext import commands, menus
+import nextcord as discord
+from nextcord.ext import commands, menus
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
@@ -12,6 +12,21 @@ role = db['roles']
 upchannel = db['channel']
 
 # pagination code bade on https://github.com/KumosLab/Discord-Economy-Bot/blob/main/Commands/leaderboard.py
+
+
+class LeaderboardMenuPage(discord.ui.View, menus.MenuPages):
+    def __init__(self, source, *, delete_message_after=False):
+        super().__init__(timeout=60)
+        self._source = source
+        self.current_page = 0
+        self.ctx = None
+        self.message = None
+        self.delete_message_after = delete_message_after
+
+
+class LeaderboardPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=10)
 
 
 class Leveling(commands.Cog):
