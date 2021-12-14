@@ -104,5 +104,5 @@ class Owner(commands.Cog):
             ("White", "#FFFFFF"),
             ("Yellow", "#FFFF00"),
         ]
-        menu = TestMenu(source=TestPageSource(data), clear_buttons_after=True)
+        menu = TestMenu(TestPageSource(data), clear_buttons_after=True)
         await menu.start(ctx)
