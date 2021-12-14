@@ -35,15 +35,6 @@ class Prefix(commands.Cog):
             await ctx.send(f"Server prefix set back to default")
 
     @commands.Cog.listener()
-    async def on_message(self, message):
-        if message.content.startwith("dprefix"):
-            result = await cursor.find_one({"guild": message.guild.id})
-            if result is not None:
-                await message.channel.send(f'Prefix for this server is {result["prefix"]}')
-            else:
-                await message.channel.send(f'Prefix for this server is d!')
-
-    @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         result = await cursor.find_one({"guild": guild.id})
         if result is not None:
