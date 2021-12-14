@@ -1,5 +1,5 @@
-import nextcord as discord
-from nextcord.ext import commands, menus
+import discord
+from discord.ext import commands, menus
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
@@ -12,14 +12,6 @@ role = db['roles']
 upchannel = db['channel']
 
 # pagination code bade on https://github.com/KumosLab/Discord-Economy-Bot/blob/main/Commands/leaderboard.py
-
-
-class LeaderboardMenuButton(menus.ButtonMenuPages):
-    FIRST_PAGE = "⏪"
-    PREVIOUS_PAGE = "◀️"
-    NEXT_PAGE = "▶️"
-    LAST_PAGE = "⏩"
-    STOP = "⏹"
 
 
 class LeaderboardPageSource(menus.ListPageSource):

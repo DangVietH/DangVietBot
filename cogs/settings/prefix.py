@@ -1,4 +1,4 @@
-from nextcord.ext import commands
+from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 

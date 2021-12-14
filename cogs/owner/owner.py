@@ -1,5 +1,22 @@
-import nextcord as discord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands, menus
+
+
+class TestMenu(menus.Menu):
+    async def send_initial_message(self, ctx, channel):
+        return await channel.send('Hello there')
+
+    @menus.button('\N{THUMBS UP SIGN}')
+    async def on_thumbs_up(self, payload):
+        await self.message.edit(content='ok')
+
+    @menus.button('\N{THUMBS DOWN SIGN}')
+    async def on_thumbs_down(self, payload):
+        await self.message.edit(content=f"What")
+
+    @menus.button('\N{BLACK SQUARE FOR STOP}\ufe0f')
+    async def on_stop(self, payload):
+        self.stop()
 
 
 class Owner(commands.Cog):
@@ -51,3 +68,9 @@ class Owner(commands.Cog):
         else:
             await ctx.send('Invalid status')
         await ctx.message.add_reaction('👌')
+
+    @commands.is_owner()
+    @commands.command(help="Test my menus skills")
+    async def tmenus(self, ctx):
+        menu = TestMenu()
+        await menu.start(ctx)

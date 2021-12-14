@@ -1,9 +1,9 @@
-import nextcord as discord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 import lavalink
 import re
 import math
-from nextcord.ext.commands.errors import CheckFailure
+from discord.ext.commands.errors import CheckFailure
 
 # This cog is based on https://github.com/Devoxin/Lavalink.py/blob/master/examples/music.py
 
