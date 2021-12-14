@@ -34,23 +34,23 @@ class MenuButtons(discord.ui.View, menus.MenuPages):
         return interaction.user == self.ctx.author
 
     @discord.ui.button(emoji='⏪', style=discord.ButtonStyle.green)
-    async def first_page(self, payload):
+    async def first_page(self, button, interaction):
         await self.show_page(0)
 
     @discord.ui.button(emoji='◀️', style=discord.ButtonStyle.green)
-    async def previous_page(self, payload):
+    async def previous_page(self, button, interaction):
         await self.show_checked_page(self.current_page - 1)
 
     @discord.ui.button(emoji='⏹', style=discord.ButtonStyle.green)
-    async def on_stop(self, payload):
+    async def on_stop(self, button, interaction):
         self.stop()
 
     @discord.ui.button(emoji='▶️', style=discord.ButtonStyle.green)
-    async def next_page(self, payload):
+    async def next_page(self, button, interaction):
         await self.show_checked_page(self.current_page + 1)
 
     @discord.ui.button(emoji='⏩', style=discord.ButtonStyle.green)
-    async def last_page(self, payload):
+    async def last_page(self, button, interaction):
         max_pages = self._source.get_max_pages()
         last_page = max(max_pages - 1, 0)
         await self.show_page(last_page)
