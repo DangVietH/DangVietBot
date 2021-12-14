@@ -14,19 +14,24 @@ upchannel = db['channel']
 # pagination code bade on https://github.com/KumosLab/Discord-Economy-Bot/blob/main/Commands/leaderboard.py
 
 
-class LeaderboardMenuPage(discord.ui.View, menus.MenuPages):
-    def __init__(self, source, *, delete_message_after=False):
-        super().__init__(timeout=60)
-        self._source = source
-        self.current_page = 0
-        self.ctx = None
-        self.message = None
-        self.delete_message_after = delete_message_after
+class LeaderboardMenuButton(menus.ButtonMenuPages):
+    FIRST_PAGE = "⏪"
+    PREVIOUS_PAGE = "◀️"
+    NEXT_PAGE = "▶️"
+    LAST_PAGE = "⏩"
+    STOP = "⏹"
 
 
 class LeaderboardPageSource(menus.ListPageSource):
     def __init__(self, data):
         super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(title="🏆 Leaderboard")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=True)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
 
 
 class Leveling(commands.Cog):
@@ -111,6 +116,18 @@ class Leveling(commands.Cog):
     @commands.command(help="See server ranks but use ext.menus")
     async def mtop(self, ctx):
         stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
+        data = []
+        num = 0
+        async for x in stats:
+            num += 1
+            to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
+            data.append(to_append)
+
+        pages = LeaderboardMenuButton(
+            sources=LeaderboardPageSource(data),
+            clear_buttons_after=True
+        )
+        await pages.start(ctx)
 
     @commands.command(help="See server ranks")
     async def top(self, ctx):
