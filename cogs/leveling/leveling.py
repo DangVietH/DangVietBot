@@ -37,7 +37,7 @@ class MenuButtons(menus.MenuPages, inherit_buttons=False):
 
 class GuildLeaderboardPageSource(menus.ListPageSource):
     def __init__(self, data):
-        super().__init__(data, per_page=10)
+        super().__init__(data, per_page=12)
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(title=f"🏆 Leaderboard of {menu.ctx.author.guild.name}", color=discord.Color.green())
@@ -49,7 +49,7 @@ class GuildLeaderboardPageSource(menus.ListPageSource):
 
 class GlobalLeaderboardPageSource(menus.ListPageSource):
     def __init__(self, data):
-        super().__init__(data, per_page=10)
+        super().__init__(data, per_page=12)
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(color=discord.Color.green())
@@ -148,7 +148,7 @@ class Leveling(commands.Cog):
         num = 0
         async for x in stats:
             num += 1
-            to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
+            to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} \n**XP:** {x['xp']}")
             data.append(to_append)
 
         pages = MenuButtons(GuildLeaderboardPageSource(data))
@@ -161,10 +161,10 @@ class Leveling(commands.Cog):
         num = 0
         async for x in stats:
             num += 1
-            to_append = (f"{num}: {self.bot.get_user(x['user'])}", f"**Server:** {self.bot.get_guild(x['guild'])} **Level:** {x['level']} **XP:** {x['xp']}")
+            to_append = (f"{num}: {self.bot.get_user(x['user'])}", f"**Server:** {self.bot.get_guild(x['guild'])} \n**Level:** {x['level']} \n**XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = MenuButtons(GuildLeaderboardPageSource(data))
+        pages = MenuButtons(GlobalLeaderboardPageSource(data))
         await pages.start(ctx)
 
     @commands.command(help="Setup level up channel if you like to")
