@@ -143,7 +143,7 @@ class Economy(commands.Cog):
             to_append = (f"{num}: {self.bot.get_user(x['id'])}", f"**Wallet:** {x['wallet']}")
             data.append(to_append)
 
-        pages = MenuButtons(GuildRichPageSource(data))
+        pages = MenuButtons(GlobalRichPageSource(data))
         await pages.start(ctx)
 
     @commands.command(help="Beg some money")
