@@ -46,6 +46,13 @@ class MenuButtons(discord.ui.View, menus.MenuPages):
     @discord.ui.button(emoji='⏹', style=discord.ButtonStyle.green)
     async def on_stop(self, button, interaction):
         self.stop()
+        for item in self.children:
+            # we only want to disable the buttons, not the select menus or others.
+            if isinstance(item, discord.Button):
+                item.disabled = True
+
+            # you also only disable this buttons by setting button.disabled
+        await interaction.message.edit(view=self)
 
     @discord.ui.button(emoji='▶️', style=discord.ButtonStyle.green)
     async def next_page(self, button, interaction):
@@ -60,20 +67,20 @@ class MenuButtons(discord.ui.View, menus.MenuPages):
 
 class GuildRichPageSource(menus.ListPageSource):
     def __init__(self, data):
-        super().__init__(data, per_page=12)
+        super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(title=f"🤑 Riches user in {menu.ctx.author.guild.name}", color=discord.Color.green(),
                               description="Base by wallet")
         for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=True)
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
         return embed
 
 
 class GlobalRichPageSource(menus.ListPageSource):
     def __init__(self, data):
-        super().__init__(data, per_page=12)
+        super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(color=discord.Color.green(), description="Base by wallet")
@@ -81,7 +88,7 @@ class GlobalRichPageSource(menus.ListPageSource):
             icon_url="https://cdn.discordapp.com/attachments/900197917170737152/916598584005238794/world.png",
             name="Riches users in the world")
         for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=True)
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
         return embed
 
