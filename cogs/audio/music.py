@@ -368,8 +368,8 @@ class Music(commands.Cog):
         player.repeat = not player.repeat
         await ctx.send('Loop ' + ('enabled' if player.repeat else 'disabled'))
 
-    @commands.command(help="Shows the player's queue but with menus")
-    async def mqueue(self, ctx):
+    @commands.command(help="Shows the player's queue")
+    async def queue(self, ctx):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         playerQueueWithCurrent = [player.current] + player.queue
         if not playerQueueWithCurrent:
@@ -384,24 +384,3 @@ class Music(commands.Cog):
 
             page = MenuButtons(QueuePageSource(data))
             await page.start(ctx)
-
-    @commands.command(help="Shows the player's queue. ")
-    async def queue(self, ctx, page: int = 1):
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
-        playerQueueWithCurrent = [player.current] + player.queue
-        if not playerQueueWithCurrent:
-            return await ctx.send('Nothing queued!')
-        items_per_page = 10
-        pages = math.ceil(len(playerQueueWithCurrent) / items_per_page)
-        start = (page - 1) * items_per_page
-        end = start + items_per_page
-
-        queue_list = ''
-        for index, track in enumerate(playerQueueWithCurrent[start:end], start=start):
-            queue_list += f'**{index + 1}:** [**{track.title}**]({track.uri})\n'
-
-        embed = discord.Embed(colour=discord.Color.random(),
-                              description=f'**{len(playerQueueWithCurrent)} tracks**\n\n{queue_list}')
-        embed.set_author(icon_url="https://cdn.discordapp.com/attachments/900197917170737152/912229731766796368/unknown.png", name=f"Queue of {ctx.guild.name}")
-        embed.set_footer(text=f'Viewing page {page}/{pages}')
-        await ctx.send(embed=embed)
