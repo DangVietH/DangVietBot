@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
 import lavalink
 import re
 import math
@@ -30,6 +30,63 @@ class NoPerm(CheckFailure):
     """No voice permission"""
 
     pass
+
+
+class MenuButtons(discord.ui.View, menus.MenuPages):
+    def __init__(self, source):
+        super().__init__(timeout=60)
+        self._source = source
+        self.current_page = 0
+        self.ctx = None
+        self.message = None
+
+    async def start(self, ctx, *, channel=None, wait=False):
+        await self._source._prepare_once()
+        self.ctx = ctx
+        self.message = await self.send_initial_message(ctx, ctx.channel)
+
+    async def _get_kwargs_from_page(self, page):
+        value = await super()._get_kwargs_from_page(page)
+        if 'view' not in value:
+            value.update({'view': self})
+        return value
+
+    async def interaction_check(self, interaction):
+        return interaction.user == self.ctx.author
+
+    @discord.ui.button(emoji='⏪', style=discord.ButtonStyle.green)
+    async def first_page(self, button, interaction):
+        await self.show_page(0)
+
+    @discord.ui.button(emoji='◀️', style=discord.ButtonStyle.green)
+    async def previous_page(self, button, interaction):
+        await self.show_checked_page(self.current_page - 1)
+
+    @discord.ui.button(emoji='⏹', style=discord.ButtonStyle.green)
+    async def on_stop(self, button, interaction):
+        self.stop()
+
+    @discord.ui.button(emoji='▶️', style=discord.ButtonStyle.green)
+    async def next_page(self, button, interaction):
+        await self.show_checked_page(self.current_page + 1)
+
+    @discord.ui.button(emoji='⏩', style=discord.ButtonStyle.green)
+    async def last_page(self, button, interaction):
+        max_pages = self._source.get_max_pages()
+        last_page = max(max_pages - 1, 0)
+        await self.show_page(last_page)
+
+
+class QueuePageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(title=f"📀 Queue of {menu.ctx.author.guild.name} 📀", color=discord.Color.green())
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
 
 
 url_rx = re.compile(r'https?://(?:www\.)?.+')
@@ -310,6 +367,23 @@ class Music(commands.Cog):
             return await ctx.send('Nothing playing.')
         player.repeat = not player.repeat
         await ctx.send('Loop ' + ('enabled' if player.repeat else 'disabled'))
+
+    @commands.command(help="Shows the player's queue but with menus")
+    async def mqueue(self, ctx):
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+        playerQueueWithCurrent = [player.current] + player.queue
+        if not playerQueueWithCurrent:
+            return await ctx.send('Nothing queued!')
+        else:
+            data = []
+            num = 0
+            for track in playerQueueWithCurrent:
+                num += 1
+                to_append = (f"{num}.", f"[**{track.title}**]({track.uri})")
+                data.append(to_append)
+
+            page = MenuButtons(QueuePageSource(data))
+            await page.start(ctx)
 
     @commands.command(help="Shows the player's queue. ")
     async def queue(self, ctx, page: int = 1):
