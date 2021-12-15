@@ -63,7 +63,8 @@ class GuildRichPageSource(menus.ListPageSource):
         super().__init__(data, per_page=12)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(title=f"🤑 Riches user in {menu.ctx.author.guild.name}", color=discord.Color.green(), description="Base by wallet")
+        embed = discord.Embed(title=f"🤑 Riches user in {menu.ctx.author.guild.name}", color=discord.Color.green(),
+                              description="Base by wallet")
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=True)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
@@ -128,6 +129,19 @@ class Economy(commands.Cog):
                 num += 1
                 to_append = (f"{num}: {is_user_in_guild}", f"**Wallet:** {x['wallet']}")
                 data.append(to_append)
+
+        pages = MenuButtons(GuildRichPageSource(data))
+        await pages.start(ctx)
+
+    @commands.command(help="Who is the richest one around the world")
+    async def grich(self, ctx):
+        stats = cursor.find().sort("wallet", -1)
+        data = []
+        num = 0
+        async for x in stats:
+            num += 1
+            to_append = (f"{num}: {self.bot.get_user(x['id'])}", f"**Wallet:** {x['wallet']}")
+            data.append(to_append)
 
         pages = MenuButtons(GuildRichPageSource(data))
         await pages.start(ctx)
