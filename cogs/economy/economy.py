@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
@@ -11,6 +11,78 @@ db = cluster["economy"]
 cursor = db["users"]
 
 NO_ACCOUNT = "You don't have an economy account. Please use the create_account command to create one"
+
+
+class MenuButtons(discord.ui.View, menus.MenuPages):
+    def __init__(self, source):
+        super().__init__(timeout=60)
+        self._source = source
+        self.current_page = 0
+        self.ctx = None
+        self.message = None
+
+    async def start(self, ctx, *, channel=None, wait=False):
+        await self._source._prepare_once()
+        self.ctx = ctx
+        self.message = await self.send_initial_message(ctx, ctx.channel)
+
+    async def _get_kwargs_from_page(self, page):
+        value = await super()._get_kwargs_from_page(page)
+        if 'view' not in value:
+            value.update({'view': self})
+        return value
+
+    async def interaction_check(self, interaction):
+        return interaction.user == self.ctx.author
+
+    @discord.ui.button(emoji='⏪', style=discord.ButtonStyle.green)
+    async def first_page(self, button, interaction):
+        await self.show_page(0)
+
+    @discord.ui.button(emoji='◀️', style=discord.ButtonStyle.green)
+    async def previous_page(self, button, interaction):
+        await self.show_checked_page(self.current_page - 1)
+
+    @discord.ui.button(emoji='⏹', style=discord.ButtonStyle.green)
+    async def on_stop(self, button, interaction):
+        self.stop()
+
+    @discord.ui.button(emoji='▶️', style=discord.ButtonStyle.green)
+    async def next_page(self, button, interaction):
+        await self.show_checked_page(self.current_page + 1)
+
+    @discord.ui.button(emoji='⏩', style=discord.ButtonStyle.green)
+    async def last_page(self, button, interaction):
+        max_pages = self._source.get_max_pages()
+        last_page = max(max_pages - 1, 0)
+        await self.show_page(last_page)
+
+
+class GuildRichPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=12)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(title=f"🤑 Riches user in {menu.ctx.author.guild.name}", color=discord.Color.green(), description="Base by wallet")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=True)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
+class GlobalRichPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=12)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.green(), description="Base by wallet")
+        embed.set_author(
+            icon_url="https://cdn.discordapp.com/attachments/900197917170737152/916598584005238794/world.png",
+            name="Riches users in the world")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=True)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
 
 
 class Economy(commands.Cog):
@@ -44,6 +116,21 @@ class Economy(commands.Cog):
             embed.add_field(name="Wallet", value=f"<:DHBuck:901485795410599988> {wallet}", inline=False)
             embed.add_field(name="Bank", value=f"<:DHBuck:901485795410599988> {bank}", inline=False)
             await ctx.send(embed=embed)
+
+    @commands.command(help="Who is the richest one in your server")
+    async def rich(self, ctx):
+        stats = cursor.find().sort("wallet", -1)
+        data = []
+        num = 0
+        async for x in stats:
+            is_user_in_guild = ctx.guild.get_member(x['id'])
+            if is_user_in_guild is not None:
+                num += 1
+                to_append = (f"{num}: {is_user_in_guild}", f"**Wallet:** {x['wallet']}")
+                data.append(to_append)
+
+        pages = MenuButtons(GuildRichPageSource(data))
+        await pages.start(ctx)
 
     @commands.command(help="Beg some money")
     @commands.cooldown(1, 7200, commands.BucketType.user)
