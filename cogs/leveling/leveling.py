@@ -43,13 +43,6 @@ class MenuButtons(discord.ui.View, menus.MenuPages):
 
     @discord.ui.button(emoji='⏹', style=discord.ButtonStyle.green)
     async def on_stop(self, button, interaction):
-        for item in self.children:
-            # we only want to disable the buttons, not the select menus or others.
-            if isinstance(item, discord.Button):
-                item.disabled = True
-
-            # you also only disable this buttons by setting button.disabled
-        await interaction.message.edit(view=self)
         self.stop()
 
     @discord.ui.button(emoji='▶️', style=discord.ButtonStyle.green)
