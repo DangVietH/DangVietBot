@@ -1,14 +1,39 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import asyncio
+from motor.motor_asyncio import AsyncIOMotorClient
+import os
+import datetime
+
+cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
+timerdb = cluster["timer"]
+timer = timerdb['remind']
 
 snipe_message_content = None
 snipe_message_author = None
 
 
+def convert(time):
+    pos = ['s', 'm', 'h', 'd']
+
+    time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
+
+    unit = time[-1]
+
+    if unit not in pos:
+        return -1
+    try:
+        val = int(time[:-1])
+    except:
+        return -2
+
+    return val * time_dict[unit]
+
+
 class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.time_checker.start()
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -32,32 +57,31 @@ class Misc(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(help="Remind your task", aliases=["reminder"])
-    async def remind(self, ctx, time, *, task):
-        def convert(time):
-            pos = ['s', 'm', 'h', 'd']
-
-            time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
-
-            unit = time[-1]
-
-            if unit not in pos:
-                return -1
-            try:
-                val = int(time[:-1])
-            except:
-                return -2
-
-            return val * time_dict[unit]
+    async def remind(self, ctx, time, *, reason):
         converted_time = convert(time)
         if converted_time == -1:
             await ctx.send("You didn't answer the time correctly")
 
         if converted_time == -2:
             await ctx.send("Time must be an integer")
+        else:
+            current_time = datetime.datetime.now()
+            final_time = current_time + datetime.timedelta(seconds=converted_time)
+            await timer.insert_one({"user": ctx.author.id, "time": final_time, "reason": reason})
+            await ctx.send("⏰ Reminder set")
 
-        await ctx.send("⏰ Reminder set")
-        await asyncio.sleep(converted_time)
-        await ctx.author.send(f"Reminder: {task}")
+    @tasks.loop(seconds=10)
+    async def time_checker(self):
+        try:
+            all_timer = timer.find({})
+            current_time = datetime.datetime.now()
+            async for x in all_timer:
+                if current_time >= x['time']:
+                    user = self.bot.get_user(x['user'])
+                    await user.send(f"**Reminder:** {x['reason']}")
+                    await timer.delete_one({"user": user.id})
+        except Exception as e:
+            print(e)
 
     @commands.command(help="Poll")
     async def poll(self, ctx, question, *options: str):

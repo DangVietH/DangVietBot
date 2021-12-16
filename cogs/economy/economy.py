@@ -68,7 +68,7 @@ class GuildRichPageSource(menus.ListPageSource):
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
+        return
 
 
 class GlobalRichPageSource(menus.ListPageSource):
@@ -84,6 +84,18 @@ class GlobalRichPageSource(menus.ListPageSource):
             embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
         return embed
+
+
+class ShopPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(title=f"Shop", color=discord.Color.green())
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return
 
 
 class Economy(commands.Cog):
@@ -209,18 +221,15 @@ class Economy(commands.Cog):
                                           color=discord.Color.red())
                     await message.reply(embed=embed)
 
-    @commands.command(help="Shopping list", aliases=["shoplist", 'sl'])
+    @commands.command(help="Shopping list", aliases=['sl'])
     async def shop(self, ctx):
-        embed = discord.Embed(title="🏪 Shop", color=discord.Color.green())
-
+        data = []
         for item in shop:
-            name = item["name"]
-            price = item["price"]
-            description = item["description"]
-            embed.add_field(name=name, value=f"<:DHBuck:901485795410599988>  {price} | Description: {description}",
-                            inline=False)
+            to_append = (f"{item['name']} | <:DHBuck:901485795410599988> {item['price']}", f"{item['description']}")
+            data.append(to_append)
 
-        await ctx.send(embed=embed)
+        page = MenuButtons(ShopPageSource(data))
+        await page.start(ctx)
 
     @commands.command(help="Buy stuff")
     async def buy(self, ctx, item_name, amount=1):

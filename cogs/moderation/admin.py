@@ -34,6 +34,7 @@ def convert(time):
 class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.time_checker.start()
 
     @commands.command(help="Warn member")
     @commands.has_permissions(administrator=True)
@@ -366,8 +367,6 @@ class Admin(commands.Cog):
             if results is None:
                 insert = {"guild": guild.id, "num": 0, "cases": []}
                 await cases.insert_one(insert)
-
-        self.time_checker.start()
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
