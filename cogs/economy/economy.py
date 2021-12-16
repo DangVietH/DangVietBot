@@ -225,7 +225,10 @@ class Economy(commands.Cog):
     async def shop(self, ctx):
         data = []
         for item in shop:
-            to_append = (f"{item['name']} | <:DHBuck:901485795410599988> {item['price']}", f"{item['description']}")
+            name = item["name"]
+            price = item["price"]
+            description = item["description"]
+            to_append = (f"{name} | <:DHBuck:901485795410599988> {price}", f"{description}")
             data.append(to_append)
 
         page = MenuButtons(ShopPageSource(data))
