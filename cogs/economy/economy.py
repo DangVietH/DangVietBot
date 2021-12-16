@@ -63,7 +63,7 @@ class InventoryPageSource(menus.ListPageSource):
         super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(title=f"{menu.ctx.author} inventory", color=discord.Color.green())
+        embed = discord.Embed(color=discord.Color.green())
         embed.set_author(
             icon_url=menu.ctx.author.avatar.url,
             name=f"{menu.ctx.author} Inventory")
