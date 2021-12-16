@@ -16,7 +16,7 @@ rdb = cluster["react_role"]
 rcursor = rdb['reaction_roles']
 
 
-class SetUp(commands.Cog):
+class Setup(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
