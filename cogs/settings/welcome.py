@@ -11,50 +11,6 @@ cursors = dbs["channel"]
 class Welcome(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        super().__init__()
-
-    @commands.command(help="Setup welcome channel")
-    @commands.has_permissions(administrator=True)
-    async def welcome_channel(self, ctx, channel: discord.TextChannel):
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is None:
-            insert = {"guild": ctx.guild.id, "channel": channel.id, "message": "Welcome {mention}",
-                      "dm": f"Have fun at **{ctx.guild.name}**"}
-            await cursors.insert_one(insert)
-            await ctx.send(f"Welcome channel set to {channel.mention}")
-        elif result is not None:
-            await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
-            await ctx.send(f"Welcome channel updated to {channel.mention}")
-
-    @commands.command(help="Remove welcome system")
-    @commands.has_permissions(administrator=True)
-    async def remove_wchannel(self, ctx):
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            await cursors.delete_one(result)
-            await ctx.send("Welcome system has been remove")
-        else:
-            await ctx.send("You don't have a welcome system")
-
-    @commands.command(help="Setup welcome text")
-    @commands.has_permissions(administrator=True)
-    async def welcome_text(self, ctx, *, text):
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is None:
-            await ctx.send("You haven't configure a welcome channel yet")
-        else:
-            await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"message": text}})
-            await ctx.send(f"Welcome message updated to ```{text}```")
-
-    @commands.command(help="Setup welcome dm")
-    @commands.has_permissions(administrator=True)
-    async def welcome_dm(self, ctx, *, text):
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is None:
-            await ctx.send("You haven't configure a welcome channel yet")
-        else:
-            await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"dm": text}})
-            await ctx.send(f"Welcome dm updated to ```{text}```")
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
