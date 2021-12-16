@@ -61,7 +61,10 @@ class GuildLeaderboardPageSource(menus.ListPageSource):
         super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(title=f"🏆 Leaderboard of {menu.ctx.author.guild.name}", color=discord.Color.green())
+        embed = discord.Embed(color=discord.Color.green())
+        embed.set_author(
+            icon_url=menu.ctx.author.guild.icon.url,
+            name=f"Leaderboard of {menu.ctx.author.guild.name}")
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
@@ -75,7 +78,7 @@ class GlobalLeaderboardPageSource(menus.ListPageSource):
     async def format_page(self, menu, entries):
         embed = discord.Embed(color=discord.Color.green())
         embed.set_author(
-            icon_url="https://cdn.discordapp.com/attachments/900197917170737152/916598584005238794/world.png",
+            icon_url="https://upload.wikimedia.org/wikipedia/commons/7/7f/Rotating_earth_animated_transparent.gif",
             name="Global Leaderboard")
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=False)

@@ -58,17 +58,35 @@ class MenuButtons(discord.ui.View, menus.MenuPages):
         await self.show_page(last_page)
 
 
+class InventoryPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(title=f"{menu.ctx.author} inventory", color=discord.Color.green())
+        embed.set_author(
+            icon_url=menu.ctx.author.avatar.url,
+            name=f"{menu.ctx.author} Inventory")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
 class GuildRichPageSource(menus.ListPageSource):
     def __init__(self, data):
         super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(title=f"🤑 Riches user in {menu.ctx.author.guild.name}", color=discord.Color.green(),
+        embed = discord.Embed(color=discord.Color.green(),
                               description="Base by wallet")
+        embed.set_author(
+            icon_url=menu.ctx.author.guild.icon.url,
+            name=f"Riches user in {menu.ctx.author.guild.name}")
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return
+        return embed
 
 
 class GlobalRichPageSource(menus.ListPageSource):
@@ -78,7 +96,7 @@ class GlobalRichPageSource(menus.ListPageSource):
     async def format_page(self, menu, entries):
         embed = discord.Embed(color=discord.Color.green(), description="Base by wallet")
         embed.set_author(
-            icon_url="https://cdn.discordapp.com/attachments/900197917170737152/916598584005238794/world.png",
+            icon_url="https://upload.wikimedia.org/wikipedia/commons/7/7f/Rotating_earth_animated_transparent.gif",
             name="Riches users in the world")
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=False)
@@ -91,7 +109,10 @@ class ShopPageSource(menus.ListPageSource):
         super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(title=f"Shop", color=discord.Color.green())
+        embed = discord.Embed(color=discord.Color.green())
+        embed.set_author(
+            icon_url="https://cdn.discordapp.com/attachments/900197917170737152/921035393456042004/shop.png",
+            name="Shop")
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
@@ -106,7 +127,7 @@ class Economy(commands.Cog):
     async def create_account(self, ctx):
         check = await cursor.find_one({"id": ctx.author.id})
         if check is None:
-            insert = {"id": ctx.author.id, "job": None, "nFired": 0, "wallet": 0, "bank": 0, "inventory": []}
+            insert = {"id": ctx.author.id, "job": "f", "FireCoin": 0, "wallet": 0, "bank": 0, "inventory": []}
             await cursor.insert_one(insert)
             await ctx.send(
                 "Done, your economy account has been created. **ONLY USE OUR CURRENCY IN THE BOT. IF YOU'RE CAUGHT USING THIS BOT TO TRADE REAL LIFE ITEMS, YOU'RE DEAD!!**")
@@ -123,11 +144,14 @@ class Economy(commands.Cog):
             wallet = check['wallet']
             bank = check['bank']
             balance = wallet + bank
-            embed = discord.Embed(title=f"{user} balance",
-                                  description=f"**Total:** <:DHBuck:901485795410599988> {balance}",
+            embed = discord.Embed(description=f"**Total:** <:DHBuck:901485795410599988> {balance}",
                                   color=discord.Color.blue())
+            embed.set_author(
+                icon_url=user.avatar.url,
+                name=f"{user} balance")
             embed.add_field(name="Wallet", value=f"<:DHBuck:901485795410599988> {wallet}", inline=False)
             embed.add_field(name="Bank", value=f"<:DHBuck:901485795410599988> {bank}", inline=False)
+            embed.add_field(name="FireCoin", value=f"<:FireCoin:920903065454903326> {check['FireCoin']}", inline=False)
             await ctx.send(embed=embed)
 
     @commands.command(help="Who is the richest one in your server")
@@ -318,7 +342,7 @@ class Economy(commands.Cog):
         if check is None:
             await ctx.send(NO_ACCOUNT)
         else:
-            embed = discord.Embed(title=f"🧳 {ctx.author}'s Inventory", color=discord.Color.random())
+            data = []
             items = check['inventory']
             if len(items) < 1:
                 await ctx.send("You didn't have anything")
@@ -326,8 +350,10 @@ class Economy(commands.Cog):
                 for item in items:
                     name = item['name']
                     amount = item['amount']
-                    embed.add_field(name=name, value=f"**Amount:** {amount}")
-                await ctx.send(embed=embed)
+                    to_append = (f"{name}", f"**Amount** {amount}")
+                    data.append(to_append)
+                page = MenuButtons(InventoryPageSource(data))
+                await page.start(ctx)
 
     @commands.command(help="Deposit your money into the bank", aliases=['dep'])
     async def deposit(self, ctx, amount=1):
