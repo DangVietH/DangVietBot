@@ -86,6 +86,21 @@ class GlobalLeaderboardPageSource(menus.ListPageSource):
         return embed
 
 
+class RoleListPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.green())
+        embed.set_author(
+            icon_url=menu.ctx.author.guild.icon.url,
+            name=f"Level roles")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
 class Leveling(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -223,7 +238,7 @@ class Leveling(commands.Cog):
     @role.command(help="Set up the roles")
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
-    async def add(self, ctx, level: int, *, roles: discord.Role):
+    async def add(self, ctx, level: int, roles: discord.Role):
         role_cursor = await roled.find_one({"guild": ctx.guild.id})
         if roles.id in role_cursor['role']:
             await ctx.send("That role is already added")
@@ -234,7 +249,7 @@ class Leveling(commands.Cog):
     @role.command(help="Remove the role from level")
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
-    async def remove(self, ctx, level: int, *, roles: discord.Role):
+    async def remove(self, ctx, level: int, roles: discord.Role):
         role_cursor = await roled.find_one({"guild": ctx.guild.id})
         if roles.id in role_cursor['role']:
             await roled.update_one({"guild": ctx.guild.id}, {"$pull": {"role": roles.id, "level": level}})

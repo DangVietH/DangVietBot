@@ -114,7 +114,10 @@ async def on_command_error(ctx, error):
 
 @bot.event
 async def on_guild_join(guild):
-    embed = discord.Embed(title=f"<:DHB:919240847206277150> Greetings {guild.name}", description="Thanks for adding DHB into your server")
+    embed = discord.Embed(title=f"Greetings {guild.name}", description="Thanks for adding DHB into your server! Start by typing d!help!", color=discord.Color.from_rgb(225, 0, 92))
+    embed.add_field(name="What do we have", value="DHB supports economy, music, leveling, moderation, python documentation, etc")
+    embed.add_field(name="Links", value="`[invite](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=8&scope=bot%20applications.commands)` \n``[Support Server](https://discord.gg/cnydBRnHU9)` \n`[Github](https://github.com/DangVietH/DHB)`")
+    embed.set_thumbnail(url=guild.icon.url)
     await guild.system_channel.send(embed=embed)
 
 
