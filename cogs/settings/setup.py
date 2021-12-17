@@ -23,8 +23,10 @@ class Setup(commands.Cog):
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Welcome system setup")
     async def welcome(self, ctx):
         embed = discord.Embed(title="Welcome", color=discord.Color.random())
-        for command in self.bot.get_command("welcome").walk_commands():
-            embed.add_field(name=f"{command}", value=f"{command.description}")
+        command = self.bot.get_command("welcome")
+        if isinstance(command, commands.Group):
+            for subcommand in command.commands:
+                embed.add_field(name=f"{subcommand.name}", value=f"{subcommand.help}")
         await ctx.send(embed)
 
     @welcome.command(help="Setup welcome channel")
@@ -73,8 +75,10 @@ class Setup(commands.Cog):
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Custom prefix setup")
     async def prefix(self, ctx):
         embed = discord.Embed(title="Prefix", color=discord.Color.random())
-        for command in self.bot.get_command("prefix").walk_commands():
-            embed.add_field(name=f"{command}", value=f"{command.description}")
+        command = self.bot.get_command("prefix")
+        if isinstance(command, commands.Group):
+            for subcommand in command.commands:
+                embed.add_field(name=f"{subcommand.name}", value=f"{subcommand.help}")
         await ctx.send(embed)
 
     @prefix.command(help="Set custom prefix")
@@ -102,8 +106,10 @@ class Setup(commands.Cog):
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Reaction role setup")
     async def reaction(self, ctx):
         embed = discord.Embed(title="Reaction", color=discord.Color.random())
-        for command in self.bot.get_command("reaction").walk_commands():
-            embed.add_field(name=f"{command}", value=f"{command.description}")
+        command = self.bot.get_command("reaction")
+        if isinstance(command, commands.Group):
+            for subcommand in command.commands:
+                embed.add_field(name=f"{subcommand.name}", value=f"{subcommand.help}")
         await ctx.send(embed)
 
     @reaction.command(help="Set up reaction role")
@@ -142,7 +148,7 @@ class Setup(commands.Cog):
 
     @reaction.command(help="Delete reaction role system. This does not delete the message.")
     @commands.has_permissions(manage_messages=True)
-    async def del_react(self, ctx, msg_id: int):
+    async def delete(self, ctx, msg_id: int):
         check = await rcursor.find_one({"id": msg_id})
         if msg_id == check['id']:
             await rcursor.delete_one(check)
