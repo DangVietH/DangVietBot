@@ -147,34 +147,6 @@ class Leveling(commands.Cog):
                 else:
                     return None
 
-    @commands.command(help="Disable levelling")
-    @commands.has_permissions(administrator=True)
-    @commands.guild_only()
-    async def disable_level(self, ctx):
-        check = await disable.find_one({"guild": ctx.guild.id})
-        if check is not None:
-            await ctx.send("Bruh")
-        else:
-            insert = {"guild": ctx.guild.id}
-            await disable.insert_one(insert)
-            for member in ctx.guild.members:
-                if not member.bot:
-                    result = await levelling.find_one({"guild": ctx.guild.id, "user": member.id})
-                    if result is not None:
-                        await levelling.delete_one({"guild": ctx.guild.id, "user": member.id})
-            await ctx.send('Levelling disabled')
-
-    @commands.command(help="Re-enable levelling")
-    @commands.has_permissions(administrator=True)
-    @commands.guild_only()
-    async def renable_level(self, ctx):
-        check = await disable.find_one({"guild": ctx.guild.id})
-        if check is not None:
-            await disable.delete_one(check)
-            await ctx.send('Levelling re-enable')
-        else:
-            await ctx.send('Leveling already enabled')
-
     @commands.command(help="See your rank")
     @commands.guild_only()
     async def rank(self, ctx, user: discord.Member = None):
@@ -259,7 +231,7 @@ class Leveling(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Level channel setup")
     async def lvl(self, ctx):
-        embed = discord.Embed(title="Level up channel", color=discord.Color.random())
+        embed = discord.Embed(title="Level up utils", color=discord.Color.random())
         command = self.bot.get_command("lvl")
         if isinstance(command, commands.Group):
             for subcommand in command.commands:
@@ -288,6 +260,34 @@ class Leveling(commands.Cog):
             await ctx.send("You don't have a level up channel")
         else:
             await upchannel.delete_one(result)
+
+    @lvl.command(help="Disable levelling")
+    @commands.has_permissions(administrator=True)
+    @commands.guild_only()
+    async def disable(self, ctx):
+        check = await disable.find_one({"guild": ctx.guild.id})
+        if check is not None:
+            await ctx.send("Bruh")
+        else:
+            insert = {"guild": ctx.guild.id}
+            await disable.insert_one(insert)
+            for member in ctx.guild.members:
+                if not member.bot:
+                    result = await levelling.find_one({"guild": ctx.guild.id, "user": member.id})
+                    if result is not None:
+                        await levelling.delete_one({"guild": ctx.guild.id, "user": member.id})
+            await ctx.send('Levelling disabled')
+
+    @lvl.command(help="Re-enable levelling")
+    @commands.has_permissions(administrator=True)
+    @commands.guild_only()
+    async def renable(self, ctx):
+        check = await disable.find_one({"guild": ctx.guild.id})
+        if check is not None:
+            await disable.delete_one(check)
+            await ctx.send('Levelling re-enable')
+        else:
+            await ctx.send('Leveling already enabled')
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
