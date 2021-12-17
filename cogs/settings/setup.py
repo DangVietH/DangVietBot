@@ -40,7 +40,8 @@ class Setup(commands.Cog):
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Welcome system setup")
     async def welcome(self, ctx):
         embed = discord.Embed(title="Welcome", color=discord.Color.random(), description="Set up welcome system")
-        embed.add_field(name="Subcommand", value=text_for_welcome)
+        for command in self.bot.get_command("welcome").walk_commands():
+            embed.add_field(name=f"{command}", value=f"{command.description}")
         await ctx.send(embed=embed)
 
     @welcome.command(help="Setup welcome channel")
@@ -89,7 +90,8 @@ class Setup(commands.Cog):
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Custom prefix setup")
     async def prefix(self, ctx):
         embed = discord.Embed(title="Prefix", color=discord.Color.random(), description="Set up custom prefix")
-        embed.add_field(name="Subcommand", value=text_for_prefix)
+        for command in self.bot.get_command("prefix").walk_commands():
+            embed.add_field(name=f"{command}", value=f"{command.description}")
         await ctx.send(embed=embed)
 
     @prefix.command(help="Set custom prefix")
@@ -117,7 +119,8 @@ class Setup(commands.Cog):
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Reaction role setup")
     async def reaction(self, ctx):
         embed = discord.Embed(title="Reaction", color=discord.Color.random(), description="Create reaction roles")
-        embed.add_field(name="Subcommand", value=text_for_reaction)
+        for command in self.bot.get_command("reaction").walk_commands():
+            embed.add_field(name=f"{command}", value=f"{command.description}")
         await ctx.send(embed=embed)
 
     @reaction.command(help="Set up reaction role")
