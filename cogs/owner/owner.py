@@ -31,9 +31,9 @@ class TestPageSource(menus.ListPageSource):
         super().__init__(data, per_page=2)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(title="🏆 Test")
+        embed = discord.Embed(title="Servers")
         for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=True)
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
         return embed
 
@@ -89,20 +89,11 @@ class Owner(commands.Cog):
         await ctx.message.add_reaction('👌')
 
     @commands.is_owner()
-    @commands.command(help="Test my menus skills")
-    async def tmenus(self, ctx):
-        data = [
-            ("Black", "#000000"),
-            ("Blue", "#0000FF"),
-            ("Brown", "#A52A2A"),
-            ("Green", "#00FF00"),
-            ("Grey", "#808080"),
-            ("Orange", "#FFA500"),
-            ("Pink", "#FFC0CB"),
-            ("Purple", "#800080"),
-            ("Red", "#FF0000"),
-            ("White", "#FFFFFF"),
-            ("Yellow", "#FFFF00"),
-        ]
+    @commands.command(help="See list of servers")
+    async def guildlist(self, ctx):
+        data = []
+        for guild in self.bot.guilds:
+            to_append = (f"{guild.name}", f"**Owner** {guild.owner}")
+            data.append(to_append)
         menu = TestMenu(TestPageSource(data))
         await menu.start(ctx)
