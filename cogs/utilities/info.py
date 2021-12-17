@@ -60,7 +60,11 @@ class Info(commands.Cog):
         embed.add_field(name="Number of roles", value=f"{role_count}")
         embed.add_field(name="Number of emojis", value=f"{emoji_count}")
         embed.add_field(name="Create on", value=f"{ctx.guild.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S')}")
-        embed.set_thumbnail(url=ctx.guild.icon.url)
+        if ctx.guild.icon.url is None:
+            embed.set_thumbnail(
+                url="https://cdn.discordapp.com/attachments/900197917170737152/921336212512444416/Discord-Logo-Black.png")
+        else:
+            embed.set_thumbnail(url=ctx.guild.icon.url)
         await ctx.send(embed=embed)
 
     @commands.command(help="Bot information")
