@@ -27,7 +27,7 @@ class Setup(commands.Cog):
         if isinstance(command, commands.Group):
             for subcommand in command.commands:
                 embed.add_field(name=f"{subcommand.name}", value=f"{subcommand.help}")
-        await ctx.send(embed)
+        await ctx.invoke(embed)
 
     @welcome.command(help="Setup welcome channel")
     @commands.has_permissions(administrator=True)
@@ -79,7 +79,7 @@ class Setup(commands.Cog):
         if isinstance(command, commands.Group):
             for subcommand in command.commands:
                 embed.add_field(name=f"{subcommand.name}", value=f"{subcommand.help}")
-        await ctx.send(embed)
+        await ctx.invoke(embed)
 
     @prefix.command(help="Set custom prefix")
     @commands.has_permissions(administrator=True)
@@ -110,7 +110,7 @@ class Setup(commands.Cog):
         if isinstance(command, commands.Group):
             for subcommand in command.commands:
                 embed.add_field(name=f"{subcommand.name}", value=f"{subcommand.help}")
-        await ctx.send(embed)
+        await ctx.invoke(embed)
 
     @reaction.command(help="Set up reaction role")
     @commands.has_permissions(manage_messages=True)
