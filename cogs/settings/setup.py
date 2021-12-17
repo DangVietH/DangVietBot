@@ -15,23 +15,6 @@ pcursor = pdb["prefix"]
 rdb = cluster["react_role"]
 rcursor = rdb['reaction_roles']
 
-text_for_welcome = """```
-welcome channel [channel] - Setup welcome channel
-welcome remove - Remove welcome system
-welcome text <text>  - Create your welcome message
-welcome dm <text>  - Create your welcome dm
-```"""
-
-text_for_prefix = """```
-prefix set <prefix> - set up custom prefix
-prefix remove - set prefix back to default
-```"""
-
-text_for_reaction = """```
-reaction create - create reaction roles
-reaction delete [message_id] - Delete reaction role system of a message. Make sure your at the same channel as the message so I can delete it
-```"""
-
 
 class Setup(commands.Cog):
     def __init__(self, bot):
@@ -43,7 +26,7 @@ class Setup(commands.Cog):
         command = self.bot.get_command("welcome")
         if isinstance(command, commands.Group):
             for subcommand in command.commands:
-                embed.add_field(name=f"{subcommand.name}", value=f"{subcommand.help}")
+                embed.add_field(name=f"welcome {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
         await ctx.send(embed=embed)
 
     @welcome.command(help="Setup welcome channel")
@@ -95,7 +78,7 @@ class Setup(commands.Cog):
         command = self.bot.get_command("prefix")
         if isinstance(command, commands.Group):
             for subcommand in command.commands:
-                embed.add_field(name=f"{subcommand.name}", value=f"{subcommand.help}")
+                embed.add_field(name=f"prefix {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
         await ctx.send(embed=embed)
 
     @prefix.command(help="Set custom prefix")
@@ -126,7 +109,7 @@ class Setup(commands.Cog):
         command = self.bot.get_command("reaction")
         if isinstance(command, commands.Group):
             for subcommand in command.commands:
-                embed.add_field(name=f"{subcommand.name}", value=f"{subcommand.help}")
+                embed.add_field(name=f"reaction {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
         await ctx.send(embed=embed)
 
     @reaction.command(help="Set up reaction role")

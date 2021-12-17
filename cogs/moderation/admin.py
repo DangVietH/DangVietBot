@@ -303,7 +303,12 @@ class Admin(commands.Cog):
 
     @commands.group(invoke_without_command=True, help="Modlog and case")
     async def modlog(self, ctx):
-        await ctx.send("modlog channel: set up modlog channel\nmodlog remove: end modlog system")
+        embed = discord.Embed(title="Modlog", color=discord.Color.random(), description="Set up modlog system")
+        command = self.bot.get_command("welcome")
+        if isinstance(command, commands.Group):
+            for subcommand in command.commands:
+                embed.add_field(name=f"modlog {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
+        await ctx.send(embed=embed)
 
     @modlog.command(help="Set up channel")
     @commands.has_permissions(administrator=True)
