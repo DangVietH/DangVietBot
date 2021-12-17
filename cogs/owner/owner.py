@@ -28,7 +28,7 @@ class TestMenu(menus.MenuPages, inherit_buttons=False):
 
 class TestPageSource(menus.ListPageSource):
     def __init__(self, data):
-        super().__init__(data, per_page=2)
+        super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(title="Servers")
