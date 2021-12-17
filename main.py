@@ -114,10 +114,7 @@ async def on_command_error(ctx, error):
 
 @bot.event
 async def on_guild_join(guild):
-    embed = discord.Embed(description=f"""Hello **{guild.name}**. I'm DHB, a multi-purpose bot made by **! DvH#9980**. Thanks for adding me into your server. 
-Begin by typing d!help or @DHB help to see my list of commands 
-Join my [server](https://discord.gg/cnydBRnHU9) if you like too""", color=discord.Color.random())
-    embed.set_footer(text="Have fun!")
+    embed = discord.Embed(title=f"<:DHB:919240847206277150> Greetings {guild.name}", description="Thanks for adding DHB into your server")
     await guild.system_channel.send(embed=embed)
 
 

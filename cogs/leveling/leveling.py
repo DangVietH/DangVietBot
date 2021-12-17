@@ -7,7 +7,7 @@ cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["levelling"]
 levelling = db['member']
 disable = db['disable']
-role = db['roles']
+roled = db['roles']
 upchannel = db['channel']
 
 
@@ -115,11 +115,26 @@ class Leveling(commands.Cog):
                             else:
                                 channel = self.bot.get_channel(lvl_channel["channel"])
                                 await channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**!!🎉")
+
+                            role_reward = await roled.find_one({"guild": message.guild.id})
+                            levelrole = role_reward['role']
+                            levelnum = role_reward['level']
+                            for i in range(len(levelrole)):
+                                if new_lvl == int(levelnum[i]):
+                                    role = message.guild.get_role(int(levelrole[i]))
+                                    await message.author.add_roles(role)
+                                    lvl_channel = await upchannel.find_one({"guild": message.guild.id})
+                                    if lvl_channel is None:
+                                        await message.channel.send(f"🎉 {message.author.mention} also receive {role.name}")
+                                    else:
+                                        channel = self.bot.get_channel(lvl_channel["channel"])
+                                        await channel.send(f"🎉 {message.author.mention} also receive {role.name}")
                 else:
                     return None
 
     @commands.command(help="Disable levelling")
     @commands.has_permissions(administrator=True)
+    @commands.guild_only()
     async def disable_level(self, ctx):
         check = await disable.find_one({"guild": ctx.guild.id})
         if check is not None:
@@ -136,6 +151,7 @@ class Leveling(commands.Cog):
 
     @commands.command(help="Re-enable levelling")
     @commands.has_permissions(administrator=True)
+    @commands.guild_only()
     async def renable_level(self, ctx):
         check = await disable.find_one({"guild": ctx.guild.id})
         if check is not None:
@@ -145,6 +161,7 @@ class Leveling(commands.Cog):
             await ctx.send('Leveling already enabled')
 
     @commands.command(help="See your rank")
+    @commands.guild_only()
     async def rank(self, ctx, user: discord.Member = None):
         user = user or ctx.author
         stats = await levelling.find_one({'guild': ctx.guild.id, "user": user.id})
@@ -166,6 +183,7 @@ class Leveling(commands.Cog):
             await ctx.send(f"The specified member haven't send a message in this server!!")
 
     @commands.command(help="See server ranks")
+    @commands.guild_only()
     async def top(self, ctx):
         stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
         data = []
@@ -179,6 +197,7 @@ class Leveling(commands.Cog):
         await pages.start(ctx)
 
     @commands.command(help="See global rank")
+    @commands.guild_only()
     async def gtop(self, ctx):
         stats = levelling.find().sort("xp", -1)
         data = []
@@ -191,9 +210,51 @@ class Leveling(commands.Cog):
         pages = MenuButtons(GlobalLeaderboardPageSource(data))
         await pages.start(ctx)
 
-    @commands.command(help="Setup level up channel if you like to")
+    @commands.group(invoke_without_command=True, case_insensitive=True, help="Level rewarding role setup")
+    async def role(self, ctx):
+        embed = discord.Embed(title="Level rewarding role setup", color=discord.Color.random())
+        command = self.bot.get_command("role")
+        if isinstance(command, commands.Group):
+            for subcommand in command.commands:
+                embed.add_field(name=f"role {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
+        embed.set_footer(text="Who needs MEE6 premium when we have this")
+        await ctx.send(embed=embed)
+
+    @role.command(help="Set up the roles")
     @commands.has_permissions(administrator=True)
-    async def lvl_channel(self, ctx, channel: discord.TextChannel):
+    @commands.guild_only()
+    async def add(self, ctx, level: int, *, roles: discord.Role):
+        role_cursor = await roled.find_one({"guild": ctx.guild.id})
+        if roles.id in role_cursor['role']:
+            await ctx.send("That role is already added")
+        else:
+            await roled.update_one({"guild": ctx.guild.id}, {"$push": {"role": roles.id, "level": level}})
+            await ctx.send(f"{roles.name} added.")
+
+    @role.command(help="Remove the role from level")
+    @commands.has_permissions(administrator=True)
+    @commands.guild_only()
+    async def remove(self, ctx, level: int, *, roles: discord.Role):
+        role_cursor = await roled.find_one({"guild": ctx.guild.id})
+        if roles.id in role_cursor['role']:
+            await roled.update_one({"guild": ctx.guild.id}, {"$pull": {"role": roles.id, "level": level}})
+            await ctx.send(f"{roles.name} remove.")
+        else:
+            await ctx.send("I don't remember I put that role in.")
+
+    @commands.group(invoke_without_command=True, case_insensitive=True, help="Level channel setup")
+    async def lvl(self, ctx):
+        embed = discord.Embed(title="Level up channel", color=discord.Color.random())
+        command = self.bot.get_command("lvl")
+        if isinstance(command, commands.Group):
+            for subcommand in command.commands:
+                embed.add_field(name=f"lvl {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
+        await ctx.send(embed=embed)
+
+    @lvl.command(help="Setup level up channel if you like to")
+    @commands.has_permissions(administrator=True)
+    @commands.guild_only()
+    async def set(self, ctx, channel: discord.TextChannel):
         result = await upchannel.find_one({"guild": ctx.guild.id})
         if result is None:
             insert = {"guild": ctx.guild.id, "channel": channel.id}
@@ -203,6 +264,20 @@ class Leveling(commands.Cog):
             await upchannel.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
             await ctx.send(f"Level up channel updated to {channel.mention}")
 
+    @lvl.command(help="Remove level up channel")
+    @commands.has_permissions(administrator=True)
+    @commands.guild_only()
+    async def remove(self, ctx):
+        result = await upchannel.find_one({"guild": ctx.guild.id})
+        if result is None:
+            await ctx.send("You don't have a level up channel")
+        else:
+            await upchannel.delete_one(result)
+
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        await roled.insert_one({"guild": guild.id, "role": [], "level": []})
+
     # remove data to save storage
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
@@ -211,6 +286,10 @@ class Leveling(commands.Cog):
                 result = await levelling.find_one({"guild": guild.id, "user": member.id})
                 if result is not None:
                     await levelling.delete_one({"guild": guild.id, "user": member.id})
+        await roled.delete_one({"guild": guild.id})
+        check = await upchannel.find_one({"guild": guild.id})
+        if check is not None:
+            await roled.delete_one({"guild": guild.id})
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
