@@ -41,7 +41,7 @@ class Setup(commands.Cog):
     async def welcome(self, ctx):
         embed = discord.Embed(title="Welcome", color=discord.Color.random(), description="Set up welcome system")
         embed.add_field(name="Subcommand", value=text_for_welcome)
-        await ctx.send(embed)
+        await ctx.send(embed=embed)
 
     @welcome.command(help="Setup welcome channel")
     @commands.has_permissions(administrator=True)
@@ -90,7 +90,7 @@ class Setup(commands.Cog):
     async def prefix(self, ctx):
         embed = discord.Embed(title="Prefix", color=discord.Color.random(), description="Set up custom prefix")
         embed.add_field(name="Subcommand", value=text_for_prefix)
-        await ctx.send(embed)
+        await ctx.send(embed=embed)
 
     @prefix.command(help="Set custom prefix")
     @commands.has_permissions(administrator=True)
@@ -118,7 +118,7 @@ class Setup(commands.Cog):
     async def reaction(self, ctx):
         embed = discord.Embed(title="Reaction", color=discord.Color.random(), description="Create reaction roles")
         embed.add_field(name="Subcommand", value=text_for_reaction)
-        await ctx.send(embed)
+        await ctx.send(embed=embed)
 
     @reaction.command(help="Set up reaction role")
     @commands.has_permissions(manage_messages=True)
