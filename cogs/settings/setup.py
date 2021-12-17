@@ -15,6 +15,23 @@ pcursor = pdb["prefix"]
 rdb = cluster["react_role"]
 rcursor = rdb['reaction_roles']
 
+text_for_welcome = """```
+welcome channel [channel] - Setup welcome channel
+welcome remove - Remove welcome system
+welcome text <text>  - Create your welcome message
+welcome dm <text>  - Create your welcome dm
+```"""
+
+text_for_prefix = """```
+prefix set <prefix> - set up custom prefix
+prefix remove - set prefix back to default
+```"""
+
+text_for_reaction = """```
+reaction create - create reaction roles
+reaction delete [message_id] - Delete reaction role system of a message. Make sure your at the same channel as the message so I can delete it
+```"""
+
 
 class Setup(commands.Cog):
     def __init__(self, bot):
@@ -22,12 +39,9 @@ class Setup(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Welcome system setup")
     async def welcome(self, ctx):
-        embed = discord.Embed(title="Welcome", color=discord.Color.random())
-        command = self.bot.get_command("welcome")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"{subcommand.name}", value=f"{subcommand.help}")
-        await ctx.invoke(embed)
+        embed = discord.Embed(title="Welcome", color=discord.Color.random(), description="Set up welcome system")
+        embed.add_field(name="Subcommand", value=text_for_welcome)
+        await ctx.send(embed)
 
     @welcome.command(help="Setup welcome channel")
     @commands.has_permissions(administrator=True)
@@ -52,7 +66,7 @@ class Setup(commands.Cog):
         else:
             await ctx.send("You don't have a welcome system")
 
-    @welcome.command(help="Setup welcome text")
+    @welcome.command(help="Create your welcome message")
     @commands.has_permissions(administrator=True)
     async def text(self, ctx, *, text):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
@@ -74,12 +88,9 @@ class Setup(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Custom prefix setup")
     async def prefix(self, ctx):
-        embed = discord.Embed(title="Prefix", color=discord.Color.random())
-        command = self.bot.get_command("prefix")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"{subcommand.name}", value=f"{subcommand.help}")
-        await ctx.invoke(embed)
+        embed = discord.Embed(title="Prefix", color=discord.Color.random(), description="Set up custom prefix")
+        embed.add_field(name="Subcommand", value=text_for_prefix)
+        await ctx.send(embed)
 
     @prefix.command(help="Set custom prefix")
     @commands.has_permissions(administrator=True)
@@ -105,12 +116,9 @@ class Setup(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Reaction role setup")
     async def reaction(self, ctx):
-        embed = discord.Embed(title="Reaction", color=discord.Color.random())
-        command = self.bot.get_command("reaction")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"{subcommand.name}", value=f"{subcommand.help}")
-        await ctx.invoke(embed)
+        embed = discord.Embed(title="Reaction", color=discord.Color.random(), description="Create reaction roles")
+        embed.add_field(name="Subcommand", value=text_for_reaction)
+        await ctx.send(embed)
 
     @reaction.command(help="Set up reaction role")
     @commands.has_permissions(manage_messages=True)
@@ -146,12 +154,14 @@ class Setup(commands.Cog):
         for emoji in emojis:
             await bot_msg.add_reaction(emoji)
 
-    @reaction.command(help="Delete reaction role system. This does not delete the message.")
+    @reaction.command(help="Delete reaction role system")
     @commands.has_permissions(manage_messages=True)
     async def delete(self, ctx, msg_id: int):
         check = await rcursor.find_one({"id": msg_id})
         if msg_id == check['id']:
+            msg = await ctx.fetch_message(msg_id)
+            await msg.delete()
             await rcursor.delete_one(check)
-            await ctx.send("Success. Now go and delete the reaction message if you haven't")
+            await ctx.send("Mission complete")
         else:
             await ctx.send("Can't find that message id")
