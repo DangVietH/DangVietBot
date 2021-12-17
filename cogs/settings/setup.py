@@ -22,7 +22,10 @@ class Setup(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Welcome system setup")
     async def welcome(self, ctx):
-        await ctx.invoke(self.bot.get_command('help'), command_or_cog='welcome')
+        embed = discord.Embed(title="Welcome", color=discord.Color.random())
+        for command in self.bot.get_command("welcome").walk_commands():
+            embed.add_field(name=f"{command}", value=f"{command.description}")
+        await ctx.send(embed)
 
     @welcome.command(help="Setup welcome channel")
     @commands.has_permissions(administrator=True)
@@ -69,7 +72,10 @@ class Setup(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Custom prefix setup")
     async def prefix(self, ctx):
-        await ctx.invoke(self.bot.get_command('help'), command_or_cog='prefix')
+        embed = discord.Embed(title="Prefix", color=discord.Color.random())
+        for command in self.bot.get_command("prefix").walk_commands():
+            embed.add_field(name=f"{command}", value=f"{command.description}")
+        await ctx.send(embed)
 
     @prefix.command(help="Set custom prefix")
     @commands.has_permissions(administrator=True)
@@ -95,7 +101,10 @@ class Setup(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Reaction role setup")
     async def reaction(self, ctx):
-        await ctx.invoke(self.bot.get_command('help'), command_or_cog='reaction')
+        embed = discord.Embed(title="Reaction", color=discord.Color.random())
+        for command in self.bot.get_command("reaction").walk_commands():
+            embed.add_field(name=f"{command}", value=f"{command.description}")
+        await ctx.send(embed)
 
     @reaction.command(help="Set up reaction role")
     @commands.has_permissions(manage_messages=True)
