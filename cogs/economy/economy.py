@@ -191,8 +191,7 @@ class Economy(commands.Cog):
             await ctx.send(NO_ACCOUNT)
         else:
             random_money = random.randint(1, 1000)
-            newBal = check['wallet'] + random_money
-            await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
+            await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
             await ctx.send(f"Someone gave you <:DHBuck:901485795410599988> {random_money}")
 
     @commands.command(help="we work for the right to work")
@@ -230,16 +229,14 @@ class Economy(commands.Cog):
             else:
                 if message.content.lower() == sentence.lower():
                     random_money = random.randint(100, 10000)
-                    newBal = check['wallet'] + random_money
-                    await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
+                    await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
                     embed = discord.Embed(title="GOOD JOB",
                                           description=f"Your receive <:DHBuck:901485795410599988> {random_money} for successfully converting it to a text",
                                           color=discord.Color.green())
                     await message.reply(embed=embed)
                 else:
                     low_money = random.randint(10, 100)
-                    newBal = check['wallet'] + low_money
-                    await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
+                    await cursor.update_one({"id": user.id}, {"$inc": {"wallet": low_money}})
                     embed = discord.Embed(title="🤦 BAD WORK 🤦",
                                           description=f"You didn't answer correctly. You only receive <:DHBuck:901485795410599988> {low_money}",
                                           color=discord.Color.red())
@@ -292,8 +289,7 @@ class Economy(commands.Cog):
                     await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
                                             {"$inc": {"inventory.$.amount": int(amount)}})
                 # get ye money
-                newBal = wallet - cost
-                await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
+                await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -cost}})
                 await ctx.send(f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988>  {cost}")
 
     @commands.command(help="Sell your items")
@@ -323,16 +319,15 @@ class Economy(commands.Cog):
             if inventory_check is None:
                 await ctx.send("That item wasn't in your inventory")
             else:
-                iamount = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
-                if amount > iamount['amount']:
+                iamount = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)}, {"$getField": "inventory.amount"})
+                if amount > iamount:
                     await ctx.send("Too much amount")
                 else:
                     await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
                                             {"$inc": {"inventory.$.amount": -amount}})
-                    if iamount['amount'] == 0:
+                    if iamount == 0:
                         await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {str(item_name)}}})
-                    newBal = check['wallet'] + amount * price
-                    await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
+                    await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amount * price}})
                     await ctx.send(
                         f"You just sold {amount} {item_name} and get <:DHBuck:901485795410599988> {amount * price}")
 
