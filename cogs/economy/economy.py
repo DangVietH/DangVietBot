@@ -14,20 +14,6 @@ cursor = db["users"]
 NO_ACCOUNT = "You don't have an economy account. Please use the create_account command to create one"
 
 
-class NoAccount(CheckFailure):
-    pass
-
-
-def is_account_exists():
-    def predicate(ctx):
-        account = await cursor.find_one({"id": ctx.author.id})
-        if account is None:
-            raise NoAccount("You don't have a global economy account yet. Do create_account to to create one")
-        else:
-            return True
-    return commands.check(predicate)
-
-
 class MenuButtons(discord.ui.View, menus.MenuPages):
     def __init__(self, source):
         super().__init__(timeout=60)
@@ -200,7 +186,6 @@ class Economy(commands.Cog):
     @commands.command(help="Beg some money")
     @commands.cooldown(1, 7200, commands.BucketType.user)
     @commands.guild_only()
-    @is_account_exists()
     async def beg(self, ctx):
         user = ctx.author
         random_money = random.randint(1, 1000)
