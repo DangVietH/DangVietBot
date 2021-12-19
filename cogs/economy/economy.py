@@ -188,9 +188,13 @@ class Economy(commands.Cog):
     @commands.guild_only()
     async def beg(self, ctx):
         user = ctx.author
-        random_money = random.randint(1, 1000)
-        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
-        await ctx.send(f"Someone gave you <:DHBuck:901485795410599988> {random_money}")
+        check = await cursor.find_one({"id": user.id})
+        if check is None:
+            await ctx.send(NO_ACCOUNT)
+        else:
+            random_money = random.randint(1, 1000)
+            await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
+            await ctx.send(f"Someone gave you <:DHBuck:901485795410599988> {random_money}")
 
     @commands.command(help="we work for the right to work")
     @commands.cooldown(1, 3600, commands.BucketType.user)
@@ -314,21 +318,12 @@ class Economy(commands.Cog):
             if name_ is None:
                 await ctx.send("That item wasn't in your inventory")
 
-            inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
-            if inventory_check is None:
-                await ctx.send("That item wasn't in your inventory")
-            else:
-                iamount = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)}, {"$getField": "inventory.amount"})
-                if amount > iamount:
-                    await ctx.send("Too much amount")
+            for item in check['inventory']:
+                if item['name'] == item_name:
+                    await ctx.send("yes")
+                    break
                 else:
-                    await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
-                                            {"$inc": {"inventory.$.amount": -amount}})
-                    if iamount == 0:
-                        await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {str(item_name)}}})
-                    await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amount * price}})
-                    await ctx.send(
-                        f"You just sold {amount} {item_name} and get <:DHBuck:901485795410599988> {amount * price}")
+                    await ctx.send("no")
 
     @commands.command(help="See your items", aliases=["bag"])
     async def inventory(self, ctx):
