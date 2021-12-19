@@ -319,11 +319,20 @@ class Economy(commands.Cog):
                 await ctx.send("That item wasn't in your inventory")
 
             for item in check['inventory']:
-                if item['name'] == item_name:
-                    await ctx.send("yes")
+                if item['name'].lower() == item_name:
+                    amounts = item['amount']
+                    if amounts < amount:
+                        await ctx.send("Too much")
+                    else:
+                        await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                                                {"$inc": {"inventory.$.amount": -amount}})
+                        if item['amount'] == 0:
+                            await cursor.update_one({"id": user.id},
+                                                    {"$pull": {
+                                                        "inventory": {"name": item_name}}})
+                        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
+                        await ctx.send(f"Successfully sold {amount} {item_name} for {price}")
                     break
-                else:
-                    await ctx.send("no")
 
     @commands.command(help="See your items", aliases=["bag"])
     async def inventory(self, ctx):
