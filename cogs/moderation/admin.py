@@ -152,13 +152,33 @@ class Admin(commands.Cog):
 
     @commands.command(help="Unmute member")
     @commands.has_permissions(administrator=True)
-    async def unmute(self, ctx, member: discord.Member):
+    async def unmute(self, ctx, member: discord.Member, *, reason=None):
         mutedRole = discord.utils.get(ctx.guild.roles,
                                       name="DHB_muted")
 
         await member.remove_roles(mutedRole)
         await ctx.send(f"Unmuted {member.mention}")
         await member.send(f"You were unmuted in the **{ctx.guild.name}**. Make sure you behave well 😉")
+
+        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
+            "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "unmute", "Mod": f"{ctx.author.id}",
+                      "reason": str(reason)}}})
+        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
+
+        result = await cursors.find_one({"guild": ctx.guild.id})
+        if result is not None:
+            channel = self.bot.get_channel(result["channel"])
+            embed = discord.Embed(title=f"Case #{num_of_case}: Unmute!",
+                                  description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}",
+                                  color=discord.Color.red())
+            await channel.send(embed=embed)
+
+        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+        if check_user_case is None:
+            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+        else:
+            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Kick member")
     @commands.has_permissions(kick_members=True)
@@ -273,9 +293,30 @@ class Admin(commands.Cog):
 
     @commands.command(help="Unban member")
     @commands.has_permissions(administrator=True)
-    async def unban(self, ctx, *, member_id: int):
-        await ctx.guild.unban(discord.Object(id=member_id))
-        await ctx.send("Successfully unban him")
+    async def unban(self, ctx, member_id: int, *, reason=None):
+        user = self.bot.get_user(int(member_id))
+        await ctx.guild.unban(user)
+        await ctx.send("Successfully unban user")
+
+        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
+            "cases": {"Number": int(num_of_case), "user": f"{user.id}", "type": "unban", "Mod": f"{ctx.author.id}",
+                      "reason": str(reason)}}})
+        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
+
+        result = await cursors.find_one({"guild": ctx.guild.id})
+        if result is not None:
+            channel = self.bot.get_channel(result["channel"])
+            embed = discord.Embed(title=f"Case #{num_of_case}: Unban!",
+                                  description=f"**User:** {user} **Mod:**{ctx.author} \n**Reason:** {reason}",
+                                  color=discord.Color.red())
+            await channel.send(embed=embed)
+
+        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": user.id})
+        if check_user_case is None:
+            await user_case.insert_one({"guild": ctx.guild.id, "user": user.id, "total_cases": 1})
+        else:
+            await user_case.update_one({"guild": ctx.guild.id, "user": user.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Clear messages in a certain amount", aliases=['purge'])
     @commands.has_permissions(manage_messages=True)

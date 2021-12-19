@@ -24,9 +24,9 @@ class CustomHelp(commands.HelpCommand):
                 embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
         embed.set_footer(text=self.get_ending_note())
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(label='Invite', url='https://bit.ly/3daeOIe', emoji="<:DHB:919240847206277150>"))
-        view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9', emoji="<:discord:919231987062018088>"))
-        view.add_item(discord.ui.Button(label='Github', url='https://github.com/DangVietH/DHB', emoji="<:github:919231769058897960>"))
+        view.add_item(discord.ui.Button(label='Invite', url='https://bit.ly/3daeOIe'))
+        view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9'))
+        view.add_item(discord.ui.Button(label='Github', url='https://github.com/DangVietH/DHB'))
         await self.get_destination().send(embed=embed, view=view)
 
     async def send_cog_help(self, cog_):
