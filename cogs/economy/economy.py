@@ -259,6 +259,7 @@ class Economy(commands.Cog):
         await page.start(ctx)
 
     @commands.command(help="Buy stuff")
+    @commands.guild_only()
     async def buy(self, ctx, item_name, amount=1):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
@@ -296,7 +297,7 @@ class Economy(commands.Cog):
                 await ctx.send(f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988>  {cost}")
 
     @commands.command(help="Sell your items")
-    @commands.is_owner()
+    @commands.guild_only()
     async def sell(self, ctx, item_name, amount=1):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
@@ -354,6 +355,7 @@ class Economy(commands.Cog):
                 await page.start(ctx)
 
     @commands.command(help="Deposit your money into the bank", aliases=['dep'])
+    @commands.guild_only()
     async def deposit(self, ctx, amount=1):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
@@ -373,6 +375,7 @@ class Economy(commands.Cog):
                 await ctx.message.add_reaction("✅")
 
     @commands.command(help="Withdraw your money from the bank")
+    @commands.guild_only()
     async def withdraw(self, ctx, amount=1):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
@@ -392,6 +395,7 @@ class Economy(commands.Cog):
                 await ctx.message.add_reaction("✅")
 
     @commands.command(help="Transfer money to someone", aliases=['send'])
+    @commands.guild_only()
     async def transfer(self, ctx, user: discord.Member = None, amount=1):
         check1 = await cursor.find_one({"id": ctx.author.id})
         check2 = await cursor.find_one({"id": user.id})
@@ -412,6 +416,7 @@ class Economy(commands.Cog):
 
     @commands.command(help="It's a crime to steal someone", aliases=['steal'])
     @commands.cooldown(1, 86400, commands.BucketType.user)
+    @commands.guild_only()
     async def rob(self, ctx, user: discord.Member = None, amount=1):
         check1 = await cursor.find_one({"id": ctx.author.id})
         check2 = await cursor.find_one({"id": user.id})
