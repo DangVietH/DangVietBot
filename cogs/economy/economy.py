@@ -5,12 +5,27 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import asyncio
 from cogs.economy.shopping_list import shop
+from discord.ext.commands.errors import CheckFailure
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["economy"]
 cursor = db["users"]
 
 NO_ACCOUNT = "You don't have an economy account. Please use the create_account command to create one"
+
+
+class NoAccount(CheckFailure):
+    pass
+
+
+def is_account_exists():
+    def predicate(ctx):
+        account = await cursor.find_one({"id": ctx.author.id})
+        if account is None:
+            raise NoAccount("You don't have a global economy account yet. Do create_account to to create one")
+        else:
+            return True
+    return commands.check(predicate)
 
 
 class MenuButtons(discord.ui.View, menus.MenuPages):
@@ -129,8 +144,7 @@ class Economy(commands.Cog):
         if check is None:
             insert = {"id": ctx.author.id, "job": "f", "FireCoin": 0, "wallet": 0, "bank": 0, "inventory": []}
             await cursor.insert_one(insert)
-            await ctx.send(
-                "Done, your economy account has been created. **ONLY USE OUR CURRENCY IN THE BOT. IF YOU'RE CAUGHT USING THIS BOT TO TRADE REAL LIFE ITEMS, YOU'RE DEAD!!**")
+            await ctx.send("Done, your global economy account has been created.")
         else:
             await ctx.send("You already have an account")
 
@@ -155,6 +169,7 @@ class Economy(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(help="Who is the richest one in your server")
+    @commands.guild_only()
     async def rich(self, ctx):
         stats = cursor.find().sort("wallet", -1)
         data = []
@@ -184,18 +199,17 @@ class Economy(commands.Cog):
 
     @commands.command(help="Beg some money")
     @commands.cooldown(1, 7200, commands.BucketType.user)
+    @commands.guild_only()
+    @is_account_exists()
     async def beg(self, ctx):
         user = ctx.author
-        check = await cursor.find_one({"id": user.id})
-        if check is None:
-            await ctx.send(NO_ACCOUNT)
-        else:
-            random_money = random.randint(1, 1000)
-            await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
-            await ctx.send(f"Someone gave you <:DHBuck:901485795410599988> {random_money}")
+        random_money = random.randint(1, 1000)
+        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
+        await ctx.send(f"Someone gave you <:DHBuck:901485795410599988> {random_money}")
 
     @commands.command(help="we work for the right to work")
     @commands.cooldown(1, 3600, commands.BucketType.user)
+    @commands.guild_only()
     async def work(self, ctx):
         user = ctx.author
 
