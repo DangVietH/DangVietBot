@@ -5,7 +5,6 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import asyncio
 from cogs.economy.shopping_list import shop
-from discord.ext.commands.errors import CheckFailure
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["economy"]
@@ -328,9 +327,7 @@ class Economy(commands.Cog):
                         await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
                                                 {"$inc": {"inventory.$.amount": -amount}})
                         if item['amount'] == 0:
-                            await cursor.update_one({"id": user.id},
-                                                    {"$pull": {
-                                                        "inventory": {"name": item_name}}})
+                            await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name, "amount": 0}}})
                         await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
                         await ctx.send(f"Successfully sold {amount} {item_name} for {price}")
                     break

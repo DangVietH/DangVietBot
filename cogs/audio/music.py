@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands, menus
 import lavalink
 import re
-import math
 from discord.ext.commands.errors import CheckFailure
 
 # This cog is based on https://github.com/Devoxin/Lavalink.py/blob/master/examples/music.py
@@ -354,7 +353,7 @@ class Music(commands.Cog):
     async def volume(self, ctx, volume: int = None):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         if volume is None:
-            await ctx.send(f'🔊 Volume set to {player.volume * 2}%')
+            await ctx.send(f'🔊 Current volume is {player.volume * 2}%')
         else:
             volume = max(1, min(volume, 100))
 
