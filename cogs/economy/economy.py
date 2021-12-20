@@ -5,6 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import asyncio
 from cogs.economy.shopping_list import shop
+from discord.ext.commands.errors import CheckFailure
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["economy"]
@@ -119,6 +120,18 @@ class ShopPageSource(menus.ListPageSource):
         return embed
 
 
+class CheckFailTemplate(CheckFailure):
+    pass
+
+
+def is_account_available(ctx):
+    account = cursor.find({"id": ctx.author.id})
+    if account is None:
+        raise CheckFailTemplate("You do not have an account")
+    else:
+        return True
+
+
 class Economy(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -134,25 +147,23 @@ class Economy(commands.Cog):
             await ctx.send("You already have an account")
 
     @commands.command(help="See how much money you have", aliases=["bal"])
+    @commands.check(is_account_available)
     async def balance(self, ctx, user: discord.Member = None):
         user = user or ctx.author
         check = await cursor.find_one({"id": user.id})
-        if check is None:
-            await ctx.send(NO_ACCOUNT)
-        else:
-            wallet = check['wallet']
-            bank = check['bank']
-            balance = wallet + bank
-            embed = discord.Embed(description=f"**Total:** <:DHBuck:901485795410599988> {balance}",
-                                  color=discord.Color.blue())
-            embed.set_author(
-                icon_url=user.avatar.url,
-                name=f"{user} balance")
-            embed.add_field(name="Wallet", value=f"<:DHBuck:901485795410599988> {wallet}", inline=False)
-            embed.add_field(name="Bank", value=f"<:DHBuck:901485795410599988> {bank}", inline=False)
-            embed.add_field(name="FireCoin", value=f"<:FireCoin:920903065454903326> {check['FireCoin']}", inline=False)
-            embed.add_field(name="Wallet", value=f"<:DHBuck:901485795410599988> {wallet}", inline=False)
-            await ctx.send(embed=embed)
+        wallet = check['wallet']
+        bank = check['bank']
+        balance = wallet + bank
+        embed = discord.Embed(description=f"**Total:** <:DHBuck:901485795410599988> {balance}",
+                              color=discord.Color.blue())
+        embed.set_author(
+            icon_url=user.avatar.url,
+            name=f"{user} balance")
+        embed.add_field(name="Wallet", value=f"<:DHBuck:901485795410599988> {wallet}", inline=False)
+        embed.add_field(name="Bank", value=f"<:DHBuck:901485795410599988> {bank}", inline=False)
+        embed.add_field(name="FireCoin", value=f"<:FireCoin:920903065454903326> {check['FireCoin']}", inline=False)
+        embed.add_field(name="Wallet", value=f"<:DHBuck:901485795410599988> {wallet}", inline=False)
+        await ctx.send(embed=embed)
 
     @commands.command(help="Who is the richest one in your server")
     @commands.guild_only()

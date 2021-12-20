@@ -38,6 +38,16 @@ class ServerEconomy(commands.Cog):
         else:
             await ctx.send("Server economy already exists!")
 
+    @se.command(help="Set server economy emoji")
+    @commands.has_permissions(administrator=True)
+    @commands.guild_only()
+    async def emote(self, ctx, *, emoji: str):
+        check = await serverSetup.find_one({"id": ctx.guild.id})
+        if check is None:
+            await ctx.send(ECON_NOT_ENABLED)
+        else:
+            await check.update_one({"id": ctx.guild.id}, {"$set": {"emoji": emoji}})
+
     @se.command(help="Create server economy system")
     @commands.guild_only()
     async def create_account(self, ctx):
