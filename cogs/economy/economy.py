@@ -327,7 +327,7 @@ class Economy(commands.Cog):
                         await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
                                                 {"$inc": {"inventory.$.amount": -amount}})
                         if item['amount'] == 0:
-                            await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name, "amount": 0}}})
+                            await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}}, upsert=False, multi=True)
                         await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
                         await ctx.send(f"Successfully sold {amount} {item_name} for {price}")
                     break
