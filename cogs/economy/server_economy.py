@@ -47,7 +47,9 @@ class ServerEconomy(commands.Cog):
         else:
             check = await econUser.find_one({"guild": ctx.guild.id, "user": ctx.author.id})
             if check is None:
-                await econUser.insert_one({"guild": ctx.guild.id, "user": ctx.author.id, "wallet": 0, "bank": 0, "inventory": []})
+                await econUser.insert_one(
+                    {"guild": ctx.guild.id, "user": ctx.author.id, "wallet": 0, "bank": 0, "inventory": []})
+                await ctx.send("Account created successfully")
             else:
                 await ctx.send("You already have an account")
 
@@ -60,8 +62,7 @@ class ServerEconomy(commands.Cog):
         else:
             check = await econUser.find_one({"guild": ctx.guild.id, "user": ctx.author.id})
             if check is None:
-                await econUser.insert_one(
-                    {"guild": ctx.guild.id, "user": ctx.author.id, "wallet": 0, "bank": 0, "inventory": []})
+                await ctx.send(NO_ACCOUNT)
             else:
                 wallet = check['wallet']
                 bank = check['bank']
@@ -77,6 +78,7 @@ class ServerEconomy(commands.Cog):
 
     @se.command(help="Beg money")
     @commands.guild_only()
+    @commands.cooldown(1, 7200, commands.BucketType.user)
     async def beg(self, ctx):
         is_econ_enable = await serverSetup.find_one({"id": ctx.guild.id})
         if is_econ_enable is None:
@@ -84,8 +86,7 @@ class ServerEconomy(commands.Cog):
         else:
             check = await econUser.find_one({"guild": ctx.guild.id, "user": ctx.author.id})
             if check is None:
-                await econUser.insert_one(
-                    {"guild": ctx.guild.id, "user": ctx.author.id, "wallet": 0, "bank": 0, "inventory": []})
+                await ctx.send(NO_ACCOUNT)
             else:
                 random_money = random.randint(1, 1000)
                 await econUser.update_one({"id": ctx.author.id}, {"$inc": {"wallet": random_money}})
