@@ -327,11 +327,12 @@ class Economy(commands.Cog):
                         await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
                                                 {"$inc": {"inventory.$.amount": -amount}})
 
+                        is_amount_zero = await cursor.find_one({"id": user.id, "inventory.name": str(item_name), "inventory.amount": 0})
+                        if is_amount_zero is not None:
+                            await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}})
                         await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
                         await ctx.send(f"Successfully sold {amount} {item_name} for {price}")
                         await asyncio.sleep(1)
-                        if amounts is 0:
-                            await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}})
                     break
 
     @commands.command(help="See your items", aliases=["bag"])

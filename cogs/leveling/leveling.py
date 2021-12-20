@@ -143,7 +143,7 @@ class Leveling(commands.Cog):
                                         await message.channel.send(f"🎉 {message.author.mention} also receive {role.name}")
                                     else:
                                         channel = self.bot.get_channel(lvl_channel["channel"])
-                                        await channel.send(f"🎉 {message.author.mention} also receive {role.name}")
+                                        await channel.send(f"🎉 {message.author.mention} also receive {role.name} role")
                 else:
                     return None
 
