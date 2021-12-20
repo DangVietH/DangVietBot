@@ -332,6 +332,32 @@ class Economy(commands.Cog):
                         await ctx.send(f"Successfully sold {amount} {item_name} for {price}")
                     break
 
+    @commands.command(help="Sell your items")
+    @commands.is_owner()
+    async def tsell(self, ctx, item_name, amount=1):
+        user = ctx.author
+        check = await cursor.find_one({"id": user.id})
+
+        if check is None:
+            await ctx.send(NO_ACCOUNT)
+        else:
+            item_name = item_name.lower()
+            name_ = None
+            price = None
+
+            for item in shop:
+                name = item["name"].lower()
+                if name == item_name:
+                    name_ = name
+                    price = item["price"]
+                    break
+
+            if name_ is None:
+                await ctx.send("That item wasn't in your inventory")
+            else:
+                await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}})
+                await ctx.send("check")
+
     @commands.command(help="See your items", aliases=["bag"])
     async def inventory(self, ctx):
         check = await cursor.find_one({"id": ctx.author.id})

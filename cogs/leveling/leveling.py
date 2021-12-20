@@ -216,7 +216,7 @@ class Leveling(commands.Cog):
             await ctx.send("That role is already added")
         else:
             await roled.update_one({"guild": ctx.guild.id}, {"$push": {"role": roles.id, "level": level}})
-            await ctx.send(f"{roles.name} added.")
+            await ctx.send(f"{roles.name} role added.")
 
     @role.command(help="Remove the role from level")
     @commands.has_permissions(administrator=True)
@@ -225,7 +225,7 @@ class Leveling(commands.Cog):
         role_cursor = await roled.find_one({"guild": ctx.guild.id})
         if roles.id in role_cursor['role']:
             await roled.update_one({"guild": ctx.guild.id}, {"$pull": {"role": roles.id, "level": level}})
-            await ctx.send(f"{roles.name} remove.")
+            await ctx.send(f"{roles.name} role remove.")
         else:
             await ctx.send("I don't remember I put that role in.")
 
