@@ -6,7 +6,7 @@ import cogs.rtfm.rtfm_utils as rtfm
 # directly taken and modify from https://github.com/BruceCodesGithub/OG-Robocord/blob/main/cogs/rtfm.py
 
 
-class RTFM(commands.Cog):
+class Dev(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.targets = {
@@ -62,7 +62,7 @@ class RTFM(commands.Cog):
     @commands.command(help="available modules")
     async def rtfm_list(self, ctx):
         aliases = {v: k for k, v in self.aliases.items()}
-        embed = discord.Embed(title="List of available modules", color=discord.Color.green())
+        embed = discord.Embed(title="List of available docs", color=discord.Color.green())
         embed.description = "\n".join(
             [
                 "[{0}]({1}): {2}".format(

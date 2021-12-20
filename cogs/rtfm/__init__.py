@@ -1,5 +1,5 @@
-from .rtfm import RTFM
+from .dev import Dev
 
 
 def setup(bot):
-    bot.add_cog(RTFM(bot))
+    bot.add_cog(Dev(bot))
