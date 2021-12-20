@@ -131,6 +131,14 @@ class Economy(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def open_account(self, user):
+        users = await cursor.find_one({"id": user.id})
+        if users is None:
+            insert = {"id": user.id, "job": "f", "FireCoin": 0, "wallet": 0, "bank": 0, "inventory": []}
+            await cursor.insert_one(insert)
+        else:
+            return None
+
     @commands.command(help="Create your economy account")
     async def create_account(self, ctx):
         check = await cursor.find_one({"id": ctx.author.id})
@@ -142,9 +150,10 @@ class Economy(commands.Cog):
             await ctx.send("You already have an account")
 
     @commands.command(help="See how much money you have", aliases=["bal"])
-    @commands.check(is_account_available)
     async def balance(self, ctx, user: discord.Member = None):
         user = user or ctx.author
+        await self.open_account(user)
+
         check = await cursor.find_one({"id": user.id})
         wallet = check['wallet']
         bank = check['bank']
@@ -191,7 +200,6 @@ class Economy(commands.Cog):
     @commands.command(help="Beg some money")
     @commands.cooldown(1, 7200, commands.BucketType.user)
     @commands.guild_only()
-    @commands.check(is_account_available)
     async def beg(self, ctx):
         user = ctx.author
         random_money = random.randint(1, 1000)
@@ -201,7 +209,6 @@ class Economy(commands.Cog):
     @commands.command(help="we work for the right to work")
     @commands.cooldown(1, 3600, commands.BucketType.user)
     @commands.guild_only()
-    @commands.check(is_account_available)
     async def work(self, ctx):
         user = ctx.author
 
@@ -260,7 +267,6 @@ class Economy(commands.Cog):
 
     @commands.command(help="Buy stuff")
     @commands.guild_only()
-    @commands.check(is_account_available)
     async def buy(self, ctx, item_name, amount=1):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
@@ -296,7 +302,6 @@ class Economy(commands.Cog):
 
     @commands.command(help="Sell your items")
     @commands.guild_only()
-    @commands.check(is_account_available)
     async def sell(self, ctx, item_name, amount=1):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
@@ -334,7 +339,6 @@ class Economy(commands.Cog):
                 break
 
     @commands.command(help="See your items", aliases=["bag"])
-    @commands.check(is_account_available)
     async def inventory(self, ctx):
         check = await cursor.find_one({"id": ctx.author.id})
         data = []
@@ -352,7 +356,6 @@ class Economy(commands.Cog):
 
     @commands.command(help="Deposit your money into the bank", aliases=['dep'])
     @commands.guild_only()
-    @commands.check(is_account_available)
     async def deposit(self, ctx, amount=1):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
@@ -367,7 +370,6 @@ class Economy(commands.Cog):
 
     @commands.command(help="Withdraw your money from the bank")
     @commands.guild_only()
-    @commands.check(is_account_available)
     async def withdraw(self, ctx, amount=1):
         user = ctx.author
         check = await cursor.find_one({"id": user.id})
@@ -381,7 +383,6 @@ class Economy(commands.Cog):
 
     @commands.command(help="Transfer money to someone", aliases=['send'])
     @commands.guild_only()
-    @commands.check(is_account_available)
     async def transfer(self, ctx, user: discord.Member = None, amount=1):
         check = await cursor.find_one({"id": ctx.author.id})
         check2 = await cursor.find_one({"id": user.id})
@@ -399,7 +400,6 @@ class Economy(commands.Cog):
     @commands.command(help="It's a crime to steal someone", aliases=['steal'])
     @commands.cooldown(1, 86400, commands.BucketType.user)
     @commands.guild_only()
-    @commands.check(is_account_available)
     async def rob(self, ctx, user: discord.Member = None, amount=1):
         check1 = await cursor.find_one({"id": ctx.author.id})
         check2 = await cursor.find_one({"id": user.id})
