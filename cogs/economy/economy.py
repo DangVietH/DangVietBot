@@ -122,7 +122,6 @@ class ShopPageSource(menus.ListPageSource):
 def is_account_available(ctx):
     account = cursor.find({"id": ctx.author.id})
     if account is None:
-        await ctx.send("You don't have an economy account. Please use the create_account command to create one")
         return False
     else:
         return True
