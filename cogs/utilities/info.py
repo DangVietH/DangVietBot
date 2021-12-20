@@ -46,7 +46,7 @@ class Info(commands.Cog):
         await ctx.send(user.avatar.url)
 
     @commands.command(help="Server information")
-    async def server_info(self, ctx):
+    async def serverinfo(self, ctx):
         role_count = len(ctx.guild.roles)
         emoji_count = len(ctx.guild.emojis)
         embed = discord.Embed(title=f"{ctx.guild.name}", color=discord.Color.random(), timestamp=ctx.message.created_at)

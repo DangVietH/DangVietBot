@@ -93,7 +93,7 @@ class Owner(commands.Cog):
     async def guildlist(self, ctx):
         data = []
         for guild in self.bot.guilds:
-            to_append = (f"{guild.name}", f"**Owner** {guild.owner}")
+            to_append = (f"{guild.name}", f"**Owner** {guild.owner} **Member** {guild.member_count} **ID** {guild.id}")
             data.append(to_append)
         menu = TestMenu(TestPageSource(data))
         await menu.start(ctx)
