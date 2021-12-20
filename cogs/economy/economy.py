@@ -139,16 +139,6 @@ class Economy(commands.Cog):
         else:
             return None
 
-    @commands.command(help="Create your economy account")
-    async def create_account(self, ctx):
-        check = await cursor.find_one({"id": ctx.author.id})
-        if check is None:
-            insert = {"id": ctx.author.id, "job": "f", "FireCoin": 0, "wallet": 0, "bank": 0, "inventory": []}
-            await cursor.insert_one(insert)
-            await ctx.send("Done, your global economy account has been created.")
-        else:
-            await ctx.send("You already have an account")
-
     @commands.command(help="See how much money you have", aliases=["bal"])
     async def balance(self, ctx, user: discord.Member = None):
         user = user or ctx.author
@@ -202,6 +192,9 @@ class Economy(commands.Cog):
     @commands.guild_only()
     async def beg(self, ctx):
         user = ctx.author
+
+        await self.open_account(user)
+
         random_money = random.randint(1, 1000)
         await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
         await ctx.send(f"Someone gave you <:DHBuck:901485795410599988> {random_money}")
@@ -211,6 +204,7 @@ class Economy(commands.Cog):
     @commands.guild_only()
     async def work(self, ctx):
         user = ctx.author
+        await self.open_account(user)
 
         name = ["Tom", "John", "Jim", "Jack", "Henry", "Tim", "Lucas"]
         verbs = ["eat", "drink", "kicked", "paid", "build", "throw", "buy"]
@@ -269,6 +263,8 @@ class Economy(commands.Cog):
     @commands.guild_only()
     async def buy(self, ctx, item_name, amount=1):
         user = ctx.author
+        await self.open_account(user)
+
         check = await cursor.find_one({"id": user.id})
 
         item_name = item_name.lower()
@@ -304,6 +300,8 @@ class Economy(commands.Cog):
     @commands.guild_only()
     async def sell(self, ctx, item_name, amount=1):
         user = ctx.author
+
+        await self.open_account(user)
         check = await cursor.find_one({"id": user.id})
 
         item_name = item_name.lower()
@@ -340,7 +338,9 @@ class Economy(commands.Cog):
 
     @commands.command(help="See your items", aliases=["bag"])
     async def inventory(self, ctx):
+        await self.open_account(ctx.author.id)
         check = await cursor.find_one({"id": ctx.author.id})
+
         data = []
         items = check['inventory']
         if len(items) < 1:
@@ -358,6 +358,7 @@ class Economy(commands.Cog):
     @commands.guild_only()
     async def deposit(self, ctx, amount=1):
         user = ctx.author
+        await self.open_account(user)
         check = await cursor.find_one({"id": user.id})
 
         wallet = check['wallet']
@@ -372,6 +373,7 @@ class Economy(commands.Cog):
     @commands.guild_only()
     async def withdraw(self, ctx, amount=1):
         user = ctx.author
+        await self.open_account(user)
         check = await cursor.find_one({"id": user.id})
 
         if amount > check['bank']:
@@ -384,6 +386,7 @@ class Economy(commands.Cog):
     @commands.command(help="Transfer money to someone", aliases=['send'])
     @commands.guild_only()
     async def transfer(self, ctx, user: discord.Member = None, amount=1):
+        await self.open_account(ctx.author.id)
         check = await cursor.find_one({"id": ctx.author.id})
         check2 = await cursor.find_one({"id": user.id})
         if check2 is None:
@@ -401,6 +404,8 @@ class Economy(commands.Cog):
     @commands.cooldown(1, 86400, commands.BucketType.user)
     @commands.guild_only()
     async def rob(self, ctx, user: discord.Member = None, amount=1):
+        await self.open_account(ctx.author.id)
+
         check1 = await cursor.find_one({"id": ctx.author.id})
         check2 = await cursor.find_one({"id": user.id})
         if check2 is None:
