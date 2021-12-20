@@ -151,6 +151,7 @@ class Economy(commands.Cog):
             embed.add_field(name="Wallet", value=f"<:DHBuck:901485795410599988> {wallet}", inline=False)
             embed.add_field(name="Bank", value=f"<:DHBuck:901485795410599988> {bank}", inline=False)
             embed.add_field(name="FireCoin", value=f"<:FireCoin:920903065454903326> {check['FireCoin']}", inline=False)
+            embed.add_field(name="Wallet", value=f"<:DHBuck:901485795410599988> {wallet}", inline=False)
             await ctx.send(embed=embed)
 
     @commands.command(help="Who is the richest one in your server")
