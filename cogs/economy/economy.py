@@ -336,7 +336,7 @@ class Economy(commands.Cog):
 
     @commands.command(help="See your items", aliases=["bag"])
     async def inventory(self, ctx):
-        await self.open_account(ctx.author.id)
+        await self.open_account(ctx.author)
         check = await cursor.find_one({"id": ctx.author.id})
 
         data = []
