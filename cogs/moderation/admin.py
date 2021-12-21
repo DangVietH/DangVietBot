@@ -43,15 +43,14 @@ class Admin(commands.Cog):
         if reason is None:
             await ctx.send("You need a reason for this command to work")
         else:
-            embed = discord.Embed(
-                description=f'**⚠️ {member.mention} has been warned for: {reason}**',
-                color=discord.Color.red()
-            )
-            await ctx.send(embed=embed)
             emb = discord.Embed(description=f"You have been warned in **{guild.name}** for: **{reason}**", color=discord.Color.red())
             await member.send(embed=emb)
 
             num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+
+            embed = discord.Embed(title=f"Case {num_of_case}", description=f"{member.mention} has warned for: {reason}", color=discord.Color.red())
+            await ctx.send(embed=embed)
+
             await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "warning", "Mod": f"{ctx.author.id}", "reason": str(reason)}}})
             await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
@@ -82,10 +81,13 @@ class Admin(commands.Cog):
                                               read_message_history=True,
                                               read_messages=False)
         await member.add_roles(mutedRole, reason=reason)
-        await ctx.send(f"Muted {member.mention} for reason {reason}")
         await member.send(f"You were muted in **{guild.name}** for {reason}")
 
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+
+        embed = discord.Embed(title=f"Case {num_of_case}", description=f"{member.mention} has been muted for: {reason}", color=discord.Color.red())
+        await ctx.send(embed=embed)
+
         await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "mute", "Mod": f"{ctx.author.id}", "reason": str(reason)}}})
         await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
@@ -123,10 +125,13 @@ class Admin(commands.Cog):
                                                   read_message_history=True,
                                                   read_messages=False)
             await member.add_roles(mutedRole, reason=reason)
-            await ctx.send(f"Temporarily muted {member.mention} for reason {reason}")
-            await member.send(f"You were muted for {converted_time} seconds in **{guild.name}** for {reason}")
+            await member.send(f"You were temporarily muted for {converted_time} seconds in **{guild.name}** for {reason}")
 
             num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+
+            embed = discord.Embed(title=f"Case {num_of_case}", description=f"{member.mention} has temporarily muted for: {reason}", color=discord.Color.red())
+            await ctx.send(embed=embed)
+
             await cases.update_one({"guild": ctx.guild.id}, {"$push": {
                 "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "mute", "Mod": f"{ctx.author.id}",
                           "reason": str(reason)}}})
@@ -157,7 +162,7 @@ class Admin(commands.Cog):
                                       name="DHB_muted")
 
         await member.remove_roles(mutedRole)
-        await ctx.send(f"Unmuted {member.mention}")
+        await ctx.send(f"Unmuted {member}")
         await member.send(f"You were unmuted in the **{ctx.guild.name}**. Make sure you behave well 😉")
 
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
@@ -186,9 +191,12 @@ class Admin(commands.Cog):
         if not member.bot:
             await member.send(f"You've been kick from **{ctx.guild.name}** for {reason}")
         await member.kick(reason=reason)
-        await ctx.send(f'{member.mention} has been kick for {reason}')
 
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+        embed = discord.Embed(title=f"Case {num_of_case}", description=f"{member.mention} has been kicked for: {reason}",
+                              color=discord.Color.red())
+        await ctx.send(embed=embed)
+
         await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "kick", "Mod": f"{ctx.author.id}", "reason": str(reason)}}})
         await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
@@ -210,9 +218,13 @@ class Admin(commands.Cog):
         if not member.bot:
             await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for {reason}. What a shame 👎")
         await member.ban(reason=reason)
-        await ctx.send(f'{member.mention} has been **BANNED** for {reason}')
 
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+
+        embed = discord.Embed(title=f"Case {num_of_case}", description=f"{member.mention} has been BANNED for: {reason}",
+                              color=discord.Color.red())
+        await ctx.send(embed=embed)
+
         await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "ban", "Mod": f"{ctx.author.id}", "reason": str(reason)}}})
         await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
@@ -243,6 +255,12 @@ class Admin(commands.Cog):
                     f"You've been banned for {converted_time} seconds from **{ctx.guild.name}** for {reason}. Don't worry, it will be a short time!!")
             await ctx.guild.ban(member)
             num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+
+            embed = discord.Embed(title=f"Case {num_of_case}",
+                                  description=f"{member.mention} has been temporarily banned for: {reason}",
+                                  color=discord.Color.red())
+            await ctx.send(embed=embed)
+
             await cases.update_one({"guild": ctx.guild.id}, {"$push": {
                 "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "ban", "Mod": f"{ctx.author.id}",
                           "reason": str(reason)}}})

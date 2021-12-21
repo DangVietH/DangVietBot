@@ -72,7 +72,7 @@ class ServerEconomy(commands.Cog):
 
     @se.command(help="Beg money")
     @commands.guild_only()
-    @commands.cooldown(1, 7200, commands.BucketType.user)
+    @commands.cooldown(1, 7200, commands.BucketType.guild)
     async def beg(self, ctx):
         await self.server_econ_create(ctx.guild)
         await self.open_account(ctx.author)
