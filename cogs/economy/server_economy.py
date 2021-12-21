@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import random
@@ -9,8 +9,65 @@ db = cluster["economy"]
 serverSetup = db["server"]
 econUser = db['server_user']
 
-ECON_NOT_ENABLED = "Server economy not enabled"
-NO_ACCOUNT = "You don't have an economy account. Please use the se create_account command to create one"
+
+class MenuButtons(discord.ui.View, menus.MenuPages):
+    def __init__(self, source):
+        super().__init__(timeout=60)
+        self._source = source
+        self.current_page = 0
+        self.ctx = None
+        self.message = None
+
+    async def start(self, ctx, *, channel=None, wait=False):
+        await self._source._prepare_once()
+        self.ctx = ctx
+        self.message = await self.send_initial_message(ctx, ctx.channel)
+
+    async def _get_kwargs_from_page(self, page):
+        value = await super()._get_kwargs_from_page(page)
+        if 'view' not in value:
+            value.update({'view': self})
+        return value
+
+    async def interaction_check(self, interaction):
+        return interaction.user == self.ctx.author
+
+    @discord.ui.button(emoji='⏪', style=discord.ButtonStyle.green)
+    async def first_page(self, button, interaction):
+        await self.show_page(0)
+
+    @discord.ui.button(emoji='◀️', style=discord.ButtonStyle.green)
+    async def previous_page(self, button, interaction):
+        await self.show_checked_page(self.current_page - 1)
+
+    @discord.ui.button(emoji='⏹', style=discord.ButtonStyle.green)
+    async def on_stop(self, button, interaction):
+        self.stop()
+
+    @discord.ui.button(emoji='▶️', style=discord.ButtonStyle.green)
+    async def next_page(self, button, interaction):
+        await self.show_checked_page(self.current_page + 1)
+
+    @discord.ui.button(emoji='⏩', style=discord.ButtonStyle.green)
+    async def last_page(self, button, interaction):
+        max_pages = self._source.get_max_pages()
+        last_page = max(max_pages - 1, 0)
+        await self.show_page(last_page)
+
+
+class ShopPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.green())
+        embed.set_author(
+            icon_url="https://cdn.discordapp.com/attachments/900197917170737152/921035393456042004/shop.png",
+            name=f"{menu.ctx.author.guild.name} Shop")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
 
 
 class ServerEconomy(commands.Cog):
@@ -44,10 +101,43 @@ class ServerEconomy(commands.Cog):
     @commands.guild_only()
     async def emote(self, ctx, *, emoji: str):
         await self.server_econ_create(ctx.guild)
-        await self.open_account(ctx.author)
 
         await serverSetup.update_one({"id": ctx.guild.id}, {"$set": {"emoji": emoji}})
         await ctx.send(f"Economy emoji is now {emoji}")
+
+    @se.command(help="Server store")
+    @commands.guild_only()
+    async def shop(self, ctx):
+        await self.server_econ_create(ctx.guild)
+
+        check = await serverSetup.find_one({"id": ctx.guild.id})
+        items = check['shop']
+        if len(items) < 1:
+            await ctx.send("There's nothing in the shop! Do create_item")
+        else:
+            data = []
+            for item in items:
+                name = item["name"]
+                price = item["price"]
+                description = item["description"]
+                to_append = (f"{name} | {check['emoji']} {price}", f"{description}")
+                data.append(to_append)
+
+            pages = MenuButtons(ShopPageSource(data))
+            await pages.start(ctx)
+
+    @se.command(help="Server store")
+    @commands.has_permissions(administrator=True)
+    @commands.guild_only()
+    async def create_item(self, ctx, name: str, price: int, stock=None, role_required=None, give_role=None, remove_role=None, money_in_wallet=0, *, description="I dunno"):
+        await self.server_econ_create(ctx.guild)
+
+        inventory_check = await serverSetup.find_one({"id": ctx.guild.id, "shop.name": name})
+        if inventory_check is not None:
+            await ctx.send("Item already exist")
+        else:
+            await serverSetup.update_one({"id": ctx.guild.id}, {"$push": {"shop": {"name": name, "price": price, "description": description, "stock": stock, "role_required": role_required, "give_role": give_role, "remove_role": remove_role, "money_in_wallet": money_in_wallet}}})
+            await ctx.send("Item added")
 
     @se.command(help="View your server balance")
     @commands.guild_only()

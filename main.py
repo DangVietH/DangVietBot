@@ -15,7 +15,7 @@ class CustomHelp(commands.HelpCommand):
     async def send_bot_help(self, mapping):
         embed = discord.Embed(title='DHB Commands',
                               description=f"{self.context.bot.description}",
-                              color=discord.Color.random())
+                              color=discord.Color.from_rgb(225, 0, 92))
 
         for cog, command in mapping.items():
             command_signatures = [self.get_command_signature(c) for c in command]
@@ -30,7 +30,7 @@ class CustomHelp(commands.HelpCommand):
         await self.get_destination().send(embed=embed, view=view)
 
     async def send_cog_help(self, cog_):
-        embed = discord.Embed(title='{0.qualified_name} Commands'.format(cog_), color=discord.Color.random())
+        embed = discord.Embed(title='{0.qualified_name} Commands'.format(cog_), color=discord.Color.from_rgb(225, 0, 92))
         if cog_.description:
             embed.description = cog_.description
 
@@ -43,7 +43,7 @@ class CustomHelp(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
     async def send_group_help(self, group):
-        embed = discord.Embed(title=group.qualified_name, color=discord.Color.random())
+        embed = discord.Embed(title=group.qualified_name, color=discord.Color.from_rgb(225, 0, 92))
         if group.help:
             embed.description = group.help
 
@@ -57,7 +57,7 @@ class CustomHelp(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
     async def send_command_help(self, command):
-        embed = discord.Embed(title=command.name, color=discord.Color.random())
+        embed = discord.Embed(title=command.name, color=discord.Color.from_rgb(225, 0, 92))
         if command.help:
             embed.add_field(name="Description", value=f"```{command.help}```", inline=False)
         if command.aliases:
@@ -114,8 +114,8 @@ async def on_command_error(ctx, error):
 
 @bot.event
 async def on_guild_join(guild):
-    embed = discord.Embed(title=f"Greetings {guild.name}", description="Thanks for adding DHB into your server! Start by typing d!help!", color=discord.Color.from_rgb(225, 0, 92))
-    embed.add_field(name="What do we have", value="```DHB supports economy, music, leveling, moderation, python documentation, etc```", inline=False)
+    embed = discord.Embed(title=f"Greetings {guild.name}", description="Thanks for adding DHB into your server! To get started type d!help!", color=discord.Color.from_rgb(225, 0, 92))
+    embed.add_field(name="Note", value="I'm still WIP, so some features may be bugged or ugly.", inline=False)
     embed.add_field(name="Links", value="[invite](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=8&scope=bot%20applications.commands) \n[Support Server](https://discord.gg/cnydBRnHU9) \n[Github](https://github.com/DangVietH/DHB)", inline=False)
     await guild.system_channel.send(embed=embed)
 

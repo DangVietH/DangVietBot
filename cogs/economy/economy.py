@@ -10,8 +10,6 @@ cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["economy"]
 cursor = db["users"]
 
-NO_ACCOUNT = "You don't have an economy account. Please use the create_account command to create one"
-
 
 class MenuButtons(discord.ui.View, menus.MenuPages):
     def __init__(self, source):
