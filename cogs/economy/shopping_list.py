@@ -12,4 +12,5 @@ shop = [{"name": "chicken", "price": 10, "description": "chicken men-men"},
         {"name": "silver", "price": 50000, "description": "cool kid"},
         {"name": "gold", "price": 200000, "description": "rich kid who like to show off"},
         {"name": "diamonds", "price": 600000, "description": "extreme rich kid"},
-        {"name": "robber_shield", "price": 1200000, "description": "Limit the amount the robber can rob"}]
+        {"name": "FireMiner", "price": 1542000, "description": "Mine FireCoin"},
+        {"name": "robber_shield", "price": 2540000, "description": "Limit the amount the robber can rob"}]

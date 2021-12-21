@@ -383,7 +383,7 @@ class Economy(commands.Cog):
     @commands.command(help="Transfer money to someone", aliases=['send'])
     @commands.guild_only()
     async def transfer(self, ctx, user: discord.Member = None, amount=1):
-        await self.open_account(ctx.author.id)
+        await self.open_account(ctx.author)
         check = await cursor.find_one({"id": ctx.author.id})
         check2 = await cursor.find_one({"id": user.id})
         if check2 is None:
@@ -401,7 +401,7 @@ class Economy(commands.Cog):
     @commands.cooldown(1, 86400, commands.BucketType.user)
     @commands.guild_only()
     async def rob(self, ctx, user: discord.Member = None, amount=1):
-        await self.open_account(ctx.author.id)
+        await self.open_account(ctx.author)
 
         check1 = await cursor.find_one({"id": ctx.author.id})
         check2 = await cursor.find_one({"id": user.id})
@@ -434,3 +434,36 @@ class Economy(commands.Cog):
                     await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
                     await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
                     await ctx.send(f"Successfully rob <:DHBuck:901485795410599988> {amount} from {user.mention}")
+
+    @commands.command(help="Mine FireCoin")
+    @commands.cooldown(1, 3600 * 2, commands.BucketType.user)
+    @commands.guild_only()
+    async def mine(self, ctx):
+        await self.open_account(ctx.author)
+
+        inventory_check = await cursor.find_one({"id": ctx.author.id, "inventory.name": "fireminer"})
+        if inventory_check is None:
+            await ctx.send("You need to buy a FireMiner to mine FireCoin")
+        else:
+            random_event = random.randint(1, 3)
+            if random_event == 1:
+                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": 50}})
+                await ctx.send("You tried to mine but it ran into some error so you receive <:FireCoin:920903065454903326> 50")
+            elif random_event == 2:
+                rand_amount = random.randint(1, 10000)
+                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": rand_amount}})
+                await ctx.send(f"You just mined <:FireCoin:920903065454903326> {rand_amount}")
+            else:
+                await ctx.send("The machine is overloaded and crash, so you can't get more FireCoin")
+
+    @commands.command(help="Convert FireCoin to DHBuck")
+    @commands.guild_only()
+    async def convert(self, ctx, amount=0):
+        await self.open_account(ctx.author)
+
+        check = await cursor.find_one({"id": ctx.author.id})
+        if check['FireCoin'] < amount:
+            await ctx.send("Too much")
+        else:
+            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount * 1000}})
+            await ctx.send(f"")
