@@ -361,7 +361,6 @@ class Economy(commands.Cog):
         await self.open_account(user)
         check = await cursor.find_one({"id": user.id})
 
-        wallet = check['wallet']
         if amount > check['wallet']:
             await ctx.send("You can't deposit more money than your wallet")
         else:
