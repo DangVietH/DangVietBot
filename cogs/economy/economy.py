@@ -408,8 +408,8 @@ class Economy(commands.Cog):
             if amount > check['wallet']:
                 await ctx.send("You didn't have enough money in your bank to give someone")
             else:
-                await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": -amount}})
-                await cursor.update_one({"id": user.id}, {"$set": {"bank": amount}})
+                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"bank": -amount}})
+                await cursor.update_one({"id": user.id}, {"$inc": {"bank": amount}})
                 await ctx.message.add_reaction("✅")
                 await user.send(f"**{ctx.author}** just gave you <:DHBuck:901485795410599988> {amount}")
 
@@ -523,15 +523,44 @@ class Economy(commands.Cog):
             await nfts.insert_one({"name": answers[0], "link": answers[1], "price": price, "owner": ctx.author.id})
             await ctx.send(f"NFT {answers[0]} created for <:FireCoin:920903065454903326> {price}")
 
+    @nft.command(help="Buy an nft")
+    async def buy(self, ctx, *, name):
+        await self.open_account(ctx.author)
+        check = await nfts.find_one({"name": name})
+        if check is None:
+            await ctx.send("NFT do not exist. Also nft are CASE SENSITIVE")
+        else:
+            user = await cursor.find_one({"id": ctx.author.id})
+            if user['FireCoin'] < check['price']:
+                await ctx.send("You don't have enough FireCoin")
+            else:
+                og_owner = self.bot.get_user(check['owner'])
+                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": -check['price']}})
+                await cursor.update_one({"id": og_owner.id}, {"$inc": {"FireCoin": check['price']}})
+                await nfts.update_one({"name": name}, {"$set": {"owner": ctx.author.id}})
+                await og_owner.send(f"**{ctx.author}** just bought your nft name **{name}** and you receive <:FireCoin:920903065454903326> {check['price']}")
+
     @nft.command(help="View an nft")
     async def view(self, ctx, *, name):
         check = await nfts.find_one({"name": name})
         if check is None:
-            await ctx.send("NFT do not exist. Also nft are CASE SENSITVE")
+            await ctx.send("NFT do not exist. Also nft are CASE SENSITIVE")
         else:
-            embed = discord.Embed(title=f"{check['name']}", description=f"**Price:** <:FireCoin:920903065454903326> {check['price']}", color=discord.Color.from_rgb(225, 0, 92))
+            embed = discord.Embed(title=f"{check['name']}", description=f"**Price:** <:FireCoin:920903065454903326> {check['price']} \n**Owner:** {self.bot.get_user(check['owner'])}", color=discord.Color.from_rgb(225, 0, 92))
             embed.set_image(url=check['link'])
             await ctx.send(embed=embed)
+
+    @nft.command(help="delete an nft")
+    @commands.is_owner()
+    async def delete(self, ctx, *, name):
+        check = await nfts.find_one({"name": name})
+        if check is None:
+            await ctx.send("NFT do not exist. Also nft are CASE SENSITIVE")
+        else:
+            og_owner = self.bot.get_user(check['owner'])
+            await cursor.delete_one(check)
+            await ctx.send("NFT deleted")
+            await og_owner.send(f"Your nft just get deleted by the bot developer!")
 
     @nft.command(help="View all nfts")
     async def list(self, ctx):
