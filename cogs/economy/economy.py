@@ -494,7 +494,7 @@ class Economy(commands.Cog):
         await ctx.send(embed=embed)
 
     @nft.command(help="Create an nft")
-    async def create(self, ctx, link, *, name):
+    async def create(self, ctx):
         await self.open_account(ctx.author)
 
         await ctx.send("Answer These Question In 1 minute!")
@@ -515,7 +515,7 @@ class Economy(commands.Cog):
             else:
                 answers.append(msg.content)
 
-        check = await nfts.find_one({"name": name})
+        check = await nfts.find_one({"name": answers[0]})
         if check is not None:
             await ctx.send("NFT already exists")
         else:
@@ -529,7 +529,7 @@ class Economy(commands.Cog):
         if check is None:
             await ctx.send("NFT do not exist. Also nft are CASE SENSITVE")
         else:
-            embed = discord.Embed(title=f"{check['name']}", description=f"Price: <:FireCoin:920903065454903326> {check['price']}", color=discord.Color.from_rgb(225, 0, 92))
+            embed = discord.Embed(title=f"{check['name']}", description=f"**Price:** <:FireCoin:920903065454903326> {check['price']}", color=discord.Color.from_rgb(225, 0, 92))
             embed.set_image(url=check['link'])
             await ctx.send(embed=embed)
 
