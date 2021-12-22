@@ -558,7 +558,7 @@ class Economy(commands.Cog):
             await ctx.send("NFT do not exist. Also nft are CASE SENSITIVE")
         else:
             og_owner = self.bot.get_user(check['owner'])
-            await cursor.delete_one(check)
+            await nfts.delete_one({"name": name})
             await ctx.send("NFT deleted")
             await og_owner.send(f"Your nft just get deleted by the bot developer!")
 
