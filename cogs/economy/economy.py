@@ -494,30 +494,12 @@ class Economy(commands.Cog):
         await ctx.send(embed=embed)
 
     @nft.commands(help="Create an nft")
-    async def create(self, ctx):
+    async def create(self, ctx, link, *, name):
         await self.open_account(ctx.author)
 
-        await ctx.send("Answer These Question In 1 minute!")
-        questions = ["Enter Name: ", "Enter Image: "]
-        answers = []
-
-        def check(user):
-            return user.author == ctx.author and user.channel == ctx.channel
-
-        for question in questions:
-            await ctx.send(question)
-
-            try:
-                msg = await self.bot.wait_for('message', timeout=60.0, check=check)
-            except asyncio.TimeoutError:
-                await ctx.send("Type Faster Next Time!")
-                return
-            else:
-                answers.append(msg.content)
-
         price = random.randint(1, 100000)
-        await nfts.insert_one({"name": answers[0], "link": answers[1], "price": price, "owner": ctx.author.id})
-        await ctx.send(f"NFT {answers[0]} created for <:FireCoin:920903065454903326> {price}")
+        await nfts.insert_one({"name": name, "link": link, "price": price, "owner": ctx.author.id})
+        await ctx.send(f"NFT {name} created for <:FireCoin:920903065454903326> {price}")
 
     @nft.commands(help="View an nft")
     async def view(self, ctx, *, name):
