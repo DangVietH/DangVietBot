@@ -493,17 +493,39 @@ class Economy(commands.Cog):
                 embed.add_field(name=f"nft {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
         await ctx.send(embed=embed)
 
-    @nft.commands(help="Create an nft")
+    @nft.command(help="Create an nft")
     async def create(self, ctx, link, *, name):
         await self.open_account(ctx.author)
 
-        price = random.randint(1, 100000)
-        await nfts.insert_one({"name": name, "link": link, "price": price, "owner": ctx.author.id})
-        await ctx.send(f"NFT {name} created for <:FireCoin:920903065454903326> {price}")
+        await ctx.send("Answer These Question In 1 minute!")
+        questions = ["Enter Name: ", "Enter Image: "]
+        answers = []
 
-    @nft.commands(help="View an nft")
+        def check(user):
+            return user.author == ctx.author and user.channel == ctx.channel
+
+        for question in questions:
+            await ctx.send(question)
+
+            try:
+                msg = await self.bot.wait_for('message', timeout=60.0, check=check)
+            except asyncio.TimeoutError:
+                await ctx.send("Type Faster Next Time!")
+                return
+            else:
+                answers.append(msg.content)
+
+        check = await nfts.find_one({"name": name})
+        if check is not None:
+            await ctx.send("NFT already exists")
+        else:
+            price = random.randint(1, 100000)
+            await nfts.insert_one({"name": answers[0], "link": answers[1], "price": price, "owner": ctx.author.id})
+            await ctx.send(f"NFT {answers[0]} created for <:FireCoin:920903065454903326> {price}")
+
+    @nft.command(help="View an nft")
     async def view(self, ctx, *, name):
-        check = await nfts.check({"name": name})
+        check = await nfts.find_one({"name": name})
         if check is None:
             await ctx.send("NFT do not exist. Also nft are CASE SENSITVE")
         else:
@@ -511,7 +533,7 @@ class Economy(commands.Cog):
             embed.set_image(url=check['link'])
             await ctx.send(embed=embed)
 
-    @nft.commands(help="View all nfts")
+    @nft.command(help="View all nfts")
     async def list(self, ctx):
         stats = nfts.find()
         data = []
