@@ -70,7 +70,9 @@ class Info(commands.Cog):
         embed.add_field(name="Written in", value="Python 3.9.6")
         embed.add_field(name="Library", value="[discord.py 2.0](https://github.com/Rapptz/discord.py)")
         embed.add_field(name="Create at", value="8/13/2021")
+        embed.add_field(name="Command's", value=f"{len(self.bot.commands)}")
         embed.add_field(name="Server's", value=f"{len(self.bot.guilds)}")
+        embed.add_field(name="User's", value=f"{len(self.bot.users)}")
         await ctx.send(embed=embed)
 
     @commands.command(help="Invite the bot")

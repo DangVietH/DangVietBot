@@ -113,37 +113,46 @@ class Leveling(commands.Cog):
                 if is_disabled is None:
                     stats = await levelling.find_one({'guild': message.guild.id, "user": message.author.id})
                     if stats is None:
-                        insert = {'guild': message.guild.id, "user": message.author.id, 'level': 0, 'xp': 5}
+                        insert = {'guild': message.guild.id, "user": message.author.id, 'level': 0, 'xp': 0}
                         await levelling.insert_one(insert)
                     else:
-                        add_exp = stats['xp'] + 5
                         await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
-                                                   {"$set": {"xp": add_exp}})
-                        lvl_end = int(stats['xp'] ** (1 / 4))
-                        if stats['level'] < lvl_end:
-                            new_lvl = stats['level'] + 1
+                                                   {"$inc": {"xp": 5}})
+
+                        xp = stats['xp']
+                        lvl = 0
+                        while True:
+                            if xp < ((50*(lvl**2))+(50*lvl)):
+                                break
+                            lvl += 1
+
+                        xp -= ((50*(lvl**2))+(50*lvl))
+
+                        if xp == 0:
                             await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
-                                                       {"$set": {"level": new_lvl}})
+                                                       {"$inc": {"level": 1}})
+
                             lvl_channel = await upchannel.find_one({"guild": message.guild.id})
                             if lvl_channel is None:
-                                await message.channel.send(f"🎉 {message.author.mention} has reached level **{new_lvl}**!!🎉")
+                                await message.channel.send(
+                                    f"🎉 {message.author.mention} has reached level **{lvl}**!!🎉")
                             else:
                                 channel = self.bot.get_channel(lvl_channel["channel"])
-                                await channel.send(f"🎉 {message.author.mention} has reach level **{new_lvl}**!!🎉")
+                                await channel.send(f"🎉 {message.author.mention} has reach level **{lvl}**!!🎉")
 
                             role_reward = await roled.find_one({"guild": message.guild.id})
                             levelrole = role_reward['role']
                             levelnum = role_reward['level']
                             for i in range(len(levelrole)):
-                                if new_lvl == int(levelnum[i]):
+                                if lvl == int(levelnum[i]):
                                     role = message.guild.get_role(int(levelrole[i]))
                                     await message.author.add_roles(role)
                                     lvl_channel = await upchannel.find_one({"guild": message.guild.id})
                                     if lvl_channel is None:
-                                        await message.channel.send(f"🎉 {message.author.mention} also receive {role.name}")
+                                        await message.channel.send(f"{message.author}also receive {role.name} role")
                                     else:
                                         channel = self.bot.get_channel(lvl_channel["channel"])
-                                        await channel.send(f"🎉 {message.author.mention} also receive {role.name} role")
+                                        await channel.send(f"{message.author} also receive {role.name} role")
                 else:
                     return None
 
@@ -155,14 +164,22 @@ class Leveling(commands.Cog):
         if stats is not None:
             ranking = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
             rank = 0
+            lvl = 0
+            xp = stats["xp"]
+            while True:
+                if xp < ((50 * (lvl ** 2)) + (50 * lvl)):
+                    break
+                lvl += 1
+            xp -= ((50 * ((lvl - 1) ** 2)) + (50 * (lvl - 1)))
+
             async for x in ranking:
                 rank += 1
                 if stats['user'] == x['user']:
                     break
 
             embed = discord.Embed(title=user, color=user.color)
-            embed.add_field(name="Level", value=f"#{stats['level']}")
-            embed.add_field(name="XP", value=f"#{stats['xp']}")
+            embed.add_field(name="Level", value=f"#{lvl}")
+            embed.add_field(name="XP", value=f"#{xp}/{int(200*((1/2)*lvl))}")
             embed.add_field(name="Rank", value=f"#{rank}")
             embed.set_thumbnail(url=user.avatar.url)
             await ctx.send(embed=embed)
