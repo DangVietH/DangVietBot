@@ -9,6 +9,7 @@ from cogs.economy.shopping_list import shop
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["economy"]
 cursor = db["users"]
+nfts = db["nft"]
 
 
 class MenuButtons(discord.ui.View, menus.MenuPages):
@@ -111,6 +112,21 @@ class ShopPageSource(menus.ListPageSource):
         embed.set_author(
             icon_url="https://cdn.discordapp.com/attachments/900197917170737152/921035393456042004/shop.png",
             name="Shop")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
+class NFTPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.green())
+        embed.set_author(
+            icon_url="https://cdn.discordapp.com/attachments/900197917170737152/923101670207004723/NFT_Icon.png",
+            name="NFT list")
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
@@ -458,7 +474,7 @@ class Economy(commands.Cog):
 
     @commands.command(help="Convert FireCoin to DHBuck")
     @commands.guild_only()
-    async def convert(self, ctx, amount=0):
+    async def convert(self, ctx, amount=1):
         await self.open_account(ctx.author)
 
         check = await cursor.find_one({"id": ctx.author.id})
@@ -466,4 +482,62 @@ class Economy(commands.Cog):
             await ctx.send("Too much")
         else:
             await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount * 1000}})
-            await ctx.send(f"")
+            await ctx.send(f"Convert {amount} to {amount * 1000}")
+
+    @commands.group(invoke_without_command=True, case_insensitive=True, help="Nft are shit")
+    async def nft(self, ctx):
+        embed = discord.Embed(title="Nft", color=discord.Color.random())
+        command = self.bot.get_command("nft")
+        if isinstance(command, commands.Group):
+            for subcommand in command.commands:
+                embed.add_field(name=f"nft {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
+        await ctx.send(embed=embed)
+
+    @nft.commands(help="Create an nft")
+    async def create(self, ctx):
+        await self.open_account(ctx.author)
+
+        await ctx.send("Answer These Question In 1 minute!")
+        questions = ["Enter Name: ", "Enter Image: "]
+        answers = []
+
+        def check(user):
+            return user.author == ctx.author and user.channel == ctx.channel
+
+        for question in questions:
+            await ctx.send(question)
+
+            try:
+                msg = await self.bot.wait_for('message', timeout=60.0, check=check)
+            except asyncio.TimeoutError:
+                await ctx.send("Type Faster Next Time!")
+                return
+            else:
+                answers.append(msg.content)
+
+        price = random.randint(1, 100000)
+        await nfts.insert_one({"name": answers[0], "link": answers[1], "price": price, "owner": ctx.author.id})
+        await ctx.send(f"NFT {answers[0]} created for <:FireCoin:920903065454903326> {price}")
+
+    @nft.commands(help="View an nft")
+    async def view(self, ctx, *, name):
+        check = await nfts.check({"name": name})
+        if check is None:
+            await ctx.send("NFT do not exist. Also nft are CASE SENSITVE")
+        else:
+            embed = discord.Embed(title=f"{check['name']}", description=f"Price: <:FireCoin:920903065454903326> {check['price']}", color=discord.Color.from_rgb(225, 0, 92))
+            embed.set_image(url=check['link'])
+            await ctx.send(embed=embed)
+
+    @nft.commands(help="View all nfts")
+    async def list(self, ctx):
+        stats = nfts.find()
+        data = []
+        num = 0
+        async for x in stats:
+            num += 1
+            to_append = (f"{num}. {x['name']}", f"**Price:** <:FireCoin:920903065454903326> {x['price']}")
+            data.append(to_append)
+
+        pages = MenuButtons(NFTPageSource(data))
+        await pages.start(ctx)
