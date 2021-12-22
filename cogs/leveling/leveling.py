@@ -117,7 +117,7 @@ class Leveling(commands.Cog):
                         await levelling.insert_one(insert)
                     else:
                         await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
-                                                   {"$inc": {"xp": 5}})
+                                                   {"$inc": {"xp": 10}})
 
                         xp = stats['xp']
                         lvl = 0
