@@ -569,7 +569,7 @@ class Economy(commands.Cog):
         num = 0
         async for x in stats:
             num += 1
-            to_append = (f"{num}. {x['name']}", f"**Price:** <:FireCoin:920903065454903326> {x['price']}")
+            to_append = (f"{num}. {x['name']}", f"**Price:** <:FireCoin:920903065454903326> {x['price']} **Owner:** {self.bot.get_user(x['owner'])}")
             data.append(to_append)
 
         pages = MenuButtons(NFTPageSource(data))
