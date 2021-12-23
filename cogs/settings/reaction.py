@@ -65,3 +65,9 @@ class Reaction(commands.Cog):
                     member = await(guild.fetch_member(payload.user_id))
                     if member is not None:
                         await member.remove_roles(role)
+
+    @commands.Cog.listener()
+    async def on_raw_message_delete(self, payload):
+        check = await cursor.find_one({"id": payload.message_id})
+        if check is not None:
+            await cursor.delete_one(check)

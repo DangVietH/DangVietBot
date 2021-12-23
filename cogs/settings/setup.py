@@ -15,6 +15,9 @@ pcursor = pdb["prefix"]
 rdb = cluster["react_role"]
 rcursor = rdb['reaction_roles']
 
+db = cluster['bot']
+gcursor = db['gc']
+
 
 class Setup(commands.Cog):
     def __init__(self, bot):
@@ -157,3 +160,33 @@ class Setup(commands.Cog):
             await ctx.send("Mission complete")
         else:
             await ctx.send("Can't find that message id")
+
+    @commands.group(invoke_without_command=True, case_insensitive=True, help="Global chat setup")
+    async def gc(self, ctx):
+        embed = discord.Embed(title="Global Chat", color=discord.Color.random(), description="Create reaction roles")
+        command = self.bot.get_command("gc")
+        if isinstance(command, commands.Group):
+            for subcommand in command.commands:
+                embed.add_field(name=f"gc {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
+        await ctx.send(embed=embed)
+
+    @gc.command(help="Set global chat channel")
+    @commands.has_permissions(manage_messages=True)
+    async def set(self, ctx, channel: discord.TextChannel):
+        result = await gcursor.find_one({"guild": ctx.guild.id})
+        if result is None:
+            await gcursor.insert_one({"guild": ctx.guild.id, "channel": channel.id})
+            await ctx.send(f"Global chat channel set to {channel.mention}")
+        elif result is not None:
+            await gcursor.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
+            await ctx.send(f"Global chat channel updated to {channel.mention}")
+
+    @gc.command(help="Remove your server from global chat")
+    @commands.has_permissions(administrator=True)
+    async def remove(self, ctx):
+        result = await gcursor.find_one({"guild": ctx.guild.id})
+        if result is not None:
+            await gcursor.delete_one(result)
+            await ctx.send("Your server has been remove from global chat")
+        else:
+            await ctx.send("You don't have a global chat system")
