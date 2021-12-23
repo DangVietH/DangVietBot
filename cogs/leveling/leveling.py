@@ -170,13 +170,14 @@ class Leveling(commands.Cog):
                     break
                 lvl += 1
             xp -= ((100 / 2 * (lvl - 1) ** 2) + (100 / 2 * (lvl - 1)))
+            boxes = int((xp / (200 * ((1 / 2) * lvl))) * 20)
             ranking = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
             async for x in ranking:
                 rank += 1
                 if stats['user'] == x['user']:
                     break
 
-            embed = discord.Embed(title=user, color=user.color)
+            embed = discord.Embed(title=user, color=user.color, description=boxes * ":red_square:" + (20-boxes) * ":white_large_square:")
             embed.add_field(name="Level", value=f"#{stats['level']}")
             embed.add_field(name="XP", value=f"#{xp}/{100 * 2 * ((1 / 2) * lvl)}")
             embed.add_field(name="Rank", value=f"#{rank}")
