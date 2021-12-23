@@ -43,10 +43,7 @@ class Info(commands.Cog):
     @commands.command(help="Get user avatar")
     async def avatar(self, ctx, user: discord.Member = None):
         user = user or ctx.author
-        avatar = "https://cdn.discordapp.com/attachments/900197917170737152/921336212512444416/Discord-Logo-Black.png"
-        if user.avatar.url is not None:
-            avatar = user.avatar.url
-        await ctx.send(avatar)
+        await ctx.send(user.avatar.url)
 
     @commands.command(help="Server information")
     async def serverinfo(self, ctx):
