@@ -113,6 +113,11 @@ async def on_command_error(ctx, error):
 
 
 @bot.event
+async def on_connect():
+    await bot.process_commands()
+
+
+@bot.event
 async def on_guild_join(guild):
     embed = discord.Embed(title=f"Greetings {guild.name}", description="Thanks for adding DHB into your server! To get started type d!help!", color=discord.Color.from_rgb(225, 0, 92))
     embed.add_field(name="Note", value="I'm still WIP, so some features may be bugged or ugly.", inline=False)

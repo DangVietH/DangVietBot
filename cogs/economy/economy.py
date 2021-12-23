@@ -451,7 +451,16 @@ class Economy(commands.Cog):
                     await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
                     await ctx.send(f"Successfully rob <:DHBuck:901485795410599988> {amount} from {user.mention}")
 
-    @commands.command(help="Mine FireCoin")
+    @commands.group(invoke_without_command=True, case_insensitive=True, help="FireCoin commands")
+    async def FireCoin(self, ctx):
+        embed = discord.Embed(title="Nft", color=discord.Color.random())
+        command = self.bot.get_command("FireCoin")
+        if isinstance(command, commands.Group):
+            for subcommand in command.commands:
+                embed.add_field(name=f"FireCoin {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
+        await ctx.send(embed=embed)
+
+    @FireCoin.command(help="Mine FireCoin")
     @commands.cooldown(1, 3600 * 2, commands.BucketType.user)
     @commands.guild_only()
     async def mine(self, ctx):
@@ -463,16 +472,41 @@ class Economy(commands.Cog):
         else:
             random_event = random.randint(1, 3)
             if random_event == 1:
-                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": 50}})
+                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": 50}})
                 await ctx.send("You tried to mine but it ran into some error so you receive <:FireCoin:920903065454903326> 50")
             elif random_event == 2:
                 rand_amount = random.randint(1, 10000)
-                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": rand_amount}})
+                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": rand_amount}})
                 await ctx.send(f"You just mined <:FireCoin:920903065454903326> {rand_amount}")
             else:
                 await ctx.send("The machine is overloaded and crash, so you can't get more FireCoin")
 
-    @commands.command(help="Convert FireCoin to DHBuck")
+    @FireCoin.command(help="Buy FireCoin")
+    @commands.guild_only()
+    async def buy(self, ctx, amount=1):
+        await self.open_account(ctx.author)
+        check = await cursor.find_one({"id": ctx.author.id})
+        cost = amount * 1000
+        if check['wallet'] < cost:
+            await ctx.send("You don't have enough money")
+        else:
+            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": -cost}})
+            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": amount}})
+            await ctx.send(f"You buy {amount} FireCoin that cost <:DHBuck:901485795410599988> {cost}")
+
+    @FireCoin.command(help="Sell FireCoin")
+    @commands.guild_only()
+    async def sell(self, ctx, amount=1):
+        await self.open_account(ctx.author)
+        check = await cursor.find_one({"id": ctx.author.id})
+        if check['FireCoin'] < amount:
+            await ctx.send("Yoou don't have enough FireCoin")
+        else:
+            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": -amount}})
+            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount * 1000}})
+            await ctx.send(f"You sold {amount} FireCoin and recive <:DHBuck:901485795410599988> {amount * 1000}")
+
+    @FireCoin.command(help="Convert FireCoin to DHBuck")
     @commands.guild_only()
     async def convert(self, ctx, amount=1):
         await self.open_account(ctx.author)
