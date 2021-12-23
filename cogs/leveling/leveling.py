@@ -129,7 +129,7 @@ class Leveling(commands.Cog):
                         xp -= ((100 / 2 * ((lvl - 1) ** 2)) + (100 / 2 * (lvl - 1)))
                         if stats["xp"] < 0:
                             levelling.update_one({"guild": message.guild.id, "user": message.author.id}, {"$set": {"xp": 0}})
-                        if stats['level'] > lvl:
+                        if stats['level'] < lvl:
                             await levelling.update_one({"guild": message.guild.id, "user": message.author.id}, {"$set": {"level": lvl + 1}})
 
                             lvl_channel = await upchannel.find_one({"guild": message.guild.id})
