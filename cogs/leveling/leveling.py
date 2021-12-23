@@ -308,14 +308,14 @@ class Leveling(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        await roled.insert_one({"guild": guild.id, "role": [], "level": []})
+        await roled.insert_one({"guild": guild.id, "role": [], "level": [], "background": "https://cdn.discordapp.com/attachments/900197917170737152/923484322449723422/rank.png", "xp": 10})
 
     @commands.Cog.listener()
     async def on_ready(self):
         for guild in self.bot.guilds:
             results = await roled.find_one({"guild": guild.id})
             if results is None:
-                await roled.insert_one({"guild": guild.id, "role": [], "level": []})
+                await roled.insert_one({"guild": guild.id, "role": [], "level": [], "background": "https://cdn.discordapp.com/attachments/900197917170737152/923484322449723422/rank.png", "xp": 10})
 
     # remove data to save storage
     @commands.Cog.listener()
