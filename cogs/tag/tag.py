@@ -48,7 +48,7 @@ class Tags(commands.Cog):
 
     @tag.command(help="Create a tag")
     async def create(self, ctx):
-        await ctx.send("Answer These Question In 1 minute!")
+        await ctx.send("Answer These Question In 10 minute!")
         questions = ["What is the tag name: ", "What is the tag value: "]
         answers = []
 
@@ -59,7 +59,7 @@ class Tags(commands.Cog):
             await ctx.send(question)
 
             try:
-                msg = await self.bot.wait_for('message', timeout=60.0, check=check)
+                msg = await self.bot.wait_for('message', timeout=600.0, check=check)
             except asyncio.TimeoutError:
                 await ctx.send("Type Faster Next Time!")
                 return
@@ -91,6 +91,7 @@ class Tags(commands.Cog):
 
     @tag.command(help="Edit a tag")
     async def edit(self, ctx, *, name):
+        await ctx.send("Complete this in 10 minute!")
         questions = ["What is the new value: "]
         answers = []
 
