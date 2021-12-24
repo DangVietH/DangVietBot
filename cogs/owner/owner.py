@@ -1,5 +1,12 @@
 import discord
 from discord.ext import commands, menus
+from motor.motor_asyncio import AsyncIOMotorClient
+import os
+
+cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
+
+db = cluster['bot']
+cursor = db['gc']
 
 
 class TestMenu(menus.MenuPages, inherit_buttons=False):
@@ -97,3 +104,29 @@ class Owner(commands.Cog):
             data.append(to_append)
         menu = TestMenu(TestPageSource(data))
         await menu.start(ctx)
+
+    @commands.group(help="Blacklist ppls")
+    @commands.is_owner()
+    async def blacklist(self, ctx):
+        embed = discord.Embed(title="Blacklist", color=discord.Color.random(), description="Create reaction roles")
+        command = self.bot.get_command("blacklist")
+        if isinstance(command, commands.Group):
+            for subcommand in command.commands:
+                embed.add_field(name=f"blacklist {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
+        await ctx.send(embed=embed)
+
+    @blacklist.command(help="Blacklist user")
+    @commands.is_owner()
+    async def user(self, ctx, user: discord.User):
+        check = await cursor.find_one({"id": user.id})
+        if check is None:
+            await cursor.insert_one({"id": user.id})
+            await ctx.send("Blacklist user successfully")
+        else:
+            await ctx.send("Blacklisted user")
+
+    @commands.command(help="unBlacklist user")
+    @commands.is_owner()
+    async def unblacklist(self, ctx, user: discord.User):
+        await cursor.delete_one({"id": user.id})
+        await ctx.send("Unblacklist user successfully")

@@ -1,5 +1,5 @@
-from .tag import Tag
+from .tag import Tags
 
 
 def setup(bot):
-    bot.add_cog(Tag(bot))
+    bot.add_cog(Tags(bot))
