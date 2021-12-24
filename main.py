@@ -74,6 +74,7 @@ cursor = db["prefix"]
 bdb = cluster['bot']
 bcursor = db['blacklist']
 
+
 async def get_prefix(bot, message):
     if not message.guild:
         return commands.when_mentioned_or("d!")(bot, message)

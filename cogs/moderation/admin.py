@@ -360,6 +360,21 @@ class Admin(commands.Cog):
         await channel.set_permissions(ctx.guild.default_role, send_messages=True)
         await ctx.send('Channel unlocked.')
 
+    @commands.command(help="Lock all channel")
+    @commands.has_permissions(administrator=True)
+    async def lock_all(self, ctx):
+        everyone_role = ctx.guild.roles[0]
+        for channel in ctx.guild.channels:
+            if isinstance(channel, discord.TextChannel):
+                await channel.set_permissions(ctx.guild.default_role, send_messages=False)
+
+    @commands.command(help="Lock all channel")
+    @commands.has_permissions(administrator=True)
+    async def unlock_all(self, ctx):
+        for channel in ctx.guild.channels:
+            if isinstance(channel, discord.TextChannel):
+                await channel.set_permissions(ctx.guild.default_role, send_messages=True)
+
     @commands.group(invoke_without_command=True, help="Modlog and case")
     async def modlog(self, ctx):
         embed = discord.Embed(title="Modlog", color=discord.Color.random(), description="Set up modlog system")

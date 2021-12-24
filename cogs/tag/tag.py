@@ -38,7 +38,7 @@ class Tags(commands.Cog):
         else:
             check = await cursor.find_one({"guild": ctx.guild.id})
             if check is None:
-                await ctx.send("Not exist")
+                return None
             else:
                 all_tag = check['tag']
                 for thing in all_tag:

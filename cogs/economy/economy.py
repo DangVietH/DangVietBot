@@ -440,7 +440,6 @@ class Economy(commands.Cog):
     @FireCoin.command(help="Buy FireCoin")
     @commands.guild_only()
     async def buy(self, ctx, amount=1):
-        await self.open_account(ctx.author)
         check = await cursor.find_one({"id": ctx.author.id})
         cost = amount * 1000
         if check['wallet'] < cost:

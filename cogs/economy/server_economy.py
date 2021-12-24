@@ -126,19 +126,6 @@ class ServerEconomy(commands.Cog):
             pages = MenuButtons(ShopPageSource(data))
             await pages.start(ctx)
 
-    @se.command(help="Server store")
-    @commands.has_permissions(administrator=True)
-    @commands.guild_only()
-    async def create_item(self, ctx, name: str, price: int, stock=None, role_required=None, give_role=None, remove_role=None, money_in_wallet=0, *, description="I dunno"):
-        await self.server_econ_create(ctx.guild)
-
-        inventory_check = await serverSetup.find_one({"id": ctx.guild.id, "shop.name": name})
-        if inventory_check is not None:
-            await ctx.send("Item already exist")
-        else:
-            await serverSetup.update_one({"id": ctx.guild.id}, {"$push": {"shop": {"name": name, "price": price, "description": description, "stock": stock, "role_required": role_required, "give_role": give_role, "remove_role": remove_role, "money_in_wallet": money_in_wallet}}})
-            await ctx.send("Item added")
-
     @se.command(help="View your server balance")
     @commands.guild_only()
     async def bal(self, ctx):
