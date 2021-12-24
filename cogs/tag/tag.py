@@ -15,7 +15,7 @@ class TagPageSource(menus.ListPageSource):
         super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green(), title=f"{menus.ctx.guild.name} Tags")
+        embed = discord.Embed(color=discord.Color.green(), title=f"{menu.ctx.author.guild.name} Tags")
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
@@ -112,7 +112,8 @@ class Tags(commands.Cog):
             await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
         else:
             await cursor.update_one({"guild": ctx.guild.id, "tag.name": name},
-                                    {"$set": {"inventory.$.amount": answers[0]}})
+                                    {"$set": {"tag.$.value": answers[0]}})
+            await ctx.send("Tag edit successfully")
 
     @tag.command(help="See a list of tags")
     async def list(self, ctx):
