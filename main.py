@@ -71,6 +71,8 @@ cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["custom_prefix"]
 cursor = db["prefix"]
 
+bdb = cluster['bot']
+bcursor = db['blacklist']
 
 async def get_prefix(bot, message):
     if not message.guild:
@@ -86,12 +88,19 @@ async def get_prefix(bot, message):
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=get_prefix, intents=intents, help_command=CustomHelp(),
                    description="One bot Many functionality", owner_id=860876181036335104, enable_debug_events=True,
-                   case_insensitive=True, activity=discord.Streaming(name="Merry Christmas 🎄", url="https://www.twitch.tv/dvieth"))
+                   case_insensitive=True, activity=discord.Streaming(name="🎄 Christmas Eve Yay", url="https://www.twitch.tv/dvieth"))
 
 
 @bot.event
 async def on_ready():
     print('DHB is online')
+
+
+@bot.check
+async def block_blacklist_user(ctx):
+    return await bcursor.find_one({"id": ctx.author.id}) is None
+
+bot.add_check(block_blacklist_user)
 
 
 @bot.event
@@ -119,10 +128,19 @@ async def on_connect():
 
 @bot.event
 async def on_guild_join(guild):
-    embed = discord.Embed(title=f"Greetings {guild.name}", description="Thanks for adding DHB into your server! To get started type d!help!", color=discord.Color.from_rgb(225, 0, 92))
-    embed.add_field(name="Note", value="I'm still WIP, so some features may be bugged or ugly.", inline=False)
-    embed.add_field(name="Links", value="[invite](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=8&scope=bot%20applications.commands) \n[Support Server](https://discord.gg/cnydBRnHU9) \n[Github](https://github.com/DangVietH/DHB)", inline=False)
-    await guild.system_channel.send(embed=embed)
+    check = await cursor.find_one({"id": guild.owner.id})
+    if check is not None:
+        await guild.system_channel.send("Leave this server because the owner is blacklisted")
+        await guild.leave()
+    else:
+        embed = discord.Embed(title=f"Greetings {guild.name}",
+                              description="Thanks for adding DHB into your server! To get started type d!help!",
+                              color=discord.Color.from_rgb(225, 0, 92))
+        embed.add_field(name="Note", value="I'm still WIP, so some features may be bugged or ugly.", inline=False)
+        embed.add_field(name="Links",
+                        value="[invite](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=8&scope=bot%20applications.commands) \n[Support Server](https://discord.gg/cnydBRnHU9) \n[Github](https://github.com/DangVietH/DHB)",
+                        inline=False)
+        await guild.system_channel.send(embed=embed)
 
 
 if __name__ == '__main__':

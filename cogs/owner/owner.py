@@ -6,7 +6,15 @@ import os
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 
 db = cluster['bot']
-cursor = db['gc']
+cursor = db['blacklist']
+
+edb = cluster["economy"]
+ecursor = edb["users"]
+
+econUser = edb['server_user']
+
+ldb = cluster["levelling"]
+levelling = ldb['member']
 
 
 class TestMenu(menus.MenuPages, inherit_buttons=False):
@@ -120,10 +128,25 @@ class Owner(commands.Cog):
     async def user(self, ctx, user: discord.User):
         check = await cursor.find_one({"id": user.id})
         if check is None:
+            users = await ecursor.find_one({"id": user.id})
+            if users is not None:
+                await ecursor.delete_one({"id": user.id})
+
+            if await levelling.find_one({"user": user.id}) is not None:
+                await levelling.delete_one({"user": user.id})
+
+            if await econUser.find_one({"user": user.id}) is not None:
+                await econUser.delete_one({"user": user.id})
+            await user.send("You have been blacklisted")
+
+            for guild in self.bot.guilds:
+                if guild.owner.id == user.id:
+                    await guild.system_channel.send("Leave this server because the owner is blacklisted")
+
             await cursor.insert_one({"id": user.id})
             await ctx.send("Blacklist user successfully")
         else:
-            await ctx.send("Blacklisted user")
+            await ctx.send("User already blacklist")
 
     @commands.command(help="unBlacklist user")
     @commands.is_owner()

@@ -124,7 +124,7 @@ class Tags(commands.Cog):
             data = []
             ta = check['tag']
             for thing in ta:
-                to_append = (thing['name'], f"{self.bot.get_user(thing['owner'])}")
+                to_append = (thing['name'], f"**Owner:** {self.bot.get_user(thing['owner'])}")
                 data.append(to_append)
             page = MenuButtons(TagPageSource(data))
             await page.start(ctx)
