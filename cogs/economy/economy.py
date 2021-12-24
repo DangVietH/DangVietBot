@@ -437,11 +437,6 @@ class Economy(commands.Cog):
             else:
                 await ctx.send("The machine is overloaded and crash, so you can't get more FireCoin")
 
-    @FireCoin.command(help="Buy FireCoin")
-    @commands.guild_only()
-    async def buy(self, ctx, amount=1):
-        await ctx.send(f"{amount}")
-
     @FireCoin.command(help="Sell FireCoin")
     @commands.guild_only()
     async def sell(self, ctx, amount=1):
