@@ -102,7 +102,7 @@ class Tags(commands.Cog):
             await ctx.send(question)
 
             try:
-                msg = await self.bot.wait_for('message', timeout=60.0, check=check)
+                msg = await self.bot.wait_for('message', timeout=600.0, check=check)
             except asyncio.TimeoutError:
                 await ctx.send("Type Faster Next Time!")
                 return
