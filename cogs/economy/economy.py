@@ -440,10 +440,7 @@ class Economy(commands.Cog):
     @FireCoin.command(help="Buy FireCoin")
     @commands.guild_only()
     async def buy(self, ctx, amount=1):
-        user = ctx.author
-        await self.open_account(user)
-        check = await cursor.find_one({"id": ctx.author.id})
-        await ctx.send("Anything wrong")
+        await ctx.send(f"{amount}")
 
     @FireCoin.command(help="Sell FireCoin")
     @commands.guild_only()
