@@ -440,14 +440,9 @@ class Economy(commands.Cog):
     @FireCoin.command(help="Buy FireCoin")
     @commands.guild_only()
     async def buy(self, ctx, amount=1):
+        await self.open_account(ctx.author)
         check = await cursor.find_one({"id": ctx.author.id})
-        cost = amount * 1000
-        if check['wallet'] < cost:
-            await ctx.send("You don't have enough money")
-        else:
-            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": -cost}})
-            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": amount}})
-            await ctx.send(f"You buy {amount} FireCoin that cost <:DHBuck:901485795410599988> {cost}")
+        await ctx.send("Anything wrong")
 
     @FireCoin.command(help="Sell FireCoin")
     @commands.guild_only()
