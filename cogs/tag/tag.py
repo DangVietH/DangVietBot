@@ -89,6 +89,31 @@ class Tags(commands.Cog):
             await cursor.update_one({"guild": ctx.guild.id}, {"$pull": {"tag": {"name": name}}})
             await ctx.send("Tag deleted successfully")
 
+    @tag.command(help="Edit a tag")
+    async def edit(self, ctx, *, name):
+        questions = ["What is the new value: "]
+        answers = []
+
+        def check(user):
+            return user.author == ctx.author and user.channel == ctx.channel
+
+        for question in questions:
+            await ctx.send(question)
+
+            try:
+                msg = await self.bot.wait_for('message', timeout=60.0, check=check)
+            except asyncio.TimeoutError:
+                await ctx.send("Type Faster Next Time!")
+                return
+            else:
+                answers.append(msg.content)
+        is_exist = await cursor.find_one({"guild": ctx.guild.id, "tag.name": name})
+        if is_exist is None:
+            await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
+        else:
+            await cursor.update_one({"guild": ctx.guild.id, "tag.name": name},
+                                    {"$set": {"inventory.$.amount": answers[0]}})
+
     @tag.command(help="See a list of tags")
     async def list(self, ctx):
         check = await cursor.find_one({"guild": ctx.guild.id})
@@ -98,6 +123,13 @@ class Tags(commands.Cog):
             data = []
             ta = check['tag']
             for thing in ta:
-                data.append((thing['name'], f"{self.bot.get_user(thing['owner'])}"))
+                to_append = (thing['name'], f"{self.bot.get_user(thing['owner'])}")
+                data.append(to_append)
             page = MenuButtons(TagPageSource(data))
             await page.start(ctx)
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
+        check = await cursor.find_one({"guild": guild.id})
+        if check is not None:
+            await cursor.delete_one({"guild": guild.id})
