@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
+import datetime
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 
@@ -28,6 +29,8 @@ class GlobalChat(commands.Cog):
                             embed.set_author(icon_url=message.author.avatar.url, name=f'{message.author}')
                             embed.set_footer(icon_url=message.guild.icon.url, text=f"Message sent from {message.guild.name}")
                             await self.bot.get_channel(channel['channel']).send(embed=embed)
+            else:
+                return None
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
