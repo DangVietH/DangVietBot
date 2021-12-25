@@ -151,4 +151,4 @@ if __name__ == '__main__':
         bot.load_extension(f'cogs.{folder}')
     bot.load_extension('jishaku')
 
-    bot.run(config_data["mango_link"])
+    bot.run(os.environ.get("token"))
