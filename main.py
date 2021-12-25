@@ -1,4 +1,4 @@
-import json
+import os
 import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -67,11 +67,7 @@ class CustomHelp(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
 
-with open('config.json') as f:
-    config_data = json.load(f)
-
-
-cluster = AsyncIOMotorClient(config_data["mango_link"])
+cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["custom_prefix"]
 cursor = db["prefix"]
 

@@ -1,11 +1,10 @@
 import discord
 from discord.ext import commands, menus
-import os
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.menustuff import MenuButtons
-from main import config_data
+import os
 
-cluster = AsyncIOMotorClient(config_data["mango_link"])
+cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["levelling"]
 levelling = db['member']
 disable = db['disable']

@@ -2,9 +2,9 @@ import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
-from main import config_data
+import os
 
-cluster = AsyncIOMotorClient(config_data["mango_link"])
+cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 
 wdbs = cluster["welcome"]
 welcome_cursors = wdbs["channel"]
