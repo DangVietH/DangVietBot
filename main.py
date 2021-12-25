@@ -1,4 +1,4 @@
-import os
+import json
 import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -67,7 +67,11 @@ class CustomHelp(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
 
-cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
+with open('config.json') as f:
+    config_data = json.load(f)
+
+
+cluster = AsyncIOMotorClient(config_data["mango_link"])
 db = cluster["custom_prefix"]
 cursor = db["prefix"]
 
@@ -143,12 +147,12 @@ async def on_guild_join(guild):
                         inline=False)
         await guild.system_channel.send(embed=embed)
 
+cog_list = ['audio', 'economy', 'entertainment', 'leveling', 'moderation', 'owner', 'rtfm', 'settings', 'tag', 'utilities']
 
 if __name__ == '__main__':
     # Load extension
-    for folder in os.listdir('./cogs'):
-        if not folder.startswith('.DS'):
-            bot.load_extension(f'cogs.{folder}')
+    for folder in cog_list:
+        bot.load_extension(f'cogs.{folder}')
     bot.load_extension('jishaku')
 
-    bot.run(os.environ.get("token"))
+    bot.run(config_data["mango_link"])

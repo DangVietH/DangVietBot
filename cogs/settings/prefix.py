@@ -1,9 +1,8 @@
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
-import os
+from main import config_data
 
-
-cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
+cluster = AsyncIOMotorClient(config_data["mango_link"])
 db = cluster["custom_prefix"]
 cursor = db["prefix"]
 

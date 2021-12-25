@@ -2,9 +2,9 @@ import discord
 from discord.ext import commands, tasks
 from motor.motor_asyncio import AsyncIOMotorClient
 import datetime
-import os
+from main import config_data
 
-cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
+cluster = AsyncIOMotorClient(config_data["mango_link"])
 modlogdb = cluster["moderation"]
 cursors = modlogdb['modlog']
 cases = modlogdb['cases']

@@ -2,12 +2,12 @@ import discord
 from discord.ext import commands, menus
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
-import os
 import asyncio
 from cogs.economy.shopping_list import shop
 from utils.menustuff import MenuButtons
+from main import config_data
 
-cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
+cluster = AsyncIOMotorClient(config_data["mango_link"])
 db = cluster["economy"]
 cursor = db["users"]
 nfts = db["nft"]
