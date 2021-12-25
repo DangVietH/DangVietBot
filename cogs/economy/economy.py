@@ -437,13 +437,26 @@ class Economy(commands.Cog):
             else:
                 await ctx.send("The machine is overloaded and crash, so you can't get more FireCoin")
 
+    @FireCoin.command(help="Buy FireCoin")
+    @commands.guild_only()
+    async def buy(self, ctx, amount=1):
+        await self.open_account(ctx.author)
+        check = await cursor.find_one({"id": ctx.author.id})
+        cost = amount * 1000
+        if check['wallet'] < cost:
+            await ctx.send("Not enough money")
+        else:
+            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": amount}})
+            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": -cost}})
+            await ctx.send(f"You buy {amount} FireCoin for <:DHBuck:901485795410599988> {cost}")
+
     @FireCoin.command(help="Sell FireCoin")
     @commands.guild_only()
     async def sell(self, ctx, amount=1):
         await self.open_account(ctx.author)
         check = await cursor.find_one({"id": ctx.author.id})
         if check['FireCoin'] < amount:
-            await ctx.send("Yoou don't have enough FireCoin")
+            await ctx.send("You don't have enough FireCoin")
         else:
             await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": -amount}})
             await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount * 1000}})
