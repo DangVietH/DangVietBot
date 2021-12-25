@@ -68,7 +68,7 @@ class Tags(commands.Cog):
 
         end = "end"
         if answers[0] == end.lower() or answers[1] == end.lower():
-            await ctx.send()
+            await ctx.send("Task abort successfully")
         check = await cursor.find_one({"guild": ctx.guild.id})
         if check is None:
             await cursor.insert_one({"guild": ctx.guild.id, "tag": [
