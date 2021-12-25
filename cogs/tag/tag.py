@@ -49,7 +49,7 @@ class Tags(commands.Cog):
     @tag.command(help="Create a tag")
     async def create(self, ctx):
         await ctx.send("Answer These Question In 10 minute!")
-        questions = ["What is the tag name \n`Type end to abort the process`: ",
+        questions = ["What is the tag name: ",
                      "What is the tag value \n`Type end to abort the process`: "]
         answers = []
 
@@ -68,7 +68,7 @@ class Tags(commands.Cog):
                 answers.append(msg.content)
 
         end = "end"
-        if answers[0] == end.lower() or answers[1] == end.lower():
+        if answers[1] == end.lower():
             await ctx.send("Task abort successfully")
         else:
             check = await cursor.find_one({"guild": ctx.guild.id})
