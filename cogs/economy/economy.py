@@ -438,7 +438,6 @@ class Economy(commands.Cog):
                 await ctx.send("The machine is overloaded and crash, so you can't get more FireCoin")
 
     @FireCoin.command(help="Buy FireCoin")
-    @commands.guild_only()
     async def buy(self, ctx, amount=1):
         await self.open_account(ctx.author)
         check = await cursor.find_one({"id": ctx.author.id})
