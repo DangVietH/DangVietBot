@@ -3,6 +3,7 @@ from discord.ext import commands, menus
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.menuUtils import MenuButtons
 import os
+from disrank.generator import Generator
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["levelling"]
@@ -84,9 +85,11 @@ class Leveling(commands.Cog):
 
                         xp -= ((100 / 2 * ((lvl - 1) ** 2)) + (100 / 2 * (lvl - 1)))
                         if stats["xp"] < 0:
-                            levelling.update_one({"guild": message.guild.id, "user": message.author.id}, {"$set": {"xp": 0}})
+                            levelling.update_one({"guild": message.guild.id, "user": message.author.id},
+                                                 {"$set": {"xp": 0}})
                         if stats['level'] < lvl:
-                            await levelling.update_one({"guild": message.guild.id, "user": message.author.id}, {"$inc": {"level": 1}})
+                            await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
+                                                       {"$inc": {"level": 1}})
 
                             lvl_channel = await upchannel.find_one({"guild": message.guild.id})
                             if lvl_channel is None:
@@ -112,6 +115,42 @@ class Leveling(commands.Cog):
                 else:
                     return None
 
+    @commands.command(help="See your rank in image")
+    @commands.guild_only()
+    async def crank(self, ctx, user: discord.Member = None):
+        user = user or ctx.author
+        stats = await levelling.find_one({'guild': ctx.guild.id, "user": user.id})
+        if stats is not None:
+            lvl = 0
+            rank = 0
+            xp = stats["xp"]
+            while True:
+                if xp < ((100 / 2 * (lvl ** 2)) + (100 / 2 * lvl)):
+                    break
+                lvl += 1
+            xp -= ((100 / 2 * (lvl - 1) ** 2) + (100 / 2 * (lvl - 1)))
+            ranking = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
+            async for x in ranking:
+                rank += 1
+                if stats['user'] == x['user']:
+                    break
+
+            args = {
+                'bg_image': 'https://cdn.discordapp.com/attachments/887686617471516713/924650829284278272/rank.png',
+                'profile_image': str(user.avatar.replace(format='png')),  # User profile picture link
+                'level': int(stats['level']),  # User current level
+                'current_xp': int(100 * 2 * ((1 / 2) * lvl)),  # Current level minimum xp
+                'user_xp': int(stats['xp']),  # User current xp
+                'next_xp': int(100 * 2 * ((1 / 2) * lvl)),  # xp required for next level
+                'user_position': rank,  # User position in leaderboard
+                'user_name': ctx.author,  # user name with descriminator
+                'user_status': ctx.author.status.name,  # User status eg. online, offline, idle, streaming, dnd
+            }
+
+            image = Generator().generate_profile(**args)
+            file = discord.File(fp=image, filename='rank.png')
+            await ctx.send(file=file)
+
     @commands.command(help="See your rank")
     @commands.guild_only()
     async def rank(self, ctx, user: discord.Member = None):
@@ -133,7 +172,8 @@ class Leveling(commands.Cog):
                 if stats['user'] == x['user']:
                     break
 
-            embed = discord.Embed(title=user, color=user.color, description=boxes * ":red_square:" + (20-boxes) * ":white_large_square:")
+            embed = discord.Embed(title=user, color=user.color,
+                                  description=boxes * ":red_square:" + (20 - boxes) * ":white_large_square:")
             embed.add_field(name="Level", value=f"#{stats['level']}")
             embed.add_field(name="XP", value=f"#{xp}/{100 * 2 * ((1 / 2) * lvl)}")
             embed.add_field(name="Rank", value=f"#{rank}")
@@ -164,7 +204,8 @@ class Leveling(commands.Cog):
         num = 0
         async for x in stats:
             num += 1
-            to_append = (f"{num}: {self.bot.get_user(x['user'])}", f"**Server:** {self.bot.get_guild(x['guild'])} **Level:** {x['level']} **XP:** {x['xp']}")
+            to_append = (f"{num}: {self.bot.get_user(x['user'])}",
+                         f"**Server:** {self.bot.get_guild(x['guild'])} **Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
         pages = MenuButtons(GlobalLeaderboardPageSource(data))
@@ -264,14 +305,18 @@ class Leveling(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        await roled.insert_one({"guild": guild.id, "role": [], "level": [], "background": "https://cdn.discordapp.com/attachments/900197917170737152/923484322449723422/rank.png", "xp": 10})
+        await roled.insert_one({"guild": guild.id, "role": [], "level": [],
+                                "background": "https://cdn.discordapp.com/attachments/900197917170737152/923484322449723422/rank.png",
+                                "xp": 10})
 
     @commands.Cog.listener()
     async def on_ready(self):
         for guild in self.bot.guilds:
             results = await roled.find_one({"guild": guild.id})
             if results is None:
-                await roled.insert_one({"guild": guild.id, "role": [], "level": [], "background": "https://cdn.discordapp.com/attachments/900197917170737152/923484322449723422/rank.png", "xp": 10})
+                await roled.insert_one({"guild": guild.id, "role": [], "level": [],
+                                        "background": "https://cdn.discordapp.com/attachments/900197917170737152/923484322449723422/rank.png",
+                                        "xp": 10})
 
     # remove data to save storage
     @commands.Cog.listener()
