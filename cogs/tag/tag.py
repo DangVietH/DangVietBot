@@ -2,7 +2,7 @@ from discord.ext import commands, menus
 import discord
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
-from utils.menustuff import MenuButtons
+from utils.menuUtils import MenuButtons
 import os
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))

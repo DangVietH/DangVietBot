@@ -4,7 +4,7 @@ import random
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
 from cogs.economy.shopping_list import shop
-from utils.menustuff import MenuButtons
+from utils.menuUtils import MenuButtons
 import os
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))

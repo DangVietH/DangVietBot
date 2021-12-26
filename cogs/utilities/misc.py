@@ -4,7 +4,7 @@ import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import datetime
-import requests
+import aiohttp
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 timerdb = cluster["timer"]
@@ -35,6 +35,7 @@ class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.time_checker.start()
+        self.session = aiohttp.ClientSession(loop=bot.loop)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -113,3 +114,27 @@ class Misc(commands.Cog):
             await ctx.send(num1 * num2)
         elif op == "/":
             await ctx.send(num1 / num2)
+
+    @commands.command(help='See updated covid cases')
+    async def covid(self, ctx, *, country="vietnam"):
+        # some of this code base on https://github.com/Dhravya/Spacebot/blob/main/src/cogs/utility.py
+        country = country.lower()
+        url = await self.session.get(f"https://disease.sh/v3/covid-19/countries/{country}")
+        stats = url.json()
+        embed = discord.Embed(title=f"Covid Information in {stats['country']}",
+                              description=f"Last updated: <t:{int(stats['updated'] / 1000)}:R>")
+        embed.set_thumbnail(url=stats['flag'])
+        embed.add_field(name="Total case", value=stats['cases'])
+        embed.add_field(name="Today Cases", value=stats['todayCases'])
+        embed.add_field(name="Total Deaths", value=stats['deaths'])
+        embed.add_field(name="Today Death", value=stats['todayDeaths'])
+        embed.add_field(name="Recovered", value=stats['todayCases'])
+        embed.add_field(name="Today recovery", value=stats['todayRecovered'])
+        embed.add_field(name="Total test", value=stats['tests'])
+        embed.add_field(name="Active", value=stats['active'])
+        embed.add_field(name="Critical", value=stats['critical'])
+        embed.add_field(name="Cases Per One Million", value=stats['casesPerOneMillion'])
+        embed.add_field(name="Deaths Per One Million", value=stats['activePerOneMillion'])
+        embed.add_field(name="Recovered Per One Million", value=stats['recoveredPerOneMillion'])
+        embed.add_field(name="Test Per One Million", value=stats['testsPerOneMillion'])
+        await ctx.send(embed=embed)

@@ -3,7 +3,7 @@ from discord.ext import commands, menus
 import lavalink
 import re
 from discord.ext.commands.errors import CheckFailure
-from utils.menustuff import MenuButtons
+from utils.menuUtils import MenuButtons
 
 # This cog is based on https://github.com/Devoxin/Lavalink.py/blob/master/examples/music.py
 
