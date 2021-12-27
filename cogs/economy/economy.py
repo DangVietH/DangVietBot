@@ -437,8 +437,8 @@ class Economy(commands.Cog):
             else:
                 await ctx.send("The machine is overloaded and crash, so you can't get more FireCoin")
 
-    @FireCoin.command(help="Buy FireCoin")
-    async def buy(self, ctx, amount=1):
+    @commands.command(help="Buy FireCoin")
+    async def fbuy(self, ctx, amount=1):
         await self.open_account(ctx.author)
         check = await cursor.find_one({"id": ctx.author.id})
         cost = amount * 1000

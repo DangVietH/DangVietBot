@@ -10,4 +10,3 @@ dnspython
 git+https://github.com/Gorialis/jishaku
 PyNaCl
 ffmpeg
-disrank

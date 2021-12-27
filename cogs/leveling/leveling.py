@@ -3,7 +3,6 @@ from discord.ext import commands, menus
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.menuUtils import MenuButtons
 import os
-from disrank.generator import Generator
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 db = cluster["levelling"]
@@ -114,42 +113,6 @@ class Leveling(commands.Cog):
                                         await channel.send(f"🎉 {message.author} also receive {role.name} role")
                 else:
                     return None
-
-    @commands.command(help="See your rank in image")
-    @commands.guild_only()
-    async def crank(self, ctx, user: discord.Member = None):
-        user = user or ctx.author
-        stats = await levelling.find_one({'guild': ctx.guild.id, "user": user.id})
-        if stats is not None:
-            lvl = 0
-            rank = 0
-            xp = stats["xp"]
-            while True:
-                if xp < ((100 / 2 * (lvl ** 2)) + (100 / 2 * lvl)):
-                    break
-                lvl += 1
-            xp -= ((100 / 2 * (lvl - 1) ** 2) + (100 / 2 * (lvl - 1)))
-            ranking = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
-            async for x in ranking:
-                rank += 1
-                if stats['user'] == x['user']:
-                    break
-
-            args = {
-                'bg_image': 'https://cdn.discordapp.com/attachments/887686617471516713/924650829284278272/rank.png',
-                'profile_image': str(user.avatar.replace(format='png')),  # User profile picture link
-                'level': int(stats['level']),  # User current level
-                'current_xp': int(100 * 2 * ((1 / 2) * lvl)),  # Current level minimum xp
-                'user_xp': int(stats['xp']),  # User current xp
-                'next_xp': int(100 * 2 * ((1 / 2) * lvl)),  # xp required for next level
-                'user_position': rank,  # User position in leaderboard
-                'user_name': ctx.author,  # user name with descriminator
-                'user_status': ctx.author.status.name,  # User status eg. online, offline, idle, streaming, dnd
-            }
-
-            image = Generator().generate_profile(**args)
-            file = discord.File(fp=image, filename='rank.png')
-            await ctx.send(file=file)
 
     @commands.command(help="See your rank")
     @commands.guild_only()
