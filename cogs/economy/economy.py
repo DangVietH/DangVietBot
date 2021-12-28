@@ -324,6 +324,25 @@ class Economy(commands.Cog):
             page = MenuButtons(InventoryPageSource(data))
             await page.start(ctx)
 
+    @commands.command(help="we work for the right to work")
+    @commands.cooldown(1, 3600, commands.BucketType.user)
+    @commands.guild_only()
+    async def gamble(self, ctx, amount: int):
+        await self.open_account(ctx.author)
+        check = await cursor.find_one({"id": ctx.author.id})
+        if check['wallet'] < amount:
+            await ctx.send("Too much")
+        elif amount <= 0:
+            await ctx.send("Too less")
+        else:
+            chance = random.randint(1, 100)
+            if chance <= 50:
+                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount}})
+                await ctx.send(f"You just won <:DHBuck:901485795410599988> {amount}")
+            else:
+                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": -amount}})
+                await ctx.send(f"You have lost <:DHBuck:901485795410599988> {amount}")
+
     @commands.command(help="Deposit your money into the bank", aliases=['dep'])
     @commands.guild_only()
     async def deposit(self, ctx, amount=1):
@@ -459,7 +478,7 @@ class Economy(commands.Cog):
         else:
             await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": -amount}})
             await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount * 1000}})
-            await ctx.send(f"You sold {amount} FireCoin and recive <:DHBuck:901485795410599988> {amount * 1000}")
+            await ctx.send(f"You sold {amount} FireCoin and receive <:DHBuck:901485795410599988> {amount * 1000}")
 
     @FireCoin.command(help="Convert FireCoin to DHBuck")
     @commands.guild_only()
