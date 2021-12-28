@@ -545,6 +545,7 @@ class Economy(commands.Cog):
                 og_owner = self.bot.get_user(check['owner'])
                 await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": -check['price']}})
                 await cursor.update_one({"id": og_owner.id}, {"$inc": {"FireCoin": check['price']}})
+                await cursor.update_one({"id": og_owner.id}, {"$inc": {"price": random.randint(1, 1000)}})
                 await nfts.update_one({"name": name}, {"$set": {"owner": ctx.author.id}})
                 await og_owner.send(f"**{ctx.author}** just bought your nft name **{name}** and you receive <:FireCoin:920903065454903326> {check['price']}")
 

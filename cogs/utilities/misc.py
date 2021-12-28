@@ -7,8 +7,7 @@ import datetime
 import aiohttp
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
-timerdb = cluster["timer"]
-timer = timerdb['remind']
+timer = cluster["timer"]['remind']
 
 snipe_message_content = None
 snipe_message_author = None

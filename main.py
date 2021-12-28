@@ -68,11 +68,9 @@ class CustomHelp(commands.HelpCommand):
 
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
-db = cluster["custom_prefix"]
-cursor = db["prefix"]
+cursor = cluster["custom_prefix"]["prefix"]
 
-bdb = cluster['bot']
-bcursor = db['blacklist']
+bcursor = cluster['bot']['blacklist']
 
 
 async def get_prefix(bot, message):

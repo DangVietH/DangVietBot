@@ -3,8 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
-db = cluster["custom_prefix"]
-cursor = db["prefix"]
+cursor = cluster["custom_prefix"]["prefix"]
 
 
 class Prefix(commands.Cog):

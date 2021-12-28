@@ -6,8 +6,7 @@ import datetime
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 
-db = cluster['bot']
-cursor = db['gc']
+cursor = cluster['bot']['gc']
 
 
 class GlobalChat(commands.Cog):

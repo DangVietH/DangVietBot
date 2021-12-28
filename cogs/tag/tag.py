@@ -6,8 +6,7 @@ from utils.menuUtils import MenuButtons
 import os
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
-db = cluster["bot"]
-cursor = db["tag"]
+cursor = cluster["bot"]["tag"]
 
 
 class TagPageSource(menus.ListPageSource):

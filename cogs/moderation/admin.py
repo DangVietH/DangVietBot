@@ -5,13 +5,12 @@ import datetime
 import os
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
-modlogdb = cluster["moderation"]
-cursors = modlogdb['modlog']
-cases = modlogdb['cases']
-user_case = modlogdb['user']
+modb = cluster["moderation"]
+cursors = modb['modlog']
+cases = modb['cases']
+user_case = modb['user']
 
-timerdb = cluster["timer"]
-timer = timerdb['mod']
+timer = cluster["timer"]['mod']
 
 
 def convert(time):

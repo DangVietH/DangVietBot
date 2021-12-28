@@ -3,8 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
-db = cluster["react_role"]
-cursor = db['reaction_roles']
+cursor = cluster["react_role"]['reaction_roles']
 
 # code base on https://github.com/AdvicSaha443/Discord.py-Self-Role-Bot/blob/main/main.py
 

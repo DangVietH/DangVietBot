@@ -4,8 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
-dbs = cluster["welcome"]
-cursors = dbs["channel"]
+cursors = cluster["welcome"]["channel"]
 
 
 class Welcome(commands.Cog):

@@ -6,17 +6,13 @@ import os
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 
-wdbs = cluster["welcome"]
-welcome_cursors = wdbs["channel"]
+welcome_cursors = cluster["welcome"]["channel"]
 
-pdb = cluster["custom_prefix"]
-pcursor = pdb["prefix"]
+pcursor = cluster["custom_prefix"]["prefix"]
 
-rdb = cluster["react_role"]
-rcursor = rdb['reaction_roles']
+rcursor = cluster["react_role"]['reaction_roles']
 
-db = cluster['bot']
-gcursor = db['gc']
+gcursor = cluster['bot']['gc']
 
 
 class Setup(commands.Cog):
