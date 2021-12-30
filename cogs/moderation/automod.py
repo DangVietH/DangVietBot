@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 import os
 from motor.motor_asyncio import AsyncIOMotorClient
+import datetime
+import asyncio
 
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 cursor = cluster["moderation"]['automod']
@@ -11,113 +13,92 @@ class AutoMod(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def add_to_db(self, guild):
-        check = await cursor.find_one({"guild": guild.id})
+    @commands.Cog.listener(name="on_message")
+    async def is_blacklist(self, message: discord.Message):
+        if message.guild:
+            check = await cursor.find_one({"guild": message.guild.id})
+            if check is None:
+                return
+            else:
+                check2 = await cursor.find_one({"guild": message.guild.id, "blacklist": message.content.lower()})
+                if check2 is not None:
+                    await message.delete()
+                    await message.author.send("That's a blacklisted word")
+
+    @commands.Cog.listener(name="on_message")
+    async def anti_spam(self, message: discord.Message):
+        if message.guild:
+            message_cooldown = commands.CooldownMapping.from_cooldown(1.0, 5.0, commands.BucketType.user)
+            bucket = message_cooldown.get_bucket(message)
+            retry_after = bucket.update_rate_limit()
+            if retry_after:
+
+                check = await cursor.find_one({"guild": message.guild.id})
+                if check is None:
+                    return
+                else:
+                    if check['anti spam'] == "on":
+                        await message.channel.purge(after=datetime.datetime.now() - datetime.timedelta(hours=1),
+                                                    check=lambda x: x.author.id == message.author.id,
+                                                    oldest_first=False)
+                        mutedRole = discord.utils.get(message.guild.roles, name="DHB_muted")
+                        if not mutedRole:
+                            mutedRole = await message.guild.create_role(name="DHB_muted")
+
+                            for channel in message.guild.channels:
+                                await channel.set_permissions(mutedRole,
+                                                              speak=False,
+                                                              send_messages=False,
+                                                              read_message_history=True,
+                                                              read_messages=False)
+                        await message.author.add_roles(mutedRole, reason="spam")
+                        await message.channel.send(f"Stop spamming {message.author.mention}")
+                        await asyncio.sleep(10)
+                        await message.author.remove_roles(mutedRole)
+            else:
+                return None
+
+    @commands.Cog.listener(name="on_message")
+    async def anti_invite(self, message: discord.Message):
+        if message.guild:
+            if "discord.gg" or "discord.com/invite" in message.content.lower():
+                check = await cursor.find_one({"guild": message.guild.id})
+                if check is None:
+                    return
+                else:
+                    if check['anti invite'] == "on":
+                        await message.delete()
+                        await message.author.send("You cannot send invite links in this server")
+
+    @commands.Cog.listener(name="on_message")
+    async def anti_link(self, message: discord.Message):
+        if message.guild:
+            if "https://" or "https://" or "www." in message.content.lower():
+                check = await cursor.find_one({"guild": message.guild.id})
+                if check is None:
+                    return
+                else:
+                    if check['anti link'] == "on":
+                        await message.delete()
+                        await message.author.send("You cannot send links in this server")
+
+    @commands.Cog.listener(name="on_message")
+    async def anti_mass_ping(self, message: discord.Message):
+        if message.guild:
+            if len(message.mentions) > 3:
+                check = await cursor.find_one({"guild": message.guild.id})
+                if check is None:
+                    return
+                else:
+                    if check['anti mass mention'] == "on":
+                        await message.delete()
+                        await message.channel.send("There's a mass ping. Do something mods")
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        check = await cursor.find_one({"guild": member.guild.id})
         if check is None:
-            await cursor.insert_one({
-                "guild": guild.id,
-                "blacklist": [],
-                "anti spam": "off",
-                "anti invite": "off",
-                "anti link": "off",
-                "anti mass mention": "off",
-                "anti raid": "off"
-            })
-
-    @commands.group(invoke_without_command=True, case_insensitive=True, help="FireCoin commands")
-    async def automod(self, ctx):
-        embed = discord.Embed(title="Automod commands", color=discord.Color.random())
-        command = self.bot.get_command("automod")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"automod {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
-        await ctx.send(embed=embed)
-
-    @automod.command(help="Blacklist a word")
-    async def blacklist(self, ctx, *, word: str):
-        await self.add_to_db(ctx.guild)
-        word = word.lower()
-
-        check = await cursor.find_one({"guild": ctx.guild.id, "blacklist": word})
-        if check is None:
-            await cursor.update_one({{"guild": ctx.guild.id}}, {"$push": {"blacklist": word}})
-            await ctx.send(f"{word} is now blacklisted")
+            return
         else:
-            await ctx.send("Word already blacklisted")
-
-    @automod.command(help="Unblacklist a word")
-    async def unblacklist(self, ctx, *, word: str):
-        await self.add_to_db(ctx.guild)
-        word = word.lower()
-
-        check = await cursor.find_one({"guild": ctx.guild.id, "blacklist": word})
-        if check is not None:
-            await cursor.update_one({{"guild": ctx.guild.id}}, {"$pull": {"blacklist": word}})
-            await ctx.send(f"{word} is now unblacklisted")
-        else:
-            await ctx.send("Word already unblacklisted")
-
-    @automod.group(help="Enable or diable a category", aliase=['disable', "toggle"], invoke_without_command=True,
-                   case_insensitive=True)
-    async def enable(self, ctx):
-        embed = discord.Embed(title="Enable category", color=discord.Color.random())
-        command = self.bot.get_command("automod enable")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"automod enable {subcommand.name}", value=f"```{subcommand.help}```",
-                                inline=False)
-        await ctx.send(embed=embed)
-
-    @enable.command(help="Toggle anti spam")
-    async def spam(self, ctx):
-        await self.add_to_db(ctx.guild)
-
-        check = await cursor.find_one({"guild": ctx.guild.id})
-        if check['anti spam'] == "off":
-            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti spam": "on"}})
-            await ctx.send("Anti spam is now on")
-        elif check['anti spam'] == "on":
-            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti spam": "off"}})
-            await ctx.send("Anti spam is now off")
-
-    @enable.command(help="Toggle anti invite")
-    async def invite(self, ctx):
-        await self.add_to_db(ctx.guild)
-
-        check = await cursor.find_one({"guild": ctx.guild.id})
-        if check['anti invite'] == "off":
-            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti invite": "on"}})
-            await ctx.send("Anti invite is now on")
-        elif check['anti invite'] == "on":
-            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti invite": "off"}})
-            await ctx.send("Anti invite is now off")
-
-    @enable.command(help="Toggle anti link")
-    async def link(self, ctx):
-        await self.add_to_db(ctx.guild)
-
-        check = await cursor.find_one({"guild": ctx.guild.id})
-        if check['anti link'] == "off":
-            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti link": "on"}})
-            await ctx.send("Anti link is now on")
-        elif check['anti link'] == "on":
-            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti link": "off"}})
-            await ctx.send("Anti link is now off")
-
-    @enable.command(help="Toggle anti mass mention", aliases=["ping"])
-    async def mention(self, ctx):
-        await self.add_to_db(ctx.guild)
-
-        check = await cursor.find_one({"guild": ctx.guild.id})
-        if check['anti mass mention'] == "off":
-            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti mass mention": "on"}})
-            await ctx.send("Anti mass mention is now on")
-        elif check['anti mass mention'] == "on":
-            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti mass mention": "off"}})
-            await ctx.send("Anti mass mention is now off")
-
-    @enable.command(help="Toggle anti link")
-    async def raid(self, ctx):
-        await self.add_to_db(ctx.guild)
-
-        await ctx.send("Coming soon!")
+            if check['anti raid'] == "on":
+                return
