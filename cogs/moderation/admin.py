@@ -511,7 +511,7 @@ class Admin(commands.Cog):
             "anti raid": check['anti raid']
         }
         for n, v in value.items():
-            embed.add_field(name=n, value=v, inline=False)
+            embed.add_field(name=n, value=f"`{v}`", inline=False)
         await ctx.send(embed=embed)
 
     @automod.group(help="Enable or diable a category", aliase=['disable', "toggle"], invoke_without_command=True,
