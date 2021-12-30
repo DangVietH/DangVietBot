@@ -462,7 +462,13 @@ class Admin(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Automod commands")
     async def automod(self, ctx):
-        await ctx.send("There's a bug, so don't use it right now")
+        embed = discord.Embed(title="Automod commands", color=discord.Color.random())
+        command = self.bot.get_command("automod")
+        if isinstance(command, commands.Group):
+            for subcommand in command.commands:
+                embed.add_field(name=f"automod {subcommand.name}", value=f"```{subcommand.help}```",
+                                inline=False)
+        await ctx.send(embed=embed)
 
     @automod.command(help="Turn of automod")
     @commands.has_permissions(administrator=True)
@@ -514,10 +520,10 @@ class Admin(commands.Cog):
             embed.add_field(name=n, value=f"`{v}`", inline=False)
         await ctx.send(embed=embed)
 
-    @automod.group(help="Enable or diable a category", aliase=['disable', "toggle"], invoke_without_command=True,
+    @automod.group(help="Enable or diable a category", invoke_without_command=True,
                    case_insensitive=True)
     @commands.has_permissions(administrator=True)
-    async def enable(self, ctx):
+    async def toggle(self, ctx):
         embed = discord.Embed(title="Enable category", color=discord.Color.random())
         command = self.bot.get_command("automod enable")
         if isinstance(command, commands.Group):
@@ -526,7 +532,7 @@ class Admin(commands.Cog):
                                 inline=False)
         await ctx.send(embed=embed)
 
-    @enable.command(help="Toggle anti spam")
+    @toggle.command(help="Toggle anti spam")
     @commands.has_permissions(administrator=True)
     async def spam(self, ctx):
         await self.add_to_db(ctx.guild)
@@ -539,7 +545,7 @@ class Admin(commands.Cog):
             await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti spam": "off"}})
             await ctx.send("Anti spam is now off")
 
-    @enable.command(help="Toggle anti invite")
+    @toggle.command(help="Toggle anti invite")
     @commands.has_permissions(administrator=True)
     async def invite(self, ctx):
         await self.add_to_db(ctx.guild)
@@ -552,7 +558,7 @@ class Admin(commands.Cog):
             await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti invite": "off"}})
             await ctx.send("Anti invite is now off")
 
-    @enable.command(help="Toggle anti link")
+    @toggle.command(help="Toggle anti link")
     @commands.has_permissions(administrator=True)
     async def link(self, ctx):
         await self.add_to_db(ctx.guild)
@@ -565,7 +571,7 @@ class Admin(commands.Cog):
             await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti link": "off"}})
             await ctx.send("Anti link is now off")
 
-    @enable.command(help="Toggle anti mass mention", aliases=["ping"])
+    @toggle.command(help="Toggle anti mass mention", aliases=["ping"])
     @commands.has_permissions(administrator=True)
     async def mention(self, ctx):
         await self.add_to_db(ctx.guild)
@@ -578,7 +584,7 @@ class Admin(commands.Cog):
             await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti mass mention": "off"}})
             await ctx.send("Anti mass mention is now off")
 
-    @enable.command(help="Toggle anti link")
+    @toggle.command(help="Toggle anti link")
     @commands.has_permissions(administrator=True)
     async def raid(self, ctx):
         await self.add_to_db(ctx.guild)

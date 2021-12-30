@@ -25,7 +25,7 @@ class AutoMod(commands.Cog):
                     await message.author.send("That's a blacklisted word")
 
     @commands.Cog.listener(name="on_message")
-    async def is_blacklist(self, message: discord.Message):
+    async def anti_invite(self, message: discord.Message):
         if message.guild:
             check = await cursor.find_one({"guild": message.guild.id})
             if check is None:
