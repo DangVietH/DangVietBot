@@ -27,15 +27,45 @@ class AutoMod(commands.Cog):
     @commands.Cog.listener(name="on_message")
     async def anti_invite(self, message: discord.Message):
         if message.guild:
-            check = await cursor.find_one({"guild": message.guild.id})
-            if check is None:
-                return
-            else:
-                if "discord.gg" in message.content.lower():
-                    if check['anti invite'] == "on":
+            if not message.author.bot:
+                check = await cursor.find_one({"guild": message.guild.id})
+                if check is None:
+                    return
+                else:
+                    if "discord.gg" in message.content.lower():
+                        if check['anti invite'] == "on":
+                            await message.delete()
+                            await message.author.send("You cannot send invite links in this server")
+                    elif "discord.com/invite" in message.content.lower():
+                        if check['anti invite'] == "on":
+                            await message.delete()
+                            await message.author.send("You cannot send invite links in this server")
+
+    @commands.Cog.listener(name="on_message")
+    async def anti_link(self, message: discord.Message):
+        if message.guild:
+            if not message.author.bot:
+                check = await cursor.find_one({"guild": message.guild.id})
+                if check is None:
+                    return
+                else:
+                    if "https://" in message.content.lower():
+                        if check['anti link'] == "on":
+                            await message.delete()
+                            await message.author.send("You cannot send links in this server")
+                    elif "http://" in message.content.lower():
+                        if check['anti link'] == "on":
+                            await message.delete()
+                            await message.author.send("You cannot send links in this server")
+
+    @commands.Cog.listener(name="on_message")
+    async def anti_mass_ping(self, message: discord.Message):
+        if message.guild:
+            if not message.author.bot:
+                check = await cursor.find_one({"guild": message.guild.id})
+                if check is None:
+                    return
+                else:
+                    if len(message.mentions) > 3:
                         await message.delete()
-                        await message.author.send("You cannot send invite links in this server")
-                elif "discord.com/invite" in message.content.lower():
-                    if check['anti invite'] == "on":
-                        await message.delete()
-                        await message.author.send("You cannot send invite links in this server")
+                        await message.channel.send("There's a mass ping. Do something mods")

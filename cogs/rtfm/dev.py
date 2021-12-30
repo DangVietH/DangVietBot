@@ -75,7 +75,7 @@ class Dev(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @commands.command(help='Search through docs')
+    @commands.command(help='Search through docs', aliases=["rtfd"])
     async def rtfm(self, ctx, docs: str, *, term: str = None):
         docs = docs.lower()
         target = None
