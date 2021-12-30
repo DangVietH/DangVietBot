@@ -460,14 +460,9 @@ class Admin(commands.Cog):
                 "anti raid": "off"
             })
 
-    @commands.group(invoke_without_command=True, case_insensitive=True, help="FireCoin commands")
+    @commands.group(invoke_without_command=True, case_insensitive=True, help="Automod commands")
     async def automod(self, ctx):
-        embed = discord.Embed(title="Automod commands", color=discord.Color.random())
-        command = self.bot.get_command("automod")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"automod {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
-        await ctx.send(embed=embed)
+        await ctx.send("There's a bug, so don't use it right now")
 
     @automod.command(help="Blacklist a word")
     async def blacklist(self, ctx, *, word: str):
