@@ -1,7 +1,7 @@
 from .admin import Admin
 from .giveaway import Giveaway
 from .automod import AutoMod
-froom automod_event import AutoModEvent
+from automod_event import AutoModEvent
 
 
 def setup(bot):
