@@ -23,3 +23,17 @@ class AutoMod(commands.Cog):
                 if check2 is not None:
                     await message.delete()
                     await message.author.send("That's a blacklisted word")
+
+    @commands.Cog.listener(name="on_message")
+    async def anti_invite(self, message: discord.Message):
+        if message.guild:
+            check = await cursor.find_one({"guild": message.guild.id})
+            if check is None:
+                return
+            else:
+                if "discord.gg" in message.content.lower():
+                    await message.delete()
+                    await message.author.send("You cannot send invite links in this server")
+                elif "discord.com/invite" in message.content.lower():
+                    await message.delete()
+                    await message.author.send("You cannot send invite links in this server")
