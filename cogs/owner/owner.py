@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, menus
+from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 
@@ -15,42 +15,6 @@ econUser = edb['server_user']
 
 ldb = cluster["levelling"]
 levelling = ldb['member']
-
-
-class TestMenu(menus.MenuPages, inherit_buttons=False):
-    @menus.button('⏪')
-    async def first_page(self, payload):
-        await self.show_page(0)
-
-    @menus.button('◀️')
-    async def previous_page(self, payload):
-        await self.show_checked_page(self.current_page - 1)
-
-    @menus.button('▶️')
-    async def next_page(self, payload):
-        await self.show_checked_page(self.current_page + 1)
-
-    @menus.button('⏩')
-    async def last_page(self, payload):
-        max_pages = self._source.get_max_pages()
-        last_page = max(max_pages - 1, 0)
-        await self.show_page(last_page)
-
-    @menus.button('⏹')
-    async def on_stop(self, payload):
-        self.stop()
-
-
-class TestPageSource(menus.ListPageSource):
-    def __init__(self, data):
-        super().__init__(data, per_page=10)
-
-    async def format_page(self, menu, entries):
-        embed = discord.Embed(title="Servers")
-        for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=False)
-        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
 
 
 class Owner(commands.Cog):
@@ -102,16 +66,6 @@ class Owner(commands.Cog):
         else:
             await ctx.send('Invalid status')
         await ctx.message.add_reaction('👌')
-
-    @commands.is_owner()
-    @commands.command(help="See list of servers")
-    async def guildlist(self, ctx):
-        data = []
-        for guild in self.bot.guilds:
-            to_append = (f"{guild.name}", f"**Owner** {guild.owner} **Member** {guild.member_count} **ID** {guild.id}")
-            data.append(to_append)
-        menu = TestMenu(TestPageSource(data))
-        await menu.start(ctx)
 
     @commands.group(help="Blacklist ppls")
     @commands.is_owner()

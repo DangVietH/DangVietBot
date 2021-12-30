@@ -60,6 +60,7 @@ class RoleListPageSource(menus.ListPageSource):
 class Leveling(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.default_bg = os.path.join(os.path.dirname(__file__), 'assets', 'rank.png')
 
     @commands.Cog.listener()
     async def on_message(self, message):

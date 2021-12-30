@@ -1,5 +1,18 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
+from utils.menuUtils import MenuButtons
+
+
+class TestPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(title="Servers")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
 
 
 class Info(commands.Cog):
@@ -79,3 +92,12 @@ class Info(commands.Cog):
     async def invite(self, ctx):
         embed = discord.Embed(title='Invite?', description="[here](https://discord.com/api/oauth2/authorize?client_id=875589545532485682&permissions=8&scope=bot%20applications.commands)")
         await ctx.send(embed=embed)
+
+    @commands.command(help="See list of servers")
+    async def guildlist(self, ctx):
+        data = []
+        for guild in self.bot.guilds:
+            to_append = (f"{guild.name}", f"**Owner** {guild.owner} **Member** {guild.member_count} **ID** {guild.id}")
+            data.append(to_append)
+        menu = MenuButtons(TestPageSource(data))
+        await menu.start(ctx)

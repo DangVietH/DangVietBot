@@ -428,7 +428,7 @@ class Economy(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="FireCoin commands")
     async def FireCoin(self, ctx):
-        embed = discord.Embed(title="Nft", color=discord.Color.random())
+        embed = discord.Embed(title="FireCoin", color=discord.Color.random())
         command = self.bot.get_command("FireCoin")
         if isinstance(command, commands.Group):
             for subcommand in command.commands:
