@@ -5,13 +5,13 @@ import requests
 import asyncpraw
 import random
 import asyncio
-import os
+from main import config_var
 
 
 reddit = asyncpraw.Reddit(client_id="WS8DpWseFlxeec8_v2sjrw",
-                          client_secret=os.environ.get("reddit_secret"),
+                          client_secret=config_var['reddit_secret'],
                           username='DangVietHoang',
-                          password=os.environ.get("reddit_pass"),
+                          password=config_var['reddit_pass'],
                           user_agent='')
 
 

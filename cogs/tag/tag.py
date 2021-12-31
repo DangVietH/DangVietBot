@@ -3,9 +3,9 @@ import discord
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
 from utils.menuUtils import MenuButtons
-import os
+from main import config_var
 
-cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
+cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["bot"]["tag"]
 
 

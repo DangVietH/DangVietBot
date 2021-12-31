@@ -5,9 +5,9 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
 from cogs.economy.shopping_list import shop
 from utils.menuUtils import MenuButtons
-import os
+from main import config_var
 
-cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
+cluster = AsyncIOMotorClient(config_var['mango_link'])
 db = cluster["economy"]
 cursor = db["users"]
 nfts = db["nft"]

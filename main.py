@@ -1,11 +1,13 @@
-import os
 import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
+import json
+
+with open('config.json') as f:
+    config_var = json.load(f)
 
 
 class CustomHelp(commands.HelpCommand):
-
     def get_ending_note(self):
         return f'Use help [command] for more info on a command. \nYou can also type help [category] for more info on a category'
 
@@ -23,6 +25,7 @@ class CustomHelp(commands.HelpCommand):
                 cog_name = getattr(cog, "qualified_name", "No Category")
                 embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
         embed.set_footer(text=self.get_ending_note())
+        embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/875589545532485682/6fd951c10178ec9bc5cb145fec56c89f.png?size=1024")
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label='Invite', url='https://bit.ly/3daeOIe'))
         view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9'))
@@ -67,7 +70,7 @@ class CustomHelp(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
 
-cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
+cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["custom_prefix"]["prefix"]
 
 bcursor = cluster['bot']['blacklist']
@@ -149,4 +152,4 @@ if __name__ == '__main__':
         bot.load_extension(f'cogs.{folder}')
     bot.load_extension('jishaku')
 
-    bot.run(os.environ.get("token"))
+    bot.run(config_var['mango_link'])

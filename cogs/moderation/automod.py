@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
-import os
 from motor.motor_asyncio import AsyncIOMotorClient
+from main import config_var
 
-cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
+cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["moderation"]['automod']
 
 
