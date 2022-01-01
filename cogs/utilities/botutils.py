@@ -9,7 +9,7 @@ class BotUtils(commands.Cog):
     @commands.command(help="Suggest something to this bot")
     async def suggest(self, ctx, *, text):
         channel = self.bot.get_channel(887949939676684338)
-        embed = discord.Embed(title=f"Suggestion from {ctx.author}", description=f"```{text}```", color=discord.Color.from_rgb(225, 0, 92))
+        embed = discord.Embed(title=f"Suggestion from {ctx.author}", description=f"{text}", color=discord.Color.from_rgb(225, 0, 92))
         msg = await channel.send(embed=embed)
         await msg.add_reaction('🔼')
         await msg.add_reaction('🔽')
@@ -18,7 +18,7 @@ class BotUtils(commands.Cog):
     @commands.command(help="Report a bug of the bot")
     async def bug(self, ctx, *, text):
         channel = self.bot.get_channel(921375785112195102)
-        embed = discord.Embed(title=f"Bug reported by {ctx.author}", description=f"```{text}```",
+        embed = discord.Embed(title=f"Bug reported by {ctx.author}", description=f"{text}",
                               color=discord.Color.from_rgb(225, 0, 92))
         msg = await channel.send(embed=embed)
         await msg.add_reaction('🔼')
