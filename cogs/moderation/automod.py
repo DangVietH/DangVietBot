@@ -88,15 +88,7 @@ class AutoMod(commands.Cog):
                                           color=discord.Color.red())
                     embed.set_footer(text="Complete this in 30 seconds")
 
-                    characters = list(string.ascii_letters + string.digits + "!@#$%^&*()")
-                    random.shuffle(characters)
-
-                    password = []
-                    for i in range(10):
-                        password.append(random.choice(characters))
-                    random.shuffle(password)
-
-                    c = "".join(password)
+                    c = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
                     captcha = discapty.Captcha(c)
                     captcha_image = discord.File(captcha.generate_captcha(), filename="captcha.png")
                     await member.send(embed=embed, file=captcha_image)
