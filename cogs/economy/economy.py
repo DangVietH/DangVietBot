@@ -292,7 +292,7 @@ class Economy(commands.Cog):
             if item['name'].lower() == item_name:
                 amounts = item['amount']
                 if amounts < amount:
-                    await ctx.send("Too much")
+                    await ctx.send(f"You don't have enough {item_name} in your inventory")
                 else:
                     await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
                                             {"$inc": {"inventory.$.amount": -amount}})
@@ -305,6 +305,52 @@ class Economy(commands.Cog):
                     await ctx.send(f"Successfully sold {amount} {item_name} for {price}")
                     await asyncio.sleep(1)
                 break
+
+    @commands.command(help="Give your items to other users")
+    @commands.guild_only()
+    async def trade(self, ctx, member: discord.Member, item_name, amount=1):
+        await self.open_account(ctx.author)
+        await self.open_account(member)
+
+        check = await cursor.find_one({"id": ctx.author.id})
+        item_name = item_name.lower()
+        name_ = None
+        price = None
+
+        for item in shop:
+            name = item["name"].lower()
+            if name == item_name:
+                name_ = name
+                price = item["price"]
+                break
+
+        if name_ is None:
+            await ctx.send("That item wasn't in your inventory")
+        else:
+            for item in check['inventory']:
+                if item['name'].lower() == item_name:
+                    amounts = item['amount']
+                    if amounts < amount:
+                        await ctx.send(f"You don't have enough {item_name} in your inventory")
+                    else:
+                        await cursor.update_one({"id": ctx.author.id, "inventory.name": str(item_name)},
+                                                {"$inc": {"inventory.$.amount": -amount}})
+
+                        is_amount_zero = await cursor.find_one(
+                            {"id": ctx.author.id, "inventory.name": str(item_name), "inventory.amount": 0})
+                        if is_amount_zero is not None:
+                            await cursor.update_one({"id": ctx.author.id}, {"$pull": {"inventory": {"name": item_name}}})
+
+                        inventory_check = await cursor.find_one({"id": member.id, "inventory.name": str(item_name)})
+                        if inventory_check is None:
+                            await cursor.update_one({"id": member.id},
+                                                    {"$push": {
+                                                        "inventory": {"name": item_name, "amount": int(amount)}}})
+                        else:
+                            await cursor.update_one({"id": member.id, "inventory.name": str(item_name)},
+                                                    {"$inc": {"inventory.$.amount": int(amount)}})
+                            await ctx.send(f"Successfully give **{amount} {item_name}** to **{member}**")
+                            await member.send(f"**{ctx.author}** just give you **{amount} {item_name}**")
 
     @commands.command(help="See your items", aliases=["bag"])
     async def inventory(self, ctx):
@@ -325,7 +371,7 @@ class Economy(commands.Cog):
             await page.start(ctx)
 
     @commands.command(help="we work for the right to work")
-    @commands.cooldown(1, 3600, commands.BucketType.user)
+    @commands.cooldown(1, 60, commands.BucketType.user)
     @commands.guild_only()
     async def gamble(self, ctx, amount: int):
         await self.open_account(ctx.author)

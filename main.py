@@ -145,7 +145,7 @@ async def on_guild_join(guild):
                               color=discord.Color.from_rgb(225, 0, 92))
         embed.add_field(name="Note", value="I'm still WIP, so some features may be bugged or ugly.", inline=False)
         embed.add_field(name="Links",
-                        value="[invite](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=8&scope=bot%20applications.commands) \n[Support Server](https://discord.gg/cnydBRnHU9) \n[Github](https://github.com/DangVietH/DHB)",
+                        value="[invite](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=8&scope=bot%20applications.commands) \n[Support Server](https://discord.gg/cnydBRnHU9)",
                         inline=False)
         embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/875589545532485682/6fd951c10178ec9bc5cb145fec56c89f.png?size=1024")
         await guild.system_channel.send(embed=embed)
