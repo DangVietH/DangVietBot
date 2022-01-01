@@ -10,4 +10,5 @@ dnspython
 git+https://github.com/Gorialis/jishaku
 PyNaCl
 ffmpeg
+discapty
 pillow==8.4.0

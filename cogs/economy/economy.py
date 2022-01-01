@@ -315,13 +315,11 @@ class Economy(commands.Cog):
         check = await cursor.find_one({"id": ctx.author.id})
         item_name = item_name.lower()
         name_ = None
-        price = None
 
         for item in shop:
             name = item["name"].lower()
             if name == item_name:
                 name_ = name
-                price = item["price"]
                 break
 
         if name_ is None:
