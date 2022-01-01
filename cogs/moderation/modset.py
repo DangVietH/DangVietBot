@@ -228,10 +228,4 @@ class ModSet(commands.Cog):
     async def raid(self, ctx):
         await self.add_to_db(ctx.guild)
 
-        check = await cursor.find_one({"guild": ctx.guild.id})
-        if check['anti raid'] == "off":
-            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti raid": "on"}})
-            await ctx.send("Anti raid mention is now on")
-        elif check['anti raid'] == "on":
-            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti raid": "off"}})
-            await ctx.send("Anti raid is now off")
+        await ctx.send("Comming soon")
