@@ -18,7 +18,8 @@ class InventoryPageSource(menus.ListPageSource):
         super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green())
+        embed = discord.Embed(color=discord.Color.green(), title="List of items")
+        embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/875886792035946496/926851278850637905/treasure.png")
         embed.set_author(
             icon_url=menu.ctx.author.avatar.url,
             name=f"{menu.ctx.author} Inventory")
@@ -87,14 +88,6 @@ class NFTPageSource(menus.ListPageSource):
             embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
         return embed
-
-
-def is_account_available(ctx):
-    account = cursor.find({"id": ctx.author.id})
-    if account is None:
-        return False
-    else:
-        return True
 
 
 class Economy(commands.Cog):
@@ -223,7 +216,7 @@ class Economy(commands.Cog):
             name = item["name"]
             price = item["price"]
             description = item["description"]
-            to_append = (f"{name} | <:DHBuck:901485795410599988> {price}", f"{description}")
+            to_append = (f"{item['emoji']} {name} | <:DHBuck:901485795410599988> {price}", f"{description}")
             data.append(to_append)
 
         page = MenuButtons(ShopPageSource(data))
@@ -240,12 +233,14 @@ class Economy(commands.Cog):
         item_name = item_name.lower()
         name_ = None
         price = None
+        emoji = None
 
         for item in shop:
             name = item["name"].lower()
             if name == item_name:
                 name_ = name
                 price = item["price"]
+                emoji = item['emoji']
                 break
 
         if name_ is None:
@@ -258,7 +253,7 @@ class Economy(commands.Cog):
             inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
             if inventory_check is None:
                 await cursor.update_one({"id": user.id},
-                                        {"$push": {"inventory": {"name": item_name, "amount": int(amount)}}})
+                                        {"$push": {"inventory": {"name": item_name, "amount": int(amount), "price": int(price), "emoji": emoji}}})
             else:
                 await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
                                         {"$inc": {"inventory.$.amount": int(amount)}})
@@ -275,22 +270,11 @@ class Economy(commands.Cog):
         check = await cursor.find_one({"id": user.id})
 
         item_name = item_name.lower()
-        name_ = None
-        price = None
-
-        for item in shop:
-            name = item["name"].lower()
-            if name == item_name:
-                name_ = name
-                price = item["price"]
-                break
-
-        if name_ is None:
-            await ctx.send("That item wasn't in your inventory")
 
         for item in check['inventory']:
             if item['name'].lower() == item_name:
                 amounts = item['amount']
+                price_ = item["price"]
                 if amounts < amount:
                     await ctx.send(f"You don't have enough {item_name} in your inventory")
                 else:
@@ -301,8 +285,8 @@ class Economy(commands.Cog):
                         {"id": user.id, "inventory.name": str(item_name), "inventory.amount": 0})
                     if is_amount_zero is not None:
                         await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}})
-                    await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
-                    await ctx.send(f"Successfully sold {amount} {item_name} for {price}")
+                    await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price_}})
+                    await ctx.send(f"Successfully sold {amount} {item_name} for {price_}")
                     await asyncio.sleep(1)
                 break
 
@@ -363,7 +347,7 @@ class Economy(commands.Cog):
             for item in items:
                 name = item['name']
                 amount = item['amount']
-                to_append = (f"{name}", f"**Amount** {amount}")
+                to_append = (f"{item['emoji']} {name}", f"**Amount** {amount}")
                 data.append(to_append)
             page = MenuButtons(InventoryPageSource(data))
             await page.start(ctx)
