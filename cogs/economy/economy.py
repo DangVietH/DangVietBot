@@ -312,6 +312,8 @@ class Economy(commands.Cog):
             for item in check['inventory']:
                 if item['name'].lower() == item_name:
                     amounts = item['amount']
+                    price = item['price']
+                    emoji = item['emoji']
                     if amounts < amount:
                         await ctx.send(f"You don't have enough {item_name} in your inventory")
                     else:
@@ -327,7 +329,7 @@ class Economy(commands.Cog):
                         if inventory_check is None:
                             await cursor.update_one({"id": member.id},
                                                     {"$push": {
-                                                        "inventory": {"name": item_name, "amount": int(amount)}}})
+                                                        "inventory": {"name": item_name, "amount": int(amount), "price": int(price), "emoji": emoji}}})
                         else:
                             await cursor.update_one({"id": member.id, "inventory.name": str(item_name)},
                                                     {"$inc": {"inventory.$.amount": int(amount)}})
