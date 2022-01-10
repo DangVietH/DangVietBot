@@ -22,7 +22,8 @@ class Dev(commands.Cog):
             "pymongo": "https://pymongo.readthedocs.io/en/stable/",
             "motor": "https://motor.readthedocs.io/en/stable/",
             "django": "https://django.readthedocs.io/en/stable",
-            "flask": "https://flask.palletsprojects.com/en/1.1.x"
+            "flask": "https://flask.palletsprojects.com/en/1.1.x",
+            "pillow": "https://pillow.readthedocs.io/en/stable/"
         }
         self.aliases = {
             ("py", "py3", "python3", "python"): "python",
@@ -37,7 +38,8 @@ class Dev(commands.Cog):
             ("pmongo", "pmg", "pymongo"): "pymongo",
             ("mt", "motor"): "motor",
             ("django", "dj"): "django",
-            ("flask", "fl"): "flask"
+            ("flask", "fl"): "flask",
+            ("pillow", "pil"): "pillow"
         }
         self.cache = {}
 

@@ -1,15 +1,11 @@
 import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
-import os
+import json
 
 
-config_var = {
-    "token": os.environ.get("token"),
-    "mango_link": os.environ.get("mango_link"),
-    "reddit_pass": os.environ.get("reddit_pass"),
-    "reddit_secret": os.environ.get("reddit_secret")
-}
+with open('config.json') as f:
+    config_var = json.load(f)
 
 
 class CustomHelp(commands.HelpCommand):
@@ -100,7 +96,30 @@ bot = commands.Bot(command_prefix=get_prefix, intents=intents, help_command=Cust
 
 @bot.event
 async def on_ready():
-    print('DHB is online')
+    print("""
+  _____  
+ |  __ \ 
+ | |  | |
+ | |  | |
+ | |__| |
+ |_____/ 
+    """)
+    print("""
+  _____  _    _ 
+ |  __ \| |  | |
+ | |  | | |__| |
+ | |  | |  __  |
+ | |__| | |  | |
+ |_____/|_|  |_|
+        """)
+    print("""
+  _____  _    _ ____  
+ |  __ \| |  | |  _ \ 
+ | |  | | |__| | |_) |
+ | |  | |  __  |  _ < 
+ | |__| | |  | | |_) |
+ |_____/|_|  |_|____/ 
+            """)
 
 
 @bot.check

@@ -4,6 +4,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from utils.menuUtils import MenuButtons
 from main import config_var
 import os
+from PIL import Image, ImageDraw, ImageFont
+import io
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 db = cluster["levelling"]
@@ -130,20 +132,59 @@ class Leveling(commands.Cog):
                     break
                 lvl += 1
             xp -= ((100 / 2 * (lvl - 1) ** 2) + (100 / 2 * (lvl - 1)))
-            boxes = int((xp / (200 * ((1 / 2) * lvl))) * 20)
             ranking = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
             async for x in ranking:
                 rank += 1
                 if stats['user'] == x['user']:
                     break
 
-            embed = discord.Embed(title=user, color=user.color,
-                                  description=boxes * ":red_square:" + (20 - boxes) * ":white_large_square:")
-            embed.add_field(name="Level", value=f"#{stats['level']}")
-            embed.add_field(name="XP", value=f"#{xp}/{100 * 2 * ((1 / 2) * lvl)}")
-            embed.add_field(name="Rank", value=f"#{rank}")
-            embed.set_thumbnail(url=user.avatar.url)
-            await ctx.send(embed=embed)
+            IMAGE_WIDTH = 850
+            IMAGE_HEIGHT = 238
+
+            image = Image.new('RGB', (IMAGE_WIDTH, IMAGE_HEIGHT), (40, 40, 50))
+            draw = ImageDraw.Draw(image)
+
+            font_big = ImageFont.truetype('font.ttf', 36)
+            font_small = ImageFont.truetype('font.ttf', 20)
+
+            draw.text((248, 48), f"{user}", fill=(225, 0, 92), font=font_big)
+            draw.text((641, 48), f"Rank #{rank}", fill=(225, 0, 92), font=font_big)
+            draw.text((248, 130), f"Level {stats['level']}", fill=(225, 0, 92), font=font_small)
+            draw.text((641, 130), f"{xp} / {100 * 2 * ((1 / 2) * lvl)} XP", fill=(225, 0, 92), font=font_small)
+
+            draw.rounded_rectangle((256, 158, 808, 158), fill=(100, 100, 100), outline=(225, 0, 92), radius=13, width=3)
+
+            AVATAR_SIZE = 200
+            avatar_asset = user.avatar.replace(format='jpg', size=128)
+            buffer_avatar = io.BytesIO(await avatar_asset.read())
+
+            buffer_avatar = io.BytesIO()
+            await avatar_asset.save(buffer_avatar)
+            buffer_avatar.seek(0)
+
+            # read JPG from buffer to Image
+            avatar_image = Image.open(buffer_avatar)
+
+            # resize it
+            avatar_image = avatar_image.resize((AVATAR_SIZE, AVATAR_SIZE))  #
+
+            circle_image = Image.new('L', (AVATAR_SIZE, AVATAR_SIZE))
+            circle_draw = ImageDraw.Draw(circle_image)
+            circle_draw.ellipse((0, 0, AVATAR_SIZE, AVATAR_SIZE), fill=255)
+
+            x = 20
+            y = (IMAGE_HEIGHT - AVATAR_SIZE) // 2
+            image.paste(avatar_image, (x, y), circle_image)
+
+            buffer = io.BytesIO()
+
+            # save PNG in buffer
+            image.save(buffer, format='PNG')
+
+            # move to beginning of buffer so `send()` it will read from beginning
+            buffer.seek(0)
+
+            await ctx.send(file=discord.File(buffer, 'rank.png'))
         else:
             await ctx.send(f"The specified member haven't send a message in this server!!")
 

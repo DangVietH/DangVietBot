@@ -96,7 +96,7 @@ class ModSet(commands.Cog):
                 "anti invite": "off",
                 "anti link": "off",
                 "anti mass mention": "off",
-                "anti raid": "off"
+                "anti alt": "off"
             })
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Automod commands")
@@ -153,7 +153,7 @@ class ModSet(commands.Cog):
             "anti invite": check['anti invite'],
             "anti link": check['anti link'],
             "anti mass mention": check['anti mass mention'],
-            "anti raid": check['anti raid']
+            "anti alt": check['anti alt']
         }
         for n, v in value.items():
             embed.add_field(name=n, value=f"`{v}`", inline=False)
@@ -225,7 +225,13 @@ class ModSet(commands.Cog):
 
     @toggle.command(help="Toggle anti link")
     @commands.has_permissions(administrator=True)
-    async def raid(self, ctx):
+    async def alt(self, ctx):
         await self.add_to_db(ctx.guild)
 
-        await ctx.send("Comming soon")
+        check = await cursor.find_one({"guild": ctx.guild.id})
+        if check['anti alt'] == "off":
+            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti mass mention": "on"}})
+            await ctx.send("Anti mass mention is now on")
+        elif check['anti alt'] == "on":
+            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"anti mass mention": "off"}})
+            await ctx.send("Anti mass mention is now off")

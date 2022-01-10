@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from motor.motor_asyncio import AsyncIOMotorClient
 from main import config_var
+import datetime
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 modb = cluster["moderation"]
@@ -63,6 +64,81 @@ class Admin(commands.Cog):
                 await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
             else:
                 await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+
+    @commands.command(help="TImout a member")
+    @commands.has_permissions(administrator=True)
+    async def timeout(self, ctx, member: discord.Member, time, *, reason=None):
+        converted_time = convert(time)
+        if converted_time == -1:
+            await ctx.send("You didn't answer the time correctly")
+
+        elif converted_time == -2:
+            await ctx.send("Time must be an integer")
+        else:
+            duration = datetime.timedelta(minutes=converted_time)
+            await member.timeout_for(duration, reason=reason)
+
+            await member.send(f"You were timeout in **{ctx.guild.name}** for {reason}")
+
+            num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+
+            embed = discord.Embed(title=f"Case {num_of_case}",
+                                  description=f"{member.mention} has been timeout for: {reason}",
+                                  color=discord.Color.red())
+            await ctx.send(embed=embed)
+
+            await cases.update_one({"guild": ctx.guild.id}, {"$push": {
+                "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "timeout",
+                          "Mod": f"{ctx.author.id}",
+                          "reason": str(reason)}}})
+            await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
+
+            result = await cursors.find_one({"guild": ctx.guild.id})
+            if result is not None:
+                channel = self.bot.get_channel(result["channel"])
+                embed = discord.Embed(title=f"Case #{num_of_case}: Timeout!",
+                                      description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}",
+                                      color=discord.Color.red())
+                await channel.send(embed=embed)
+
+            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+            if check_user_case is None:
+                await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+            else:
+                await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+
+    @commands.command(help="Untimeout a member")
+    @commands.has_permissions(administrator=True)
+    async def untimeout(self, ctx, member: discord.Member, *, reason=None):
+        await member.remove_timeout(reason=reason)
+
+        await member.send(f"You were untimeout in **{ctx.guild.name}** for {reason}")
+
+        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+
+        embed = discord.Embed(title=f"Case {num_of_case}",
+                              description=f"{member.mention} has been untimeout for: {reason}",
+                              color=discord.Color.green())
+        await ctx.send(embed=embed)
+
+        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
+            "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "untimeout", "Mod": f"{ctx.author.id}",
+                      "reason": str(reason)}}})
+        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
+
+        result = await cursors.find_one({"guild": ctx.guild.id})
+        if result is not None:
+            channel = self.bot.get_channel(result["channel"])
+            embed = discord.Embed(title=f"Case #{num_of_case}: Untimeout!",
+                                  description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}",
+                                  color=discord.Color.red())
+            await channel.send(embed=embed)
+
+        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+        if check_user_case is None:
+            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+        else:
+            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Mute member")
     @commands.has_permissions(administrator=True)
@@ -160,7 +236,6 @@ class Admin(commands.Cog):
                                       name="DHB_muted")
 
         await member.remove_roles(mutedRole)
-        await ctx.send(f"Unmuted {member}")
         await member.send(f"You were unmuted in the **{ctx.guild.name}**. Make sure you behave well 😉")
 
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1

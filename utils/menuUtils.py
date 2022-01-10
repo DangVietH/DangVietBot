@@ -21,8 +21,12 @@ class MenuButtons(discord.ui.View, menus.MenuPages):
             value.update({'view': self})
         return value
 
-    async def interaction_check(self, interaction):
-        return interaction.user == self.ctx.author
+    async def interaction_check(self, interaction) -> bool:
+        if interaction.user != self.ctx.author:
+            await interaction.response.send_messahe("These buttons are not for you idiot", ephemeral=True)
+            return False
+        else:
+            return True
 
     @discord.ui.button(emoji='⏪', style=discord.ButtonStyle.green)
     async def first_page(self, button, interaction):

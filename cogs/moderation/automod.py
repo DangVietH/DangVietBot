@@ -2,9 +2,12 @@ import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from main import config_var
+from datetime import datetime
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["moderation"]['automod']
+cases = cluster["moderation"]['cases']
+mchannel = cluster["moderation"]['modlog']
 
 
 class AutoMod(commands.Cog):
@@ -77,6 +80,25 @@ class AutoMod(commands.Cog):
         if check is None:
             return
         else:
-            if check['anti raid'] == "on":
+            if check['anti alt'] == "on":
                 if not member.bot:
-                    return
+                    created = member.created_at
+                    now = datetime.now()
+                    delta = (now - created).days
+                    if delta <= 10:
+                        num_of_case = (await cases.find_one({"guild": member.guild.id}))['num'] + 1
+                        await cases.update_one({"guild": member.guild.id}, {"$push": {
+                            "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "kick",
+                                      "Mod": f"{875589545532485682}", "reason": "Potential alt"}}})
+                        await cases.update_one({"guild": member.guild.id}, {"$inc": {"num": 1}})
+
+                        result = await mchannel.find_one({"guild": member.guild.id})
+                        if result is not None:
+                            channel = self.bot.get_channel(result["channel"])
+                            embed = discord.Embed(title=f"Case #{num_of_case}: Kick!",
+                                                  description=f"**User:** {member} **Mod:** DHB#6074 \n**Reason:** Potential alt",
+                                                  color=discord.Color.red())
+                            await channel.send(embed=embed)
+
+                        await member.send("It's seems you're an alt by your account age!")
+                        await member.kick(reason="Potential alt")
