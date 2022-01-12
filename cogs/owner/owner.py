@@ -5,16 +5,11 @@ from main import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 
-db = cluster['bot']
-cursor = db['blacklist']
+cursor = cluster['bot']['blacklist']
 
-edb = cluster["economy"]
-ecursor = edb["users"]
+ecursor = cluster["economy"]["users"]
 
-econUser = edb['server_user']
-
-ldb = cluster["levelling"]
-levelling = ldb['member']
+levelling = cluster["levelling"]['member']
 
 
 class Owner(commands.Cog):
@@ -82,15 +77,12 @@ class Owner(commands.Cog):
     async def user(self, ctx, user: discord.User):
         check = await cursor.find_one({"id": user.id})
         if check is None:
-            users = await ecursor.find_one({"id": user.id})
-            if users is not None:
+            if await ecursor.find_one({"id": user.id}) is not None:
                 await ecursor.delete_one({"id": user.id})
 
             if await levelling.find_one({"user": user.id}) is not None:
                 await levelling.delete_one({"user": user.id})
 
-            if await econUser.find_one({"user": user.id}) is not None:
-                await econUser.delete_one({"user": user.id})
             await user.send("You have been blacklisted")
 
             for guild in self.bot.guilds:

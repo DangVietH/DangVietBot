@@ -152,7 +152,9 @@ class Leveling(commands.Cog):
             draw.text((248, 130), f"Level {stats['level']}", fill=(225, 0, 92), font=font_small)
             draw.text((641, 130), f"{xp} / {100 * 2 * ((1 / 2) * lvl)} XP", fill=(225, 0, 92), font=font_small)
 
-            draw.rounded_rectangle((256, 158, 808, 158), fill=(100, 100, 100), outline=(225, 0, 92), radius=13, width=3)
+            draw.rounded_rectangle((242, 182, 803, 208), fill=(70, 70, 70), outline=(225, 0, 92), radius=13, width=3)
+            bar_length = (100 * 2 * ((1 / 2) * lvl)) // 5
+            draw.rounded_rectangle((245, 185, bar_length, 205), fill=(225, 0, 92), radius=10)
 
             AVATAR_SIZE = 200
             avatar_asset = user.avatar.replace(format='jpg', size=128)
@@ -166,7 +168,7 @@ class Leveling(commands.Cog):
             avatar_image = Image.open(buffer_avatar)
 
             # resize it
-            avatar_image = avatar_image.resize((AVATAR_SIZE, AVATAR_SIZE))  #
+            avatar_image = avatar_image.resize((AVATAR_SIZE, AVATAR_SIZE))
 
             circle_image = Image.new('L', (AVATAR_SIZE, AVATAR_SIZE))
             circle_draw = ImageDraw.Draw(circle_image)

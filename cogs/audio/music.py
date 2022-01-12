@@ -64,11 +64,11 @@ class LavalinkVoiceClient(discord.VoiceClient):
         else:
             self.client.lavalink = lavalink.Client(client.user.id)
             self.client.lavalink.add_node(
-                    'lavalink-repl.dangviethoang.repl.co',
-                    443,
+                    'lava.link',
+                    80,
                     'youshallnotpass',
-                    'vietnam',
-                    'default-node')
+                    'singapore',
+                    'MAIN')
             self.lavalink = self.client.lavalink
 
     async def on_voice_server_update(self, data):
@@ -127,11 +127,11 @@ class Music(commands.Cog):
         if not hasattr(bot, 'lavalink'):  # This ensures the client isn't overwritten during cog reloads.
             bot.lavalink = lavalink.Client(875589545532485682)  # bot id
             bot.lavalink.add_node(
-                    'lavalink-repl.dangviethoang.repl.co',
-                    443,
+                    'lava.link',
+                    80,
                     'youshallnotpass',
-                    'vietnam',
-                    'default-node')  # Host, Port, Password, Region, Name
+                    'singapore',
+                    'MAIN') # Host, Port, Password, Region, Name
 
         lavalink.add_event_hook(self.track_hook)
 
