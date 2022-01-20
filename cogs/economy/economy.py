@@ -79,7 +79,7 @@ class NFTPageSource(menus.ListPageSource):
         super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green())
+        embed = discord.Embed(color=discord.Color.green(), title="PLZ SCREENSHOT IT")
         embed.set_author(
             icon_url="https://cdn.discordapp.com/attachments/900197917170737152/923101670207004723/NFT_Icon.png",
             name="NFT list")
@@ -112,21 +112,22 @@ class Economy(commands.Cog):
     @commands.command(help="See how much money you have", aliases=["bal"])
     async def balance(self, ctx, user: discord.Member = None):
         user = user or ctx.author
-        await self.open_account(user)
+        if not user.bot:
+            await self.open_account(user)
 
-        check = await cursor.find_one({"id": user.id})
-        wallet = check['wallet']
-        bank = check['bank']
-        balance = wallet + bank
-        embed = discord.Embed(description=f"**Total:** <:DHBuck:901485795410599988> {balance}",
-                              color=discord.Color.blue())
-        embed.set_author(
-            icon_url=user.avatar.url,
-            name=f"{user} balance")
-        embed.add_field(name="Wallet", value=f"<:DHBuck:901485795410599988> {wallet}", inline=False)
-        embed.add_field(name="Bank", value=f"<:DHBuck:901485795410599988> {bank}", inline=False)
-        embed.add_field(name="FireCoin", value=f"<:FireCoin:920903065454903326> {check['FireCoin']}", inline=False)
-        await ctx.send(embed=embed)
+            check = await cursor.find_one({"id": user.id})
+            wallet = check['wallet']
+            bank = check['bank']
+            balance = wallet + bank
+            embed = discord.Embed(description=f"**Total:** <:DHBuck:901485795410599988> {balance}",
+                                  color=discord.Color.blue())
+            embed.set_author(
+                icon_url=user.avatar.url,
+                name=f"{user} balance")
+            embed.add_field(name="Wallet", value=f"<:DHBuck:901485795410599988> {wallet}", inline=False)
+            embed.add_field(name="Bank", value=f"<:DHBuck:901485795410599988> {bank}", inline=False)
+            embed.add_field(name="FireCoin", value=f"<:FireCoin:920903065454903326> {check['FireCoin']}", inline=False)
+            await ctx.send(embed=embed)
 
     @commands.command(help="Who is the richest one in your server")
     @commands.guild_only()
@@ -231,7 +232,7 @@ class Economy(commands.Cog):
 
     @commands.command(help="Buy stuff")
     @commands.guild_only()
-    async def buy(self, ctx, item_name, amount=1):
+    async def buy(self, ctx, item_name: str, amount=1):
         user = ctx.author
         await self.open_account(user)
 
@@ -250,17 +251,15 @@ class Economy(commands.Cog):
 
         if name_ is None:
             await ctx.send("That item didn't exist")
-        wallet = check['wallet']
-        cost = price * amount
-        if cost > wallet:
-            await ctx.send(f"You don't have enough money to buy {amount} {item_name}")
         else:
-            inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
-            if inventory_check is None:
-                await cursor.update_one({"id": user.id},
-                                        {"$push": {"inventory": {"name": item_name, "amount": int(amount)}}})
+            wallet = check['wallet']
+            cost = price * amount
+            if cost > wallet: await ctx.send(f"You don't have enough money to buy {amount} {item_name}")
             else:
-                await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
+                if inventory_check is None: await cursor.update_one({"id": user.id},
+                                        {"$push": {"inventory": {"name": item_name, "price": int(price), "amount": int(amount)}}})
+                else: await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
                                         {"$inc": {"inventory.$.amount": int(amount)}})
             # get ye money
             await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -cost}})
@@ -275,22 +274,10 @@ class Economy(commands.Cog):
         check = await cursor.find_one({"id": user.id})
 
         item_name = item_name.lower()
-        name_ = None
-        price = None
-
-        for item in shop:
-            name = item["name"].lower()
-            if name == item_name:
-                name_ = name
-                price = item["price"]
-                break
-
-        if name_ is None:
-            await ctx.send("That item wasn't in your inventory")
-
         for item in check['inventory']:
             if item['name'].lower() == item_name:
                 amounts = item['amount']
+                price = item["price"]
                 if amounts < amount:
                     await ctx.send("Too much")
                 else:
@@ -303,7 +290,6 @@ class Economy(commands.Cog):
                         await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}})
                     await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
                     await ctx.send(f"Successfully sold {amount} {item_name} for {price}")
-                    await asyncio.sleep(1)
                 break
 
     @commands.command(help="See your items", aliases=["bag"])
@@ -397,7 +383,7 @@ class Economy(commands.Cog):
         check1 = await cursor.find_one({"id": ctx.author.id})
         check2 = await cursor.find_one({"id": user.id})
         if check2 is None:
-            await ctx.send("They don't have an economy account")
+            await ctx.send("They haven't registered yet")
         else:
             total_check = check1['wallet'] + check1['bank']
             if total_check < 10000:
@@ -492,7 +478,7 @@ class Economy(commands.Cog):
             await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount * 1000}})
             await ctx.send(f"Convert {amount} to {amount * 1000}")
 
-    @commands.group(invoke_without_command=True, case_insensitive=True, help="Nft are shit")
+    @commands.group(invoke_without_command=True, case_insensitive=True, help="IT'S SCREENSHOT TIME!")
     async def nft(self, ctx):
         embed = discord.Embed(title="Nft", color=discord.Color.random())
         command = self.bot.get_command("nft")
@@ -506,7 +492,7 @@ class Economy(commands.Cog):
         await self.open_account(ctx.author)
 
         await ctx.send("Answer These Question In 1 minute!")
-        questions = ["Enter Name: ", "Enter Image: "]
+        questions = ["Enter Name: ", "Enter Image link: "]
         answers = []
 
         def check(user):
@@ -531,7 +517,7 @@ class Economy(commands.Cog):
             await nfts.insert_one({"name": answers[0], "link": answers[1], "price": price, "owner": ctx.author.id})
             await ctx.send(f"NFT {answers[0]} created for <:FireCoin:920903065454903326> {price}")
 
-    @nft.command(help="Buy an nft")
+    @nft.command(help="WHY DON'T SCREENSHOT")
     async def buy(self, ctx, *, name):
         await self.open_account(ctx.author)
         check = await nfts.find_one({"name": name})
@@ -549,7 +535,7 @@ class Economy(commands.Cog):
                 await nfts.update_one({"name": name}, {"$set": {"owner": ctx.author.id}})
                 await og_owner.send(f"**{ctx.author}** just bought your nft name **{name}** and you receive <:FireCoin:920903065454903326> {check['price']}")
 
-    @nft.command(help="View an nft")
+    @nft.command(help="IT'S SCREENSHOT TIME")
     async def view(self, ctx, *, name):
         check = await nfts.find_one({"name": name})
         if check is None:
@@ -559,7 +545,7 @@ class Economy(commands.Cog):
             embed.set_image(url=check['link'])
             await ctx.send(embed=embed)
 
-    @nft.command(help="delete an nft")
+    @nft.command(help="after someone just screenshot it")
     @commands.is_owner()
     async def delete(self, ctx, *, name):
         check = await nfts.find_one({"name": name})

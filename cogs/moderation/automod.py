@@ -31,9 +31,10 @@ class AutoMod(commands.Cog):
                         await message.delete()
                         await message.author.send("That's a blacklisted word")
                     # anti invite 
-                    if self.invite.findall(message.content) is True and data['anti invite'] == "on":
-                        await message.delete()
-                        await message.author.send("You cannot send invite links in this server")
+                    if data['anti invite'] == "on":
+                        if self.invite.findall(message.content) is True:
+                            await message.delete()
+                            await message.author.send("You cannot send invite links in this server")
                 
                     # anti spam 
                     if data['anti spam'] == "on":
@@ -57,13 +58,15 @@ class AutoMod(commands.Cog):
                             await message.author.send("I unmuted you. Now BEHAVE OK!")
                 
                     # anti link
-                    if not self.invite.findall(message.content) is True and self.links.findall(message.content) and data['anti link'] == "on":
-                        await message.delete()
-                        await message.author.send("You cannot send links in this server")
+                    if data['anti link'] == "on":
+                        if self.links.findall(message.content):
+                            await message.delete()
+                            await message.author.send("You cannot send links in this server")
                 
-                    if len(message.mentions) > 3 and data['anti mass mention'] == "on":
-                        await message.delete()
-                        await message.channel.send("There's a mass ping. Do something mods")   
+                    if data['anti mass mention'] == "on":
+                        if len(message.mentions) > 3:
+                            await message.delete()
+                            await message.channel.send("There's a mass ping. Do something mods")   
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
