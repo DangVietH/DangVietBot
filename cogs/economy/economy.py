@@ -239,31 +239,24 @@ class Economy(commands.Cog):
         check = await cursor.find_one({"id": user.id})
 
         item_name = item_name.lower()
-        name_ = None
-        price = None
-
         for item in shop:
             name = item["name"].lower()
             if name == item_name:
-                name_ = name
                 price = item["price"]
-                break
-
-        if name_ is None:
-            await ctx.send("That item didn't exist")
-        else:
-            wallet = check['wallet']
-            cost = price * amount
-            if cost > wallet: await ctx.send(f"You don't have enough money to buy {amount} {item_name}")
-            else:
-                inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
-                if inventory_check is None: await cursor.update_one({"id": user.id},
+                wallet = check['wallet']
+                cost = price * amount
+                if cost > wallet: await ctx.send(f"You don't have enough money to buy {amount} {item_name}")
+                else:
+                    inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
+                    if inventory_check is None: await cursor.update_one({"id": user.id},
                                         {"$push": {"inventory": {"name": item_name, "price": int(price), "amount": int(amount)}}})
-                else: await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                    else: await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
                                         {"$inc": {"inventory.$.amount": int(amount)}})
-            # get ye money
-            await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -cost}})
-            await ctx.send(f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988>  {cost}")
+                # get ye money
+                    await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -cost}})
+                    await ctx.send(f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988>  {cost}")
+                break
+            
 
     @commands.command(help="Sell your items")
     @commands.guild_only()
