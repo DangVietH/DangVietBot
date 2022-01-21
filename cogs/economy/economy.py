@@ -1,9 +1,10 @@
 import discord
-from discord.ext import commands, menus
+from discord.ext import commands
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
-from cogs.economy.shopping_list import shop
+import cogs.economy.shopping_list as shopping_list
+from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource, NFTPageSource
 from utils.menuUtils import MenuButtons
 from main import config_var
 
@@ -11,90 +12,6 @@ cluster = AsyncIOMotorClient(config_var['mango_link'])
 db = cluster["economy"]
 cursor = db["users"]
 nfts = db["nft"]
-
-
-class InventoryPageSource(menus.ListPageSource):
-    def __init__(self, data):
-        super().__init__(data, per_page=10)
-
-    async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green())
-        embed.set_author(
-            icon_url=menu.ctx.author.avatar.url,
-            name=f"{menu.ctx.author} Inventory")
-        for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=False)
-        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
-
-
-class GuildRichPageSource(menus.ListPageSource):
-    def __init__(self, data):
-        super().__init__(data, per_page=10)
-
-    async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green(),
-                              description="Base by wallet")
-        embed.set_author(
-            icon_url=menu.ctx.author.guild.icon.url,
-            name=f"Riches user in {menu.ctx.author.guild.name}")
-        for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=False)
-        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
-
-
-class GlobalRichPageSource(menus.ListPageSource):
-    def __init__(self, data):
-        super().__init__(data, per_page=10)
-
-    async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green(), description="Base by wallet")
-        embed.set_author(
-            icon_url="https://upload.wikimedia.org/wikipedia/commons/7/7f/Rotating_earth_animated_transparent.gif",
-            name="Riches users in the world")
-        for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=False)
-        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
-
-
-class ShopPageSource(menus.ListPageSource):
-    def __init__(self, data):
-        super().__init__(data, per_page=10)
-
-    async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green())
-        embed.set_author(
-            icon_url="https://cdn.discordapp.com/attachments/900197917170737152/921035393456042004/shop.png",
-            name="Shop")
-        for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=False)
-        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
-
-
-class NFTPageSource(menus.ListPageSource):
-    def __init__(self, data):
-        super().__init__(data, per_page=10)
-
-    async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green(), title="PLZ SCREENSHOT IT")
-        embed.set_author(
-            icon_url="https://cdn.discordapp.com/attachments/900197917170737152/923101670207004723/NFT_Icon.png",
-            name="NFT list")
-        for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=False)
-        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
-
-
-def is_account_available(ctx):
-    account = cursor.find({"id": ctx.author.id})
-    if account is None:
-        return False
-    else:
-        return True
 
 
 class Economy(commands.Cog):
@@ -217,45 +134,7 @@ class Economy(commands.Cog):
                                       color=discord.Color.red())
                 await message.reply(embed=embed)
 
-    @commands.command(help="Shopping list", aliases=['sl'])
-    async def shop(self, ctx):
-        data = []
-        for item in shop:
-            name = item["name"]
-            price = item["price"]
-            description = item["description"]
-            to_append = (f"{name} | <:DHBuck:901485795410599988> {price}", f"{description}")
-            data.append(to_append)
-
-        page = MenuButtons(ShopPageSource(data))
-        await page.start(ctx)
-
-    @commands.command(help="Buy stuff")
-    @commands.guild_only()
-    async def buy(self, ctx, item_name: str, amount=1):
-        user = ctx.author
-        await self.open_account(user)
-
-        check = await cursor.find_one({"id": user.id})
-
-        item_name = item_name.lower()
-        for item in shop:
-            name = item["name"].lower()
-            if name == item_name:
-                price = item["price"]
-                wallet = check['wallet']
-                cost = price * amount
-                if cost > wallet: await ctx.send(f"You don't have enough money to buy {amount} {item_name}")
-                else:
-                    inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
-                    if inventory_check is None: await cursor.update_one({"id": user.id},
-                                        {"$push": {"inventory": {"name": item_name, "price": int(price), "amount": int(amount)}}})
-                    else: await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
-                                        {"$inc": {"inventory.$.amount": int(amount)}})
-                # get ye money
-                    await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -cost}})
-                    await ctx.send(f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988>  {cost}")
-                break
+    
             
 
     @commands.command(help="Sell your items")

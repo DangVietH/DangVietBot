@@ -23,7 +23,7 @@ class MenuButtons(discord.ui.View, menus.MenuPages):
 
     async def interaction_check(self, interaction) -> bool:
         if interaction.user != self.ctx.author:
-            await interaction.response.send_messahe("These buttons are not for you idiot", ephemeral=True)
+            await interaction.response.send_message("These buttons are not for you idiot", ephemeral=True)
             return False
         else:
             return True
