@@ -3,7 +3,6 @@ from discord.ext import commands, menus
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.menuUtils import MenuButtons
 from main import config_var
-import os
 from PIL import Image, ImageDraw, ImageFont
 import io
 
@@ -63,7 +62,6 @@ class RoleListPageSource(menus.ListPageSource):
 class Leveling(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.default_bg = os.path.join(os.path.dirname(__file__), 'assets', 'rank.png')
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -249,8 +247,19 @@ class Leveling(commands.Cog):
             await roled.update_one({"guild": ctx.guild.id}, {"$pull": {"role": roles.id, "level": level}})
             await ctx.send(f"{roles.name} role remove.")
         else:
-            await ctx.send("I don't remember I put that role in.")
-
+            await ctx.send("I don't remember I put that role in. do role list to see")
+    
+    @role.command(help="See list of rewarding roles")
+    @commands.guild_only()
+    async def list(self, ctx): 
+        role_cursor = await roled.find_one({"guild": ctx.guild.id})
+        levelrole = role_cursor['role']
+        levelnum = role_cursor['level']
+        embed = discord.Embed(title="Role Rewards")
+        for i in range(len(levelrole)):
+            embed.add_field(name=f"Level {levelnum[i]}", value=f"Role reward: {ctx.guild.get_role(levelrole[i]).name}")
+        await ctx.send(embed=embed)
+        
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Level channel setup")
     async def lvl(self, ctx):
         embed = discord.Embed(title="Level up utils", color=discord.Color.random())

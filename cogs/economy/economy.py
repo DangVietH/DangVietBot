@@ -133,9 +133,23 @@ class Economy(commands.Cog):
                                       description=f"You didn't answer correctly. You only receive <:DHBuck:901485795410599988> {low_money}",
                                       color=discord.Color.red())
                 await message.reply(embed=embed)
-
     
-            
+    @commands.command(help="View the store", aliases=['store'])
+    @commands.guild_only()
+    async def shop(self, ctx):
+        data = []
+        for i in range(len(shopping_list.items)):
+            data.append((f"{shopping_list.items[i]} | <:DHBuck:901485795410599988> {shopping_list.price[i]}", shopping_list.description[i]))
+        page = MenuButtons(ShopPageSource(data))
+        await page.start(ctx)
+    
+    @commands.command(help="Buy some items")
+    @commands.guild_only()
+    async def buy(self, ctx, item_name, amount=1):
+        user = ctx.author
+
+        await self.open_account(user)
+        check = await cursor.find_one({"id": user.id})
 
     @commands.command(help="Sell your items")
     @commands.guild_only()
@@ -161,7 +175,7 @@ class Economy(commands.Cog):
                     if is_amount_zero is not None:
                         await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}})
                     await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
-                    await ctx.send(f"Successfully sold {amount} {item_name} for {price}")
+                    await ctx.send(f"Successfully sold {amount} {item_name} for <:DHBuck:901485795410599988> {price}")
                 break
 
     @commands.command(help="See your items", aliases=["bag"])
@@ -405,6 +419,7 @@ class Economy(commands.Cog):
                 await cursor.update_one({"id": og_owner.id}, {"$inc": {"FireCoin": check['price']}})
                 await cursor.update_one({"id": og_owner.id}, {"$inc": {"price": random.randint(1, 1000)}})
                 await nfts.update_one({"name": name}, {"$set": {"owner": ctx.author.id}})
+                await ctx.send("Successfully bought the nft. **REMEMBER THAT NFTS IS DESTROYING OUR PLANET!**")
                 await og_owner.send(f"**{ctx.author}** just bought your nft name **{name}** and you receive <:FireCoin:920903065454903326> {check['price']}")
 
     @nft.command(help="IT'S SCREENSHOT TIME")
@@ -429,7 +444,7 @@ class Economy(commands.Cog):
             await ctx.send("NFT deleted")
             await og_owner.send(f"Your nft just get deleted by the bot developer!")
 
-    @nft.command(help="View all nfts")
+    @nft.command(help="View all nfts to screenshot")
     async def list(self, ctx):
         stats = nfts.find()
         data = []
