@@ -154,7 +154,7 @@ class Leveling(commands.Cog):
             draw.rounded_rectangle((242, 182, 803, 208), fill=(70, 70, 70), outline=(225, 0, 92), radius=13, width=3)
             
             
-            bar_length = 245 + xp / needed_xp * 800
+            bar_length = 245 + xp / needed_xp * 205
             draw.rounded_rectangle((245, 185, bar_length, 205), fill=(225, 0, 92), radius=10)
 
             AVATAR_SIZE = 200
