@@ -145,13 +145,16 @@ class Leveling(commands.Cog):
             font_big = ImageFont.truetype('font.ttf', 36)
             font_small = ImageFont.truetype('font.ttf', 20)
 
+            needed_xp = 100 * 2 * ((1 / 2) * lvl)
             draw.text((248, 48), f"{user}", fill=(225, 0, 92), font=font_big)
             draw.text((641, 48), f"Rank #{rank}", fill=(225, 0, 92), font=font_big)
             draw.text((248, 130), f"Level {stats['level']}", fill=(225, 0, 92), font=font_small)
-            draw.text((641, 130), f"{xp} / {100 * 2 * ((1 / 2) * lvl)} XP", fill=(225, 0, 92), font=font_small)
+            draw.text((641, 130), f"{xp} / {needed_xp} XP", fill=(225, 0, 92), font=font_small)
 
             draw.rounded_rectangle((242, 182, 803, 208), fill=(70, 70, 70), outline=(225, 0, 92), radius=13, width=3)
-            bar_length = (100 * 2 * ((1 / 2) * lvl)) // 5
+            
+            
+            bar_length = 245 + xp / needed_xp * 800
             draw.rounded_rectangle((245, 185, bar_length, 205), fill=(225, 0, 92), radius=10)
 
             AVATAR_SIZE = 200
