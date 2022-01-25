@@ -13,7 +13,7 @@ class InventoryPageSource(menus.ListPageSource):
             embed.set_author(
             icon_url=menu.ctx.author.avatar.url,
             name=f"{menu.ctx.author} Inventory")
-            for entry in entries: embed.add_field(name=entry[0], value=entry[1], inline=False)
+            for entry in entries: embed.add_field(name=entry[0], value=entry[1])
             embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
             return embed
 
@@ -53,7 +53,7 @@ class ShopPageSource(menus.ListPageSource):
 
     async def format_page(self, menu, entries):
             embed = discord.Embed(color=discord.Color.green(), title="SHOP")
-            for entry in entries: embed.add_field(name=entry[0], value=entry[1], inline=False)
+            for entry in entries: embed.add_field(name=entry[0], value=entry[1])
             embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
             return embed
 
@@ -64,7 +64,7 @@ class NFTPageSource(menus.ListPageSource):
 
     async def format_page(self, menu, entries):
             embed = discord.Embed(color=discord.Color.green(), title="PLZ SCREENSHOT THEM")
-            for entry in entries: embed.add_field(name=entry[0], value=entry[1], inline=False)
+            for entry in entries: embed.add_field(name=entry[0], value=entry[1])
             embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
             embed.set_thumbnail(url=nft_png)
             return embed

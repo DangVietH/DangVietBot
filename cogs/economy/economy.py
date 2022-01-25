@@ -150,6 +150,23 @@ class Economy(commands.Cog):
 
         await self.open_account(user)
         check = await cursor.find_one({"id": user.id})
+        item_name = item_name.lower()
+        if item_name not in shopping_list.items:
+            await ctx.send("Item does not exist in shop")
+        else: 
+            for i in range(len(shopping_list.items)):
+                if item_name == str(shopping_list.items[i]): 
+                    cost = int(shopping_list.price[i]) * amount
+                    if cost < check['wallet']: await ctx.send("You don't have enough money in your wallet")
+                    else: 
+                        inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
+                        if inventory_check is None: await cursor.update_one({"id": user.id},
+                                        {"$push": {"inventory": {"name": item_name, "price": int(shopping_list.price[i]), "amount": int(amount)}}})
+                        else: await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                                        {"$inc": {"inventory.$.amount": int(amount)}})
+                        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -cost}})
+                        await ctx.send(f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988> {cost}")
+                    break
 
     @commands.command(help="Sell your items")
     @commands.guild_only()

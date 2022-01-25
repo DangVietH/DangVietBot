@@ -16,7 +16,7 @@ cursor = cluster["moderation"]['automod']
 def convert(time):
     pos = ['s', 'm', 'h', 'd']
 
-    time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
+    time_dict = {"s": 1/60, "m": (1/60)*60, "h": ((1/60)*60)*60, "d": (((1/60)*60)*60)*24}
 
     unit = time[-1]
 
