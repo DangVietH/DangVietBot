@@ -54,7 +54,7 @@ class RoleListPageSource(menus.ListPageSource):
             icon_url=menu.ctx.author.guild.icon.url,
             name=f"Level roles")
         for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=False)
+            embed.add_field(name=entry[0], value=entry[1])
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
         return embed
 
@@ -322,6 +322,24 @@ class Leveling(commands.Cog):
             await ctx.send('Levelling re-enable')
         else:
             await ctx.send('Leveling already enabled')
+    
+    @commands.command(help="Add xp to member")
+    @commands.has_permissions(administrator=True)
+    @commands.guild_only()
+    async def add_xp(self, ctx, member: discord.Member, amount: int):
+        if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}): await ctx.send("User has no account")
+        else: 
+            await levelling.update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": amount}})
+            await ctx.send(f"Successfully added {amount} xp to {member}")
+    
+    @commands.command(help="Remove xp from member")
+    @commands.has_permissions(administrator=True)
+    @commands.guild_only()
+    async def remove_xp(self, ctx, member: discord.Member, amount: int):
+        if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}): await ctx.send("User has no account")
+        else: 
+            await levelling.update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": -amount}})
+            await ctx.send(f"Successfully remove {amount} xp from {member}")
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
