@@ -24,9 +24,10 @@ class CustomHelp(commands.HelpCommand):
             command_signatures = [self.get_command_signature(c) for c in command]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "No Category")
-                embed.add_field(name=cog_name, value="\n".join(command_signatures), inline=False)
+                embed.add_field(name=cog_name, value=f"Commands: {len(command)}")
         embed.set_footer(text=self.get_ending_note())
         embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/875589545532485682/6fd951c10178ec9bc5cb145fec56c89f.png?size=1024")
+        embed.set_image(url="https://cdn.discordapp.com/attachments/875886792035946496/936188584451538985/tet-nguyen-dan-nham-dan-2022.jpeg")
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label='Invite', url='https://bit.ly/3daeOIe'))
         view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9'))
@@ -42,7 +43,8 @@ class CustomHelp(commands.HelpCommand):
         for command in filtered:
             embed.add_field(name=command.name,
                             value=f"```{command.short_doc}```" or 'No description Provided', inline=False)
-
+        embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/875589545532485682/6fd951c10178ec9bc5cb145fec56c89f.png?size=1024")
+        embed.set_image(url="https://cdn.discordapp.com/attachments/875886792035946496/936188584451538985/tet-nguyen-dan-nham-dan-2022.jpeg")
         embed.set_footer(text=self.get_ending_note())
         await self.get_destination().send(embed=embed)
 
@@ -56,7 +58,8 @@ class CustomHelp(commands.HelpCommand):
             for command in filtered:
                 embed.add_field(name=command.name,
                                 value=f"```{command.short_doc}```" or 'No description Provided', inline=False)
-
+        embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/875589545532485682/6fd951c10178ec9bc5cb145fec56c89f.png?size=1024")
+        embed.set_image(url="https://cdn.discordapp.com/attachments/875886792035946496/936188584451538985/tet-nguyen-dan-nham-dan-2022.jpeg")
         embed.set_footer(text=self.get_ending_note())
         await self.get_destination().send(embed=embed)
 
@@ -67,6 +70,8 @@ class CustomHelp(commands.HelpCommand):
         if command.aliases:
             embed.add_field(name="Aliases", value=f"```{command.aliases}```", inline=False)
         embed.add_field(name="Usage", value=f"```{self.get_command_signature(command)}```", inline=False)
+        embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/875589545532485682/6fd951c10178ec9bc5cb145fec56c89f.png?size=1024")
+        embed.set_image(url="https://cdn.discordapp.com/attachments/875886792035946496/936188584451538985/tet-nguyen-dan-nham-dan-2022.jpeg")
         embed.set_footer(text=self.get_ending_note())
         await self.get_destination().send(embed=embed)
 
@@ -91,7 +96,7 @@ async def get_prefix(bot, message):
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=get_prefix, intents=intents, help_command=CustomHelp(),
                    description="One bot Many functionality", owner_id=860876181036335104, enable_debug_events=True,
-                   case_insensitive=True, activity=discord.Streaming(name="Happy new Year!", url="https://www.twitch.tv/dvieth"))
+                   case_insensitive=True, activity=discord.Streaming(name="Happy lunar new Year!", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"))
 
 
 @bot.event
