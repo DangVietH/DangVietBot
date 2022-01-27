@@ -59,11 +59,12 @@ class Admin(commands.Cog):
                 embed = discord.Embed(title=f"Case #{num_of_case}: Warn!", description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}", color=discord.Color.red())
                 await channel.send(embed=embed)
 
-            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-            if check_user_case is None:
-                await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-            else:
-                await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+            if not member.bot:
+                check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+                if check_user_case is None:
+                    await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+                else:
+                    await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="TImout a member")
     @commands.has_permissions(administrator=True)
@@ -101,11 +102,12 @@ class Admin(commands.Cog):
                                       color=discord.Color.red())
                 await channel.send(embed=embed)
 
-            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-            if check_user_case is None:
-                await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-            else:
-                await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+            if not member.bot:
+                check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+                if check_user_case is None:
+                    await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+                else:
+                    await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Untimeout a member")
     @commands.has_permissions(administrator=True)
@@ -134,11 +136,12 @@ class Admin(commands.Cog):
                                   color=discord.Color.red())
             await channel.send(embed=embed)
 
-        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-        if check_user_case is None:
-            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-        else:
-            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+        if not member.bot:
+                check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+                if check_user_case is None:
+                    await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+                else:
+                    await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Mute member")
     @commands.has_permissions(administrator=True)
@@ -171,11 +174,12 @@ class Admin(commands.Cog):
             embed = discord.Embed(title=f"Case #{num_of_case}: Mute!", description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}", color=discord.Color.red())
             await channel.send(embed=embed)
 
-        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-        if check_user_case is None:
-            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-        else:
-            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+        if not member.bot:
+                check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+                if check_user_case is None:
+                    await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+                else:
+                    await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Mute member but with a timer", aliases=['softmute'])
     @commands.has_permissions(administrator=True)
@@ -219,12 +223,12 @@ class Admin(commands.Cog):
                                       color=discord.Color.red())
                 await channel.send(embed=embed)
 
-            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-            if check_user_case is None:
-                await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-            else:
-                await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
-
+            if not member.bot:
+                check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+                if check_user_case is None:
+                    await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+                else:
+                    await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
             current_time = datetime.datetime.now()
             final_time = current_time + datetime.timedelta(seconds=converted_time)
             await timer.insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id, "role": mutedRole.id})
@@ -252,11 +256,12 @@ class Admin(commands.Cog):
                                   color=discord.Color.red())
             await channel.send(embed=embed)
 
-        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-        if check_user_case is None:
-            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-        else:
-            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+        if not member.bot:
+                check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+                if check_user_case is None:
+                    await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
+                else:
+                    await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Kick member")
     @commands.has_permissions(kick_members=True)
@@ -278,13 +283,7 @@ class Admin(commands.Cog):
             channel = self.bot.get_channel(result["channel"])
             embed = discord.Embed(title=f"Case #{num_of_case}: Kick!", description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}", color=discord.Color.red())
             await channel.send(embed=embed)
-
-        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-        if check_user_case is None:
-            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-        else:
-            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
-
+                    
     @commands.command(help="Ban member")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason=None):
@@ -306,12 +305,6 @@ class Admin(commands.Cog):
             channel = self.bot.get_channel(result["channel"])
             embed = discord.Embed(title=f"Case #{num_of_case}: Ban!", description=f"**User:** {member} **Mod:**{ctx.author} \n**Reason:** {reason}", color=discord.Color.red())
             await channel.send(embed=embed)
-
-        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-        if check_user_case is None:
-            await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-        else:
-            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Ban member but temporarily", aliases=['softban'])
     @commands.has_permissions(ban_members=True)
@@ -402,12 +395,6 @@ class Admin(commands.Cog):
                                   description=f"**User:** {user} **Mod:**{ctx.author} \n**Reason:** {reason}",
                                   color=discord.Color.red())
             await channel.send(embed=embed)
-
-        check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": user.id})
-        if check_user_case is None:
-            await user_case.insert_one({"guild": ctx.guild.id, "user": user.id, "total_cases": 1})
-        else:
-            await user_case.update_one({"guild": ctx.guild.id, "user": user.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Clear messages in a certain amount", aliases=['purge'])
     @commands.has_permissions(manage_messages=True)

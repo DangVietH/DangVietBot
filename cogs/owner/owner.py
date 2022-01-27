@@ -61,6 +61,17 @@ class Owner(commands.Cog):
         else:
             await ctx.send('Invalid status')
         await ctx.message.add_reaction('👌')
+    
+    @commands.command(help="Toggles on and off a command")
+    @commands.is_owner()
+    async def cmd_toggle(self, ctx:commands.Context, command:str):
+        command = self.bot.get_command(command)
+        if not command.enabled:
+            command.enabled = True
+            await ctx.reply(F"Enabled {command.name} command")
+        else:
+            command.enabled = False
+            await ctx.reply(F"Disabled {command.name} command.")
 
     @commands.group(help="Blacklist ppls")
     @commands.is_owner()
