@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 import json
+import datetime
 
 
 with open('config.json') as f:
@@ -147,7 +148,8 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("You are missing a required argument for this command to work")
     elif isinstance(error, commands.CommandOnCooldown):
-        await ctx.send(f'⏱️ This command is on a cooldown. Use it after {round(error.retry_after, 2)}s')
+        seconds = int(error.retry_after)
+        await ctx.send(f'⏱️ This command is on a cooldown. Use it after {str(datetime.timedelta(seconds=seconds))}')
     else:
         await ctx.send(error)
 

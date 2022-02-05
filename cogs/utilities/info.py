@@ -80,7 +80,7 @@ class Info(commands.Cog):
         embed = discord.Embed(title="Bot information", color=discord.Color.random())
         embed.add_field(name="Developer", value=f"! DvH#9980")
         embed.add_field(name="Version", value="0.6.0")
-        embed.add_field(name="Written in", value="Python 3.9.6")
+        embed.add_field(name="Written in", value="Python 3.9.10")
         embed.add_field(name="Library", value="[pycord 2.0](https://github.com/Pycord-Development/pycord)")
         embed.add_field(name="Create at", value="8/13/2021")
         embed.add_field(name="Command's", value=f"{len(self.bot.commands)}")

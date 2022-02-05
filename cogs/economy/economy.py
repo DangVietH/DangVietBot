@@ -3,8 +3,8 @@ from discord.ext import commands
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
-import cogs.economy.shopping_list as shopping_list
-from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource, NFTPageSource
+from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource, \
+    NFTPageSource
 from utils.menuUtils import MenuButtons
 from main import config_var
 
@@ -12,6 +12,13 @@ cluster = AsyncIOMotorClient(config_var['mango_link'])
 db = cluster["economy"]
 cursor = db["users"]
 nfts = db["nft"]
+
+items = ["chicken", "parrot", "watch", "horse", "sword", "rifle", "laptop", "platinum", "silver", "gold", "diamonds",
+         "fireminer"]
+price = [10, 20, 42, 70, 102, 499, 1000, 20000, 50000, 200000, 599999, 1542649]
+description = ["KFC GO BRRR", "talking birb machine", "moniter ye time", "Juan",
+               "fight others", "hunt animals", "work on it", "Show of your status", "cool kid",
+               "rich kid who like to show off", "extremely rich kid", "Mine FireCoin"]
 
 
 class Economy(commands.Cog):
@@ -133,16 +140,17 @@ class Economy(commands.Cog):
                                       description=f"You didn't answer correctly. You only receive <:DHBuck:901485795410599988> {low_money}",
                                       color=discord.Color.red())
                 await message.reply(embed=embed)
-    
+
     @commands.command(help="View the store", aliases=['store'])
     @commands.guild_only()
     async def shop(self, ctx):
         data = []
-        for i in range(len(shopping_list.items)):
-            data.append((f"{shopping_list.items[i]} | <:DHBuck:901485795410599988> {shopping_list.price[i]}", shopping_list.description[i]))
+        for i in range(len(items)):
+            data.append((f"{items[i]} | <:DHBuck:901485795410599988> {price[i]}",
+                         description[i]))
         page = MenuButtons(ShopPageSource(data))
         await page.start(ctx)
-    
+
     @commands.command(help="Buy some items")
     @commands.guild_only()
     async def buy(self, ctx, item_name, amount=1):
@@ -151,21 +159,27 @@ class Economy(commands.Cog):
         await self.open_account(user)
         check = await cursor.find_one({"id": user.id})
         item_name = item_name.lower()
-        if item_name not in shopping_list.items:
+        if item_name not in items:
             await ctx.send("Item does not exist in shop")
-        else: 
-            for i in range(len(shopping_list.items)):
-                if item_name == str(shopping_list.items[i]): 
-                    cost = int(shopping_list.price[i]) * amount
-                    if cost < check['wallet']: await ctx.send("You don't have enough money in your wallet")
-                    else: 
+        else:
+            for i in range(len(items)):
+                if item_name == str(items[i]):
+                    cost = int(price[i]) * amount
+                    if cost < check['wallet'] and amount > 0:
+                        await ctx.send("You don't have enough money in your wallet")
+                    else:
                         inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
-                        if inventory_check is None: await cursor.update_one({"id": user.id},
-                                        {"$push": {"inventory": {"name": item_name, "price": int(shopping_list.price[i]), "amount": int(amount)}}})
-                        else: await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
-                                        {"$inc": {"inventory.$.amount": int(amount)}})
+                        if inventory_check is None:
+                            await cursor.update_one({"id": user.id},
+                                                    {"$push": {"inventory": {"name": item_name,
+                                                                             "price": int(price[i]),
+                                                                             "amount": int(amount)}}})
+                        else:
+                            await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                                                    {"$inc": {"inventory.$.amount": int(amount)}})
                         await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -cost}})
-                        await ctx.send(f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988> {cost}")
+                        await ctx.send(
+                            f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988> {cost}")
                     break
 
     @commands.command(help="Sell your items")
@@ -212,6 +226,13 @@ class Economy(commands.Cog):
                 data.append(to_append)
             page = MenuButtons(InventoryPageSource(data))
             await page.start(ctx)
+
+    @commands.command(help="Claim your daily money")
+    @commands.cooldown(1, 60 * 60 * 24, commands.BucketType.user)
+    async def daily(self, ctx):
+        await self.open_account(ctx.author)
+        await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": 90000}})
+        await ctx.send(embed=discord.Embed(title="Daily Claimed", description="You just got 90000 <:DHBuck:901485795410599988>", color=discord.Color.green()))
 
     @commands.command(help="we work for the right to work")
     @commands.cooldown(1, 60, commands.BucketType.user)
@@ -337,7 +358,8 @@ class Economy(commands.Cog):
             random_event = random.randint(1, 3)
             if random_event == 1:
                 await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": 50}})
-                await ctx.send("You tried to mine but it ran into some error so you receive <:FireCoin:920903065454903326> 50")
+                await ctx.send(
+                    "You tried to mine but it ran into some error so you receive <:FireCoin:920903065454903326> 50")
             elif random_event == 2:
                 rand_amount = random.randint(1, 10000)
                 await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": rand_amount}})
@@ -437,7 +459,8 @@ class Economy(commands.Cog):
                 await cursor.update_one({"id": og_owner.id}, {"$inc": {"price": random.randint(1, 1000)}})
                 await nfts.update_one({"name": name}, {"$set": {"owner": ctx.author.id}})
                 await ctx.send("Successfully bought the nft. **REMEMBER THAT NFTS IS DESTROYING OUR PLANET!**")
-                await og_owner.send(f"**{ctx.author}** just bought your nft name **{name}** and you receive <:FireCoin:920903065454903326> {check['price']}")
+                await og_owner.send(
+                    f"**{ctx.author}** just bought your nft name **{name}** and you receive <:FireCoin:920903065454903326> {check['price']}")
 
     @nft.command(help="IT'S SCREENSHOT TIME")
     async def view(self, ctx, *, name):
@@ -445,7 +468,9 @@ class Economy(commands.Cog):
         if check is None:
             await ctx.send("NFT do not exist. Also nft are CASE SENSITIVE")
         else:
-            embed = discord.Embed(title=f"{check['name']}", description=f"**Price:** <:FireCoin:920903065454903326> {check['price']} \n**Owner:** {self.bot.get_user(check['owner'])}", color=discord.Color.from_rgb(225, 0, 92))
+            embed = discord.Embed(title=f"{check['name']}",
+                                  description=f"**Price:** <:FireCoin:920903065454903326> {check['price']} \n**Owner:** {self.bot.get_user(check['owner'])}",
+                                  color=discord.Color.from_rgb(225, 0, 92))
             embed.set_image(url=check['link'])
             await ctx.send(embed=embed)
 
@@ -468,7 +493,8 @@ class Economy(commands.Cog):
         num = 0
         async for x in stats:
             num += 1
-            to_append = (f"{num}. {x['name']}", f"**Price:** <:FireCoin:920903065454903326> {x['price']} **Owner:** {self.bot.get_user(x['owner'])}")
+            to_append = (f"{num}. {x['name']}",
+                         f"**Price:** <:FireCoin:920903065454903326> {x['price']} **Owner:** {self.bot.get_user(x['owner'])}")
             data.append(to_append)
 
         pages = MenuButtons(NFTPageSource(data))
