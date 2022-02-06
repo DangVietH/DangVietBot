@@ -17,17 +17,20 @@ class GlobalChat(commands.Cog):
     async def on_message(self, message):
         if not message.author.bot:
             server = await cursor.find_one({"guild": message.guild.id})
-            if message.channel == self.bot.get_channel(server['channel']):
-                if not message.content:
-                    return
-                else:
-                    alChannels = cursor.find()
-                    async for channel in alChannels:
-                        if channel['channel'] != message.channel.id:
-                            embed = discord.Embed(description=message.content, timestamp=datetime.datetime.utcnow(), color=discord.Color.from_rgb(225, 0, 92))
-                            embed.set_author(icon_url=message.author.avatar.url, name=f'{message.author}')
-                            embed.set_footer(icon_url=message.guild.icon.url, text=f"Message sent from {message.guild.name}")
-                            await self.bot.get_channel(channel['channel']).send(embed=embed)
+            if server is not None:
+                if message.channel == self.bot.get_channel(server['channel']):
+                    if not message.content:
+                        return
+                    else:
+                        alChannels = cursor.find()
+                        async for channel in alChannels:
+                            if channel['channel'] != message.channel.id:
+                                embed = discord.Embed(description=message.content, timestamp=datetime.datetime.utcnow(),
+                                                      color=discord.Color.from_rgb(225, 0, 92))
+                                embed.set_author(icon_url=message.author.avatar.url, name=f'{message.author}')
+                                embed.set_footer(icon_url=message.guild.icon.url,
+                                                 text=f"Message sent from {message.guild.name}")
+                                await self.bot.get_channel(channel['channel']).send(embed=embed)
             else:
                 return None
 

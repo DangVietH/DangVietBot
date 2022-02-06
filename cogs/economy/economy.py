@@ -13,12 +13,13 @@ db = cluster["economy"]
 cursor = db["users"]
 nfts = db["nft"]
 
-items = ["chicken", "parrot", "watch", "horse", "sword", "rifle", "laptop", "platinum", "silver", "gold", "diamonds",
-         "fireminer"]
-price = [10, 20, 42, 70, 102, 499, 1000, 20000, 50000, 200000, 599999, 1542649]
-description = ["KFC GO BRRR", "talking birb machine", "moniter ye time", "Juan",
-               "fight others", "hunt animals", "work on it", "Show of your status", "cool kid",
-               "rich kid who like to show off", "extremely rich kid", "Mine FireCoin"]
+items_name = ["chicken", "parrot", "watch", "horse", "sword", "rifle", "laptop", "platinum", "silver", "gold",
+              "diamonds",
+              "fireminer"]
+items_price = [10, 20, 42, 70, 102, 499, 1000, 20000, 50000, 200000, 599999, 1542649]
+items_description = ["KFC GO BRRR", "talking birb machine", "moniter ye time", "Juan",
+                     "fight others", "hunt animals", "work on it", "Show of your status", "cool kid",
+                     "rich kid who like to show off", "extremely rich kid", "Mine FireCoin"]
 
 
 class Economy(commands.Cog):
@@ -145,34 +146,34 @@ class Economy(commands.Cog):
     @commands.guild_only()
     async def shop(self, ctx):
         data = []
-        for i in range(len(items)):
-            data.append((f"{items[i]} | <:DHBuck:901485795410599988> {price[i]}",
-                         description[i]))
+        for i in range(len(items_name)):
+            data.append((f"{items_name[i]} | <:DHBuck:901485795410599988> {items_price[i]}",
+                         items_description[i]))
         page = MenuButtons(ShopPageSource(data))
         await page.start(ctx)
 
-    @commands.command(help="Buy some items")
+    @commands.command(help="Buy some items", aliases=['buy'])
     @commands.guild_only()
-    async def buy(self, ctx, item_name, amount=1):
+    async def buyz(self, ctx, item_name: str, amount=1):
         user = ctx.author
 
         await self.open_account(user)
         check = await cursor.find_one({"id": user.id})
         item_name = item_name.lower()
-        if item_name not in items:
+        if item_name not in items_name:
             await ctx.send("Item does not exist in shop")
         else:
-            for i in range(len(items)):
-                if item_name == str(items[i]):
-                    cost = int(price[i]) * amount
-                    if cost < check['wallet'] and amount > 0:
+            for i in range(len(items_name)):
+                if item_name == str(items_name[i]):
+                    cost = int(items_price[i]) * amount
+                    if cost < check['wallet']:
                         await ctx.send("You don't have enough money in your wallet")
                     else:
                         inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
                         if inventory_check is None:
                             await cursor.update_one({"id": user.id},
                                                     {"$push": {"inventory": {"name": item_name,
-                                                                             "price": int(price[i]),
+                                                                             "price": int(items_price[i]),
                                                                              "amount": int(amount)}}})
                         else:
                             await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
@@ -184,7 +185,7 @@ class Economy(commands.Cog):
 
     @commands.command(help="Sell your items")
     @commands.guild_only()
-    async def sell(self, ctx, item_name, amount=1):
+    async def sell(self, ctx, item_name: str, amount=1):
         user = ctx.author
 
         await self.open_account(user)
@@ -232,7 +233,9 @@ class Economy(commands.Cog):
     async def daily(self, ctx):
         await self.open_account(ctx.author)
         await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": 90000}})
-        await ctx.send(embed=discord.Embed(title="Daily Claimed", description="You just got 90000 <:DHBuck:901485795410599988>", color=discord.Color.green()))
+        await ctx.send(
+            embed=discord.Embed(title="Daily Claimed", description="You just got 90000 <:DHBuck:901485795410599988>",
+                                color=discord.Color.green()))
 
     @commands.command(help="we work for the right to work")
     @commands.cooldown(1, 60, commands.BucketType.user)
