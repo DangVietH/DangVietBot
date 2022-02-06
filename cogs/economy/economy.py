@@ -166,7 +166,7 @@ class Economy(commands.Cog):
             for i in range(len(items_name)):
                 if item_name == str(items_name[i]):
                     cost = int(items_price[i]) * amount
-                    if cost < check['wallet']:
+                    if cost > check['wallet']:
                         await ctx.send("You don't have enough money in your wallet")
                     else:
                         inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
