@@ -27,11 +27,9 @@ class CustomHelp(commands.HelpCommand):
                 cog_name = getattr(cog, "qualified_name", "No Category")
                 embed.add_field(name=cog_name, value=f"Commands: {len(command)}")
         embed.set_footer(text=self.get_ending_note())
-        embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/875589545532485682/6fd951c10178ec9bc5cb145fec56c89f.png?size=1024")
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label='Invite', url='https://bit.ly/3daeOIe'))
         view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9'))
-        view.add_item(discord.ui.Button(label='Github', url='https://github.com/DangVietH/DHB'))
         await self.get_destination().send(embed=embed, view=view)
 
     async def send_cog_help(self, cog_):
@@ -43,7 +41,6 @@ class CustomHelp(commands.HelpCommand):
         for command in filtered:
             embed.add_field(name=command.name,
                             value=f"```{command.short_doc}```" or 'No description Provided', inline=False)
-        embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/875589545532485682/6fd951c10178ec9bc5cb145fec56c89f.png?size=1024")
         embed.set_footer(text=self.get_ending_note())
         await self.get_destination().send(embed=embed)
 
@@ -57,7 +54,6 @@ class CustomHelp(commands.HelpCommand):
             for command in filtered:
                 embed.add_field(name=command.name,
                                 value=f"```{command.short_doc}```" or 'No description Provided', inline=False)
-        embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/875589545532485682/6fd951c10178ec9bc5cb145fec56c89f.png?size=1024")
         embed.set_footer(text=self.get_ending_note())
         await self.get_destination().send(embed=embed)
 
@@ -68,7 +64,6 @@ class CustomHelp(commands.HelpCommand):
         if command.aliases:
             embed.add_field(name="Aliases", value=f"```{command.aliases}```", inline=False)
         embed.add_field(name="Usage", value=f"```{self.get_command_signature(command)}```", inline=False)
-        embed.set_thumbnail(url="https://cdn.discordapp.com/avatars/875589545532485682/6fd951c10178ec9bc5cb145fec56c89f.png?size=1024")
         embed.set_footer(text=self.get_ending_note())
         await self.get_destination().send(embed=embed)
 

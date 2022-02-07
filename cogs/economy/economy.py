@@ -3,8 +3,7 @@ from discord.ext import commands
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
-from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource, \
-    NFTPageSource
+from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource, NFTPageSource
 from utils.menuUtils import MenuButtons
 from main import config_var
 
@@ -29,7 +28,7 @@ class Economy(commands.Cog):
     async def open_account(self, user):
         users = await cursor.find_one({"id": user.id})
         if users is None:
-            insert = {"id": user.id, "job": "f", "FireCoin": 0, "wallet": 0, "bank": 0, "inventory": []}
+            insert = {"id": user.id, "job": "f", "wallet": 0, "bank": 0, "inventory": []}
             await cursor.insert_one(insert)
         else:
             return None
@@ -51,7 +50,6 @@ class Economy(commands.Cog):
                 name=f"{user} balance")
             embed.add_field(name="Wallet", value=f"<:DHBuck:901485795410599988> {wallet}", inline=False)
             embed.add_field(name="Bank", value=f"<:DHBuck:901485795410599988> {bank}", inline=False)
-            embed.add_field(name="FireCoin", value=f"<:FireCoin:920903065454903326> {check['FireCoin']}", inline=False)
             await ctx.send(embed=embed)
 
     @commands.command(help="Who is the richest one in your server")
@@ -152,9 +150,9 @@ class Economy(commands.Cog):
         page = MenuButtons(ShopPageSource(data))
         await page.start(ctx)
 
-    @commands.command(help="Buy some items", aliases=['buy'])
+    @commands.command(help="Buy some items")
     @commands.guild_only()
-    async def buyz(self, ctx, item_name: str, amount=1):
+    async def buy(self, ctx, item_name: str, amount=1):
         user = ctx.author
 
         await self.open_account(user)
@@ -339,73 +337,6 @@ class Economy(commands.Cog):
                     await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
                     await ctx.send(f"Successfully rob <:DHBuck:901485795410599988> {amount} from {user.mention}")
 
-    @commands.group(invoke_without_command=True, case_insensitive=True, help="FireCoin commands")
-    async def FireCoin(self, ctx):
-        embed = discord.Embed(title="FireCoin", color=discord.Color.random())
-        command = self.bot.get_command("FireCoin")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"FireCoin {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
-        await ctx.send(embed=embed)
-
-    @FireCoin.command(help="Mine FireCoin")
-    @commands.cooldown(1, 3600 * 2, commands.BucketType.user)
-    @commands.guild_only()
-    async def mine(self, ctx):
-        await self.open_account(ctx.author)
-
-        inventory_check = await cursor.find_one({"id": ctx.author.id, "inventory.name": "fireminer"})
-        if inventory_check is None:
-            await ctx.send("You need to buy a FireMiner to mine FireCoin")
-        else:
-            random_event = random.randint(1, 3)
-            if random_event == 1:
-                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": 50}})
-                await ctx.send(
-                    "You tried to mine but it ran into some error so you receive <:FireCoin:920903065454903326> 50")
-            elif random_event == 2:
-                rand_amount = random.randint(1, 10000)
-                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": rand_amount}})
-                await ctx.send(f"You just mined <:FireCoin:920903065454903326> {rand_amount}")
-            else:
-                await ctx.send("The machine is overloaded and crash, so you can't get more FireCoin")
-
-    @commands.command(help="Buy FireCoin")
-    async def fbuy(self, ctx, amount=1):
-        await self.open_account(ctx.author)
-        check = await cursor.find_one({"id": ctx.author.id})
-        cost = amount * 1000
-        if check['wallet'] < cost:
-            await ctx.send("Not enough money")
-        else:
-            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": amount}})
-            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": -cost}})
-            await ctx.send(f"You buy {amount} FireCoin for <:DHBuck:901485795410599988> {cost}")
-
-    @FireCoin.command(help="Sell FireCoin")
-    @commands.guild_only()
-    async def sell(self, ctx, amount=1):
-        await self.open_account(ctx.author)
-        check = await cursor.find_one({"id": ctx.author.id})
-        if check['FireCoin'] < amount:
-            await ctx.send("You don't have enough FireCoin")
-        else:
-            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": -amount}})
-            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount * 1000}})
-            await ctx.send(f"You sold {amount} FireCoin and receive <:DHBuck:901485795410599988> {amount * 1000}")
-
-    @FireCoin.command(help="Convert FireCoin to DHBuck")
-    @commands.guild_only()
-    async def convert(self, ctx, amount=1):
-        await self.open_account(ctx.author)
-
-        check = await cursor.find_one({"id": ctx.author.id})
-        if check['FireCoin'] < amount:
-            await ctx.send("Too much")
-        else:
-            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount * 1000}})
-            await ctx.send(f"Convert {amount} to {amount * 1000}")
-
     @commands.group(invoke_without_command=True, case_insensitive=True, help="IT'S SCREENSHOT TIME!")
     async def nft(self, ctx):
         embed = discord.Embed(title="Nft", color=discord.Color.random())
@@ -445,20 +376,20 @@ class Economy(commands.Cog):
             await nfts.insert_one({"name": answers[0], "link": answers[1], "price": price, "owner": ctx.author.id})
             await ctx.send(f"NFT {answers[0]} created for <:FireCoin:920903065454903326> {price}")
 
-    @nft.command(help="WHY DON'T SCREENSHOT")
-    async def buy(self, ctx, *, name):
+    @nft.command(help="WHY DON'T SCREENSHOT", aliases=["buy"])
+    async def purchase(self, ctx, *, name):
         await self.open_account(ctx.author)
         check = await nfts.find_one({"name": name})
         if check is None:
             await ctx.send("NFT do not exist. Also nft are CASE SENSITIVE")
         else:
             user = await cursor.find_one({"id": ctx.author.id})
-            if user['FireCoin'] < check['price']:
+            if user['wallet'] < check['price']:
                 await ctx.send("You don't have enough FireCoin")
             else:
                 og_owner = self.bot.get_user(check['owner'])
-                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"FireCoin": -check['price']}})
-                await cursor.update_one({"id": og_owner.id}, {"$inc": {"FireCoin": check['price']}})
+                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": -check['price']}})
+                await cursor.update_one({"id": og_owner.id}, {"$inc": {"wallet": check['price']}})
                 await cursor.update_one({"id": og_owner.id}, {"$inc": {"price": random.randint(1, 1000)}})
                 await nfts.update_one({"name": name}, {"$set": {"owner": ctx.author.id}})
                 await ctx.send("Successfully bought the nft. **REMEMBER THAT NFTS IS DESTROYING OUR PLANET!**")
