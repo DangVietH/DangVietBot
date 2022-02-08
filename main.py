@@ -18,10 +18,10 @@ class CustomHelp(commands.HelpCommand):
 
     async def send_bot_help(self, mapping):
         embed = discord.Embed(title='DHB Commands',
-                              description=f"{self.context.bot.items_description}",
+                              description=f"{self.context.bot.description}",
                               color=discord.Color.from_rgb(225, 0, 92))
 
-        for cog, command in mapping.items_name():
+        for cog, command in mapping.items():
             command_signatures = [self.get_command_signature(c) for c in command]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "No Category")
@@ -34,8 +34,6 @@ class CustomHelp(commands.HelpCommand):
 
     async def send_cog_help(self, cog_):
         embed = discord.Embed(title='{0.qualified_name} Commands'.format(cog_), color=discord.Color.from_rgb(225, 0, 92))
-        if cog_.items_description:
-            embed.items_description = cog_.items_description
 
         filtered = await self.filter_commands(cog_.get_commands(), sort=True)
         for command in filtered:
@@ -46,8 +44,6 @@ class CustomHelp(commands.HelpCommand):
 
     async def send_group_help(self, group):
         embed = discord.Embed(title=group.qualified_name, color=discord.Color.from_rgb(225, 0, 92))
-        if group.help:
-            embed.items_description = group.help
 
         if isinstance(group, commands.Group):
             filtered = await self.filter_commands(group.commands, sort=True)
