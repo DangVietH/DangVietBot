@@ -86,6 +86,7 @@ class Tags(commands.Cog):
                     await ctx.send(f"Tag {answers[0]} successfully created")
 
     @tag.command(help="Remove a tag", aliases=['remove'])
+    @commands.has_permissions(manage_guild=True)
     async def delete(self, ctx, *, name):
         is_exist = await cursor.find_one({"guild": ctx.guild.id, "tag.name": name})
         if is_exist is None:
@@ -96,30 +97,21 @@ class Tags(commands.Cog):
 
     @tag.command(help="Edit a tag")
     async def edit(self, ctx, *, name):
-        await ctx.send("Complete this in 10 minute!")
-        questions = ["What is the new value: "]
-        answers = []
+        is_exist = await cursor.find_one({"guild": ctx.guild.id, "tag.name": name})
+        if is_exist is None:
+            return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
+        if ctx.author is not self.bot.get_user(is_exist['owner']):
+            return await ctx.send("You are not the owner of this tag")
+        await ctx.send("What is the new tag value: `Type end to abort the process`")
 
         def check(user):
             return user.author == ctx.author and user.channel == ctx.channel
 
-        for question in questions:
-            await ctx.send(question)
-
-            try:
-                msg = await self.bot.wait_for('message', timeout=600.0, check=check)
-            except asyncio.TimeoutError:
-                await ctx.send("Type Faster Next Time!")
-                return
-            else:
-                answers.append(msg.content)
-        is_exist = await cursor.find_one({"guild": ctx.guild.id, "tag.name": name})
-        if is_exist is None:
-            await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
-        else:
-            await cursor.update_one({"guild": ctx.guild.id, "tag.name": name},
-                                    {"$set": {"tag.$.value": answers[0]}})
-            await ctx.send("Tag edit successfully")
+        user_choice = (await self.bot.wait_for('message', check=check)).content
+        if user_choice == "end":
+            return await ctx.send("Task abort successfully")
+        await cursor.update_one({"guild": ctx.guild.id, "tag.name": name}, {"$set": {"tag.value": user_choice}})
+        await ctx.send("Tag edited successfully")
 
     @tag.command(help="See a list of tags")
     async def list(self, ctx):
