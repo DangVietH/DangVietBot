@@ -11,7 +11,7 @@ with open('config.json') as f:
 
 class CustomHelp(commands.HelpCommand):
     def get_ending_note(self):
-        return f'Use help [command] for more info on a command. \nYou can also type help [category] for more info on a category'
+        return f'Use help [command] for more info on a command. \nYou can also type help [category] for more info on a category \nExample: d!help Economy \nCreate by DvH#9980'
 
     def get_command_signature(self, command):
         return f'{command.qualified_name} {command.signature}'

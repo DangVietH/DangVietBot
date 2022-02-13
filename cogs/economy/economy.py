@@ -14,11 +14,11 @@ nfts = db["nft"]
 
 items_name = ["chicken", "parrot", "watch", "horse", "sword", "rifle", "laptop", "platinum", "silver", "gold",
               "diamonds",
-              "fireminer"]
+              "robber_shield"]
 items_price = [10, 20, 42, 70, 102, 499, 1000, 20000, 50000, 200000, 599999, 1542649]
 items_description = ["KFC GO BRRR", "talking birb machine", "moniter ye time", "Juan",
                      "fight others", "hunt animals", "work on it", "Show of your status", "cool kid",
-                     "rich kid who like to show off", "extremely rich kid", "Mine FireCoin"]
+                     "rich kid who like to show off", "extremely rich kid", "They can only nick a little"]
 
 
 class Economy(commands.Cog):
@@ -326,15 +326,15 @@ class Economy(commands.Cog):
                     await ctx.send(
                         'You tried to rob him, but he caught you and force you to pay <:DHB_coin:901485795410599988> 1000')
                     author_update = check1['wallet'] - 1000
-                    user_update = check2['bank'] + 1000
-                    await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
-                    await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
+                    user_update = check2['wallet'] + 1000
+                    await cursor.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
+                    await cursor.update_one({"id": user.id}, {"$set": {"wallet": user_update}})
 
                 else:
                     author_update = check1['wallet'] + amount
                     user_update = check2['wallet'] - amount
-                    await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
-                    await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
+                    await cursor.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
+                    await cursor.update_one({"id": user.id}, {"$set": {"wallet": user_update}})
                     await ctx.send(f"Successfully rob <:DHBuck:901485795410599988> {amount} from {user.mention}")
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="IT'S SCREENSHOT TIME!")

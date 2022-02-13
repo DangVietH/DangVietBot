@@ -141,6 +141,18 @@ class ModSet(commands.Cog):
         else:
             await ctx.send("Word already unblacklisted")
 
+    @commands.command(help="List of blacklisted words")
+    async def black_list(self, ctx):
+        check = await cursor.find_one({"guild": ctx.guild.id})
+        if check is None:
+            await ctx.send('Nothing to blacklist here')
+        else:
+            word_list = ""
+            for word in check['blacklist']:
+                word_list += f"{word}\n"
+            embed = discord.Embed(title=f"List of blacklisted words in {ctx.guild.name}", description=f"{word_list}")
+            await ctx.send(embed=embed)
+
     @automod.command(help="Automod stats")
     @commands.has_permissions(administrator=True)
     async def stats(self, ctx):
