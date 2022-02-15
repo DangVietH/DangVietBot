@@ -11,7 +11,7 @@ with open('config.json') as f:
 
 class CustomHelp(commands.HelpCommand):
     def get_ending_note(self):
-        return f'Use help [command] for more info on a command. \nYou can also type help [category] for more info on a category \nExample: d!help Economy \nCreate by DvH#9980'
+        return f'Use help [something] for more info on a command or category. \nExample: d!help Economy'
 
     def get_command_signature(self, command):
         return f'{command.qualified_name} {command.signature}'
@@ -131,7 +131,7 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send('You do not have permission to use this command')
     elif isinstance(error, commands.NotOwner):
-        await ctx.send("Only ! DvH#9980 (the creator) can use this command")
+        await ctx.send("You're not the owner of the bot")
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("You are missing a required argument for this command to work")
     elif isinstance(error, commands.CommandOnCooldown):

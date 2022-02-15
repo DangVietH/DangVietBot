@@ -313,7 +313,7 @@ class Music(commands.Cog):
     async def volume(self, ctx, volume: int = None):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         if volume is None:
-            await ctx.send(f'🔊 Current volume is {player.volume * 2}%')
+            await ctx.send(f'Volume: {player.volume * 2}%')
         else:
             volume = max(1, min(volume, 100))
 
