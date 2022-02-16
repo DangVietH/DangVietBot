@@ -139,6 +139,3 @@ cython_debug/
 
 # pycharm
 .idea/
-
-# configuration
-*.json
