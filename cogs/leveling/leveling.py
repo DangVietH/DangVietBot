@@ -250,10 +250,10 @@ class Leveling(commands.Cog):
             await ctx.send(f"{roles.name} role remove.")
         else:
             await ctx.send("I don't remember I put that role in. do role list to see")
-    
+
     @role.command(help="See list of rewarding roles")
     @commands.guild_only()
-    async def list(self, ctx): 
+    async def list(self, ctx):
         role_cursor = await roled.find_one({"guild": ctx.guild.id})
         levelrole = role_cursor['role']
         levelnum = role_cursor['level']
@@ -261,7 +261,7 @@ class Leveling(commands.Cog):
         for i in range(len(levelrole)):
             embed.add_field(name=f"Level {levelnum[i]}", value=f"Role reward: {ctx.guild.get_role(levelrole[i]).name}")
         await ctx.send(embed=embed)
-        
+
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Level channel setup")
     async def lvl(self, ctx):
         embed = discord.Embed(title="Level up utils", color=discord.Color.random())
@@ -321,29 +321,30 @@ class Leveling(commands.Cog):
             await ctx.send('Levelling re-enable')
         else:
             await ctx.send('Leveling already enabled')
-    
+
     @commands.command(help="Add xp to member")
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def add_xp(self, ctx, member: discord.Member, amount: int):
-        if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}): await ctx.send("User has no account")
-        else: 
+        if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}):
+            await ctx.send("User has no account")
+        else:
             await levelling.update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": amount}})
             await ctx.send(f"Successfully added {amount} xp to {member}")
-    
+
     @commands.command(help="Remove xp from member")
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def remove_xp(self, ctx, member: discord.Member, amount: int):
-        if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}): await ctx.send("User has no account")
-        else: 
+        if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}):
+            await ctx.send("User has no account")
+        else:
             await levelling.update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": -amount}})
             await ctx.send(f"Successfully remove {amount} xp from {member}")
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         await roled.insert_one({"guild": guild.id, "role": [], "level": [],
-                                "background": "https://cdn.discordapp.com/attachments/900197917170737152/923484322449723422/rank.png",
                                 "xp": 10})
 
     @commands.Cog.listener()
@@ -352,7 +353,6 @@ class Leveling(commands.Cog):
             results = await roled.find_one({"guild": guild.id})
             if results is None:
                 await roled.insert_one({"guild": guild.id, "role": [], "level": [],
-                                        "background": "https://cdn.discordapp.com/attachments/900197917170737152/923484322449723422/rank.png",
                                         "xp": 10})
 
     # remove data to save storage
