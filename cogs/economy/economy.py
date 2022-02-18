@@ -65,7 +65,7 @@ class Economy(commands.Cog):
                 to_append = (f"{num}: {is_user_in_guild}", f"**Wallet:** {x['wallet']}")
                 data.append(to_append)
 
-        pages = MenuButtons(GuildRichPageSource(data))
+        pages = MenuButtons(source=GuildRichPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
     @commands.command(help="Who is the richest one around the world")
@@ -78,7 +78,7 @@ class Economy(commands.Cog):
             to_append = (f"{num}: {self.bot.get_user(x['id'])}", f"**Wallet:** {x['wallet']}")
             data.append(to_append)
 
-        pages = MenuButtons(GlobalRichPageSource(data))
+        pages = MenuButtons(source=GlobalRichPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
     @commands.command(help="Beg some money")
@@ -147,7 +147,7 @@ class Economy(commands.Cog):
         for i in range(len(items_name)):
             data.append((f"{items_name[i]} | <:DHBuck:901485795410599988> {items_price[i]}",
                          items_description[i]))
-        page = MenuButtons(ShopPageSource(data))
+        page = MenuButtons(source=ShopPageSource(data), disable_buttons_after=True, ctx=ctx)
         await page.start(ctx)
 
     @commands.command(help="Buy some items")
@@ -223,7 +223,7 @@ class Economy(commands.Cog):
                 amount = item['amount']
                 to_append = (f"{name}", f"**Amount** {amount}")
                 data.append(to_append)
-            page = MenuButtons(InventoryPageSource(data))
+            page = MenuButtons(source=InventoryPageSource(data), disable_buttons_after=True, ctx=ctx)
             await page.start(ctx)
 
     @commands.command(help="Claim your daily money")
@@ -431,5 +431,5 @@ class Economy(commands.Cog):
                          f"**Price:** <:FireCoin:920903065454903326> {x['price']} **Owner:** {self.bot.get_user(x['owner'])}")
             data.append(to_append)
 
-        pages = MenuButtons(NFTPageSource(data))
+        pages = MenuButtons(source=NFTPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)

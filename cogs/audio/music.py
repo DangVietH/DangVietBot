@@ -341,5 +341,5 @@ class Music(commands.Cog):
                 to_append = (f"{num}.", f"[**{track.title}**]({track.uri})")
                 data.append(to_append)
 
-            page = MenuButtons(QueuePageSource(data))
+            page = MenuButtons(source=QueuePageSource(data), disable_buttons_after=True, ctx=ctx)
             await page.start(ctx)

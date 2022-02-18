@@ -201,7 +201,7 @@ class Leveling(commands.Cog):
             to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = MenuButtons(GuildLeaderboardPageSource(data))
+        pages = MenuButtons(source=GuildLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
     @commands.command(help="See global rank")
@@ -216,7 +216,7 @@ class Leveling(commands.Cog):
                          f"**Server:** {self.bot.get_guild(x['guild'])} **Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = MenuButtons(GlobalLeaderboardPageSource(data))
+        pages = MenuButtons(source=GlobalLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Level rewarding role setup")
