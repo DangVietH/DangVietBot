@@ -5,9 +5,9 @@ from nextcord.ext import menus, commands
 class MenuButtons(menus.ButtonMenuPages):
     FIRST_PAGE = "⏪"
     PREVIOUS_PAGE = "◀️"
-    NEXT_PAGE = "⏹"
-    LAST_PAGE = "▶️"
-    STOP = "⏩"
+    STOP = "⏹"
+    NEXT_PAGE = "▶️"
+    LAST_PAGE = "⏩"
 
     def __init__(self, ctx: commands.Context, **kwargs):
         super().__init__(**kwargs)
