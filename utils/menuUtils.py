@@ -1,5 +1,5 @@
-import discord
-from discord.ext import menus
+import nextcord as discord
+from nextcord.ext import menus
 
 
 class MenuButtons(discord.ui.View, menus.MenuPages):

@@ -1,5 +1,5 @@
-import discord
-from discord.ext import commands, tasks
+import nextcord as discord
+from nextcord.ext import commands, tasks
 from motor.motor_asyncio import AsyncIOMotorClient
 from main import config_var
 import datetime

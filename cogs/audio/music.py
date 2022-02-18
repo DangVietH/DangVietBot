@@ -1,5 +1,5 @@
-import discord
-from discord.ext import commands, menus
+import nextcord as discord
+from nextcord.ext import commands, menus
 import lavalink
 import re
 from discord.ext.commands.errors import CheckFailure

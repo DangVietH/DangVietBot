@@ -1,5 +1,5 @@
-import discord
-from discord.ext import menus
+import nextcord as discord
+from nextcord.ext import menus
 
 shop_png = "https://cdn.discordapp.com/attachments/900197917170737152/921035393456042004/shop.png"
 nft_png = "https://cdn.discordapp.com/attachments/900197917170737152/923101670207004723/NFT_Icon.png"

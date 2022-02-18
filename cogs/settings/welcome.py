@@ -1,7 +1,8 @@
-import discord
-from discord.ext import commands
+import nextcord as discord
+from nextcord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from main import config_var
+from PIL import Image, ImageDraw, ImageFont
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursors = cluster["welcome"]["channel"]
