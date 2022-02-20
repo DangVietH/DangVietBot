@@ -1,12 +1,12 @@
 import nextcord as discord
 from nextcord.ext import commands
-from main import config_var
 from motor.motor_asyncio import AsyncIOMotorClient
 import traceback
 from core.help import CustomHelp
 import datetime
+import os
 
-cluster = AsyncIOMotorClient(config_var['mango_link'])
+cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 cursor = cluster["custom_prefix"]["prefix"]
 bcursor = cluster['bot']['blacklist']
 
@@ -45,7 +45,7 @@ class DHB(commands.Bot):
                 print(f"Failed to load extension {ext}: {tb}")
 
     def run(self):
-        super().run(config_var['token'], reconnect=True)
+        super().run(os.environ.get("token"), reconnect=True)
 
     async def on_ready(self):
         print(f"{self.user} is online! \nUsing nextcord {discord.__version__} \nDevelop by DvH#9980")
