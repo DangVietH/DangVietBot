@@ -34,7 +34,7 @@ class Setup(commands.Cog):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             insert = {"guild": ctx.guild.id, "channel": channel.id, "message": "Welcome {mention}",
-                      "dm": f"Have fun at **{ctx.guild.name}**"}
+                      "dm": f"Have fun at **{ctx.guild.name}**", "img": "https://cdn.discordapp.com/attachments/875886792035946496/936446668293935204/bridge.png"}
             await welcome_cursors.insert_one(insert)
             await ctx.send(f"Welcome channel set to {channel.mention}")
         elif result is not None:

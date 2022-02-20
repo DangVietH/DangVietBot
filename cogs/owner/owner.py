@@ -75,17 +75,7 @@ class Owner(commands.Cog):
 
     @commands.group(help="Blacklist ppls")
     @commands.is_owner()
-    async def blacklist(self, ctx):
-        embed = discord.Embed(title="Blacklist", color=discord.Color.random(), description="Create reaction roles")
-        command = self.bot.get_command("blacklist")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"blacklist {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
-        await ctx.send(embed=embed)
-
-    @blacklist.command(help="Blacklist user")
-    @commands.is_owner()
-    async def user(self, ctx, user: discord.User):
+    async def blacklist(self, ctx, user: discord.Member, *, reason):
         check = await cursor.find_one({"id": user.id})
         if check is None:
             if await ecursor.find_one({"id": user.id}) is not None:
@@ -94,7 +84,7 @@ class Owner(commands.Cog):
             if await levelling.find_one({"user": user.id}) is not None:
                 await levelling.delete_one({"user": user.id})
 
-            await user.send("You have been blacklisted")
+            await user.send(f"You have been blacklisted for: {reason}")
 
             for guild in self.bot.guilds:
                 if guild.owner.id == user.id:
@@ -110,3 +100,4 @@ class Owner(commands.Cog):
     async def unblacklist(self, ctx, user: discord.User):
         await cursor.delete_one({"id": user.id})
         await ctx.send("Unblacklist user successfully")
+        await user.send(f"You have been unblacklisted")

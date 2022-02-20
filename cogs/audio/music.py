@@ -2,7 +2,7 @@ import nextcord as discord
 from nextcord.ext import commands, menus
 import lavalink
 import re
-from discord.ext.commands.errors import CheckFailure
+from nextcord.ext.commands.errors import CheckFailure
 from utils.menuUtils import MenuButtons
 
 # This cog is based on https://github.com/Devoxin/Lavalink.py/blob/master/examples/music.py

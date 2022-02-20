@@ -18,7 +18,7 @@ reddit = asyncpraw.Reddit(client_id="WS8DpWseFlxeec8_v2sjrw",
 def get_quote():
     response = requests.get("https://zenquotes.io/api/random")
     json_data = json.loads(response.text)
-    quote = json_data[0]['q'] + "\n          -" + json_data[0]['a'] + "-"
+    quote = f"**{json_data[0]['q']}**\n          -{json_data[0]['a']}"
     return quote
 
 
