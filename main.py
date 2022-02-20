@@ -1,5 +1,5 @@
 import os
-from core.bot import DHB
+from core.dhbbot import DHB
 from motor.motor_asyncio import AsyncIOMotorClient
 
 config_var = {
