@@ -4,8 +4,9 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from core.help import CustomHelp
 import datetime
 import os
+from utils.configs import config_var
 
-cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
+cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["custom_prefix"]["prefix"]
 bcursor = cluster['bot']['blacklist']
 
@@ -31,7 +32,7 @@ class DangVietBot(commands.Bot):
         self.load_extension("jishaku")
 
     def run(self):
-        super().run(os.environ.get("token"), reconnect=True)
+        super().run(config_var['token'], reconnect=True)
 
     async def on_ready(self):
         print(f"{self.user} is online! \nUsing nextcord {discord.__version__} \nDevelop by DvH#9980")

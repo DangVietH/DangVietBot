@@ -5,7 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
 from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource, NFTPageSource
 from utils.menuUtils import MenuButtons
-from main import config_var
+from utils.configs import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 db = cluster["economy"]

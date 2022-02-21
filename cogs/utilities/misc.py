@@ -2,11 +2,11 @@ import nextcord as discord
 from nextcord.ext import commands, tasks
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
-import os
+from utils.configs import config_var
 import datetime
 import aiohttp
 
-cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
+cluster = AsyncIOMotorClient(config_var["mango_link"])
 timer = cluster["timer"]['remind']
 
 snipe_message_content = None

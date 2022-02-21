@@ -1,6 +1,6 @@
 from nextcord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
-from main import config_var
+from utils.configs import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["react_role"]['reaction_roles']

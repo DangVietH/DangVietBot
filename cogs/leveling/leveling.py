@@ -2,7 +2,7 @@ import nextcord as discord
 from nextcord.ext import commands, menus
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.menuUtils import MenuButtons
-from main import config_var
+from utils.configs import config_var
 from PIL import Image, ImageDraw, ImageFont
 import io
 

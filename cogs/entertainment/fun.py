@@ -5,7 +5,7 @@ import requests
 import asyncpraw
 import random
 import asyncio
-from main import config_var
+from utils.configs import config_var
 
 
 reddit = asyncpraw.Reddit(client_id="WS8DpWseFlxeec8_v2sjrw",

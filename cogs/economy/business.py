@@ -1,7 +1,7 @@
 import nextcord as discord
 from nextcord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
-from main import config_var
+from utils.configs import config_var
 import asyncio
 
 # load this file later
