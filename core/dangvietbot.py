@@ -10,6 +10,18 @@ cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["custom_prefix"]["prefix"]
 bcursor = cluster['bot']['blacklist']
 
+cog_list = [
+    'cogs.audio',
+    'cogs.economy',
+    'cogs.entertainment',
+    'cogs.leveling',
+    'cogs.moderation',
+    'cogs.owner',
+    'cogs.rtfm',
+    'cogs.settings',
+    'cogs.utilities',
+    'jishaku']
+
 
 class DangVietBot(commands.Bot):
     def __init__(self, *args, **kwargs):
@@ -27,9 +39,11 @@ class DangVietBot(commands.Bot):
         )
 
         # loading cogs
-        for ext in os.listdir("cogs"):
-            self.load_extension(f"cogs.{ext}")
-        self.load_extension("jishaku")
+        for ext in cog_list:
+            try:
+                self.load_extension(ext)
+            except Exception as e:
+                print(f"Failed to load extension {ext}: {e}")
 
     def run(self):
         super().run(config_var['token'], reconnect=True)
