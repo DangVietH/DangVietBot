@@ -27,7 +27,7 @@ class DangVietBot(commands.Bot):
         )
 
         # loading cogs
-        for ext in os.listdir("./cogs"):
+        for ext in os.listdir("cogs"):
             self.load_extension(f"cogs.{ext}")
         self.load_extension("jishaku")
 
