@@ -1,4 +1,4 @@
-requests==2.26.0
+requests==2.27.1
 asyncpraw==7.5.0
 motor==2.5.1
 DateTime==4.3
