@@ -1,7 +1,6 @@
 import nextcord as discord
 from nextcord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
-import traceback
 from core.help import CustomHelp
 import datetime
 import os
@@ -9,18 +8,6 @@ import os
 cluster = AsyncIOMotorClient(os.environ.get("mango_link"))
 cursor = cluster["custom_prefix"]["prefix"]
 bcursor = cluster['bot']['blacklist']
-
-cog_list = [
-    'cogs.audio',
-    'cogs.economy',
-    'cogs.entertainment',
-    'cogs.leveling',
-    'cogs.moderation',
-    'cogs.owner',
-    'cogs.rtfm',
-    'cogs.settings',
-    'cogs.utilities',
-    'jishaku']
 
 
 class DangVietBot(commands.Bot):
@@ -39,12 +26,9 @@ class DangVietBot(commands.Bot):
         )
 
         # loading cogs
-        for ext in cog_list:
-            try:
-                self.load_extension(ext)
-            except Exception as e:
-                tb = traceback.format_exception(type(e), e, e.__traceback__)
-                print(f"Failed to load extension {ext}: {tb}")
+        for ext in os.listdir("./cogs"):
+            self.load_extension(f"cogs.{ext}")
+        self.load_extension("jishaku")
 
     def run(self):
         super().run(os.environ.get("token"), reconnect=True)
