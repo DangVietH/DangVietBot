@@ -25,16 +25,18 @@ cog_list = [
 
 class DHB(commands.Bot):
     def __init__(self, *args, **kwargs):
-        super().__init__(command_prefix=self.get_prefix,
-                         intents=discord.Intents.all(),
-                         strip_after_prefix=True,
-                         case_insensitive=True,
-                         help_command=CustomHelp(),
-                         description="One bot Many functionality",
-                         owner_id=860876181036335104,
-                         enable_debug_events=True,
-                         activity=discord.Streaming(name="d!help", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
-                         **kwargs)
+        super().__init__(
+            command_prefix=self.get_prefix,
+            intents=discord.Intents.all(),
+            strip_after_prefix=True,
+            case_insensitive=True,
+            help_command=CustomHelp(),
+            description="One bot Many functionality",
+            owner_id=860876181036335104,
+            enable_debug_events=True,
+            activity=discord.Streaming(name="d!help", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+            **kwargs
+        )
 
         # loading cogs
         for ext in cog_list:
@@ -74,7 +76,7 @@ class DHB(commands.Bot):
 
     async def on_guild_join(self, guild):
         embed = discord.Embed(title=f"Greetings {guild.name}",
-                              description="Thanks for adding DHB into your server! To get started type d!help!",
+                              description=f"Thanks for adding {self.user.name} into your server! To get started type d!help!",
                               color=discord.Color.from_rgb(225, 0, 92))
         embed.add_field(name="Note", value="I'm still WIP, so some features may be bugged or ugly.", inline=False)
         embed.add_field(name="Links",
