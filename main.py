@@ -1,5 +1,5 @@
 import os
-from core.dhbbot import DHB
+from core.dangvietbot import DangVietBot
 from motor.motor_asyncio import AsyncIOMotorClient
 
 config_var = {
@@ -11,7 +11,7 @@ config_var = {
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 bcursor = cluster['bot']['blacklist']
 
-bot = DHB()
+bot = DangVietBot()
 
 
 @bot.check

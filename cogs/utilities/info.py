@@ -78,7 +78,6 @@ class Info(commands.Cog):
     @commands.command(help="Bot information")
     async def about(self, ctx):
         embed = discord.Embed(title="Bot information", color=discord.Color.random())
-        embed.add_field(name="Sever prefix", value=f"{ctx.clear_prefix}")
         embed.add_field(name="Developer", value=f"DvH#9980")
         embed.add_field(name="Version", value="0.6.0")
         embed.add_field(name="Written in", value="Python 3.10.1")

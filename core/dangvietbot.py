@@ -23,7 +23,7 @@ cog_list = [
     'jishaku']
 
 
-class DHB(commands.Bot):
+class DangVietBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(
             command_prefix=self.get_prefix,
