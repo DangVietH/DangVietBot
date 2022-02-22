@@ -51,13 +51,21 @@ class Setup(commands.Cog):
         else:
             await ctx.send("You don't have a welcome system")
 
-    @welcome.command(help="Create your welcome message")
+    @welcome.command(help="Create your welcome message. Use var to see the list of variables")
     @commands.has_permissions(administrator=True)
     async def text(self, ctx, *, text):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             await ctx.send("You haven't configure a welcome channel yet")
         else:
+            if text.lower() == "var":
+                return await ctx.send("""
+{mention}: Mention the joined user
+{username}: user name and discriminator
+{count}: Display the member count
+{name}: The user's name
+{server}: The server's name
+                """)
             await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"message": text}})
             await ctx.send(f"Welcome message updated to ```{text}```")
 
