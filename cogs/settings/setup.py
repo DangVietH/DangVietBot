@@ -71,7 +71,7 @@ class Setup(commands.Cog):
             await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"dm": text}})
             await ctx.send(f"Welcome dm updated to ```{text}```")
 
-    @welcome.command(help="Custom image. Make sure it's a link", aliases=["image"])
+    @welcome.command(help="Custom image. Make sure it's a link", aliases=["img"])
     @commands.has_permissions(administrator=True)
     async def image(self, ctx, *, link: str):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
