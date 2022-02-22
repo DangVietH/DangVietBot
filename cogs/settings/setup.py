@@ -71,6 +71,16 @@ class Setup(commands.Cog):
             await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"dm": text}})
             await ctx.send(f"Welcome dm updated to ```{text}```")
 
+    @welcome.command(help="Custom image. Make sure it's a link", aliases=["image"])
+    @commands.has_permissions(administrator=True)
+    async def image(self, ctx, *, link: str):
+        result = await welcome_cursors.find_one({"guild": ctx.guild.id})
+        if result is None:
+            await ctx.send("You haven't configure a welcome channel yet")
+        else:
+            await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"img": link}})
+            await ctx.send(f"Successfully updated welcome image")
+
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Custom prefix setup")
     async def prefix(self, ctx):
         embed = discord.Embed(title="Prefix", color=discord.Color.random(), description="Set up custom prefix")

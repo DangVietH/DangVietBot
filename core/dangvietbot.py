@@ -3,7 +3,6 @@ from nextcord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from core.help import CustomHelp
 import datetime
-import os
 from utils.configs import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
