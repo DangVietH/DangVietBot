@@ -169,7 +169,7 @@ class Leveling(commands.Cog):
         bar_length = 245 + xp / needed_xp * 205
         draw.rounded_rectangle((245, 185, bar_length, 205), fill=(225, 0, 92), radius=10)
 
-        AVATAR_SIZE = 200
+        AVATAR_SIZE = 128
         avatar_asset = user.avatar.replace(format='jpg', size=128)
         buffer_avatar = io.BytesIO(await avatar_asset.read())
 
@@ -179,9 +179,6 @@ class Leveling(commands.Cog):
 
         # read JPG from buffer to Image
         avatar_image = Image.open(buffer_avatar)
-
-        # resize it
-        avatar_image = avatar_image.resize((AVATAR_SIZE, AVATAR_SIZE))
 
         circle_image = Image.new('L', (AVATAR_SIZE, AVATAR_SIZE))
         circle_draw = ImageDraw.Draw(circle_image)
