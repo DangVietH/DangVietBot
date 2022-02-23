@@ -5,6 +5,7 @@ from utils.menuUtils import MenuButtons
 from utils.configs import config_var
 from PIL import Image, ImageDraw, ImageFont
 import io
+from utils.imageUtils import get_image_from_url
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 db = cluster["levelling"]
@@ -115,6 +116,90 @@ class Leveling(commands.Cog):
                                         await channel.send(f"🎉 {message.author} also receive {role.name} role")
                 else:
                     return None
+
+    @commands.command(help="See your rank but alpha")
+    @commands.guild_only()
+    async def test_rank(self, ctx, user: discord.Member = None):
+        user = user or ctx.author
+        stats = await levelling.find_one({'guild': ctx.guild.id, "user": user.id})
+        if stats is None:
+            return await ctx.send("The specified member haven't send a message in this server!!")
+        lvl = 0
+        rank = 0
+        xp = stats["xp"]
+        while True:
+            if xp < ((100 / 2 * (lvl ** 2)) + (100 / 2 * lvl)):
+                break
+            lvl += 1
+        xp -= ((100 / 2 * (lvl - 1) ** 2) + (100 / 2 * (lvl - 1)))
+        ranking = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
+        async for x in ranking:
+            rank += 1
+            if stats['user'] == x['user']:
+                break
+
+        IMAGE_WIDTH = 850
+        IMAGE_HEIGHT = 238
+
+        image = Image.open(get_image_from_url(
+            "https://cdn.discordapp.com/attachments/875886792035946496/945619357512372274/com_wallpaper.png")).convert(
+            "RGBA"
+        )
+
+        image = image.resize((IMAGE_WIDTH, IMAGE_HEIGHT))
+
+        rectangle_image = Image.new('RGBA', (IMAGE_WIDTH, IMAGE_HEIGHT))
+        rectangle_draw = ImageDraw.Draw(rectangle_image)
+        rectangle_draw.rectangle((50, 50, IMAGE_WIDTH-50, IMAGE_HEIGHT-50), fill=(0, 0, 0, 127))
+        image = Image.alpha_composite(image, rectangle_image)
+
+        draw = ImageDraw.Draw(image)
+
+        font_big = ImageFont.truetype('font.ttf', 36)
+        font_small = ImageFont.truetype('font.ttf', 20)
+
+        needed_xp = 100 * 2 * ((1 / 2) * lvl)
+        draw.text((248, 48), f"{user}", fill=(225, 0, 92), font=font_big)
+        draw.text((641, 48), f"Rank #{rank}", fill=(225, 0, 92), font=font_big)
+        draw.text((248, 130), f"Level {stats['level']}", fill=(225, 0, 92), font=font_small)
+        draw.text((641, 130), f"{xp} / {needed_xp} XP", fill=(225, 0, 92), font=font_small)
+
+        draw.rounded_rectangle((242, 182, 803, 208), fill=(70, 70, 70), outline=(225, 0, 92), radius=13, width=3)
+
+        bar_length = 245 + xp / needed_xp * 205
+        draw.rounded_rectangle((245, 185, bar_length, 205), fill=(225, 0, 92), radius=10)
+
+        AVATAR_SIZE = 200
+        avatar_asset = user.avatar.replace(format='jpg', size=128)
+        buffer_avatar = io.BytesIO(await avatar_asset.read())
+
+        buffer_avatar = io.BytesIO()
+        await avatar_asset.save(buffer_avatar)
+        buffer_avatar.seek(0)
+
+        # read JPG from buffer to Image
+        avatar_image = Image.open(buffer_avatar)
+
+        # resize it
+        avatar_image = avatar_image.resize((AVATAR_SIZE, AVATAR_SIZE))
+
+        circle_image = Image.new('L', (AVATAR_SIZE, AVATAR_SIZE))
+        circle_draw = ImageDraw.Draw(circle_image)
+        circle_draw.ellipse((0, 0, AVATAR_SIZE, AVATAR_SIZE), fill=255)
+
+        x = 20
+        y = (IMAGE_HEIGHT - AVATAR_SIZE) // 2
+        image.paste(avatar_image, (x, y), circle_image)
+
+        buffer = io.BytesIO()
+
+        # save PNG in buffer
+        image.save(buffer, format='PNG')
+
+        # move to beginning of buffer so `send()` it will read from beginning
+        buffer.seek(0)
+
+        await ctx.send(file=discord.File(buffer, 'rank.png'))
 
     @commands.command(help="See your rank")
     @commands.guild_only()
