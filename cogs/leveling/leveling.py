@@ -179,6 +179,7 @@ class Leveling(commands.Cog):
 
         # read JPG from buffer to Image
         avatar_image = Image.open(buffer_avatar)
+        avatar_image = avatar_image.resize((AVATAR_SIZE, AVATAR_SIZE))
 
         circle_image = Image.new('L', (AVATAR_SIZE, AVATAR_SIZE))
         circle_draw = ImageDraw.Draw(circle_image)
