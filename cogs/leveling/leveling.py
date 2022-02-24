@@ -138,8 +138,8 @@ class Leveling(commands.Cog):
             if stats['user'] == x['user']:
                 break
 
-        IMAGE_WIDTH = 933
-        IMAGE_HEIGHT = 280
+        IMAGE_WIDTH = 850
+        IMAGE_HEIGHT = 238
 
         image = Image.open(get_image_from_url(
             "https://cdn.discordapp.com/attachments/875886792035946496/945619357512372274/com_wallpaper.png")).convert(
@@ -150,7 +150,7 @@ class Leveling(commands.Cog):
 
         rectangle_image = Image.new('RGBA', (IMAGE_WIDTH, IMAGE_HEIGHT))
         rectangle_draw = ImageDraw.Draw(rectangle_image)
-        rectangle_draw.rectangle((20, 20, IMAGE_WIDTH-20, IMAGE_HEIGHT-20), fill=(0, 0, 0, 127))
+        rectangle_draw.rectangle((30, 30, IMAGE_WIDTH-30, IMAGE_HEIGHT-30), fill=(0, 0, 0, 127))
         image = Image.alpha_composite(image, rectangle_image)
 
         draw = ImageDraw.Draw(image)
