@@ -185,7 +185,7 @@ class Leveling(commands.Cog):
         circle_draw = ImageDraw.Draw(circle_image)
         circle_draw.ellipse((0, 0, AVATAR_SIZE, AVATAR_SIZE), fill=255)
 
-        x = 20
+        x = 40
         y = (IMAGE_HEIGHT - AVATAR_SIZE) // 2
         image.paste(avatar_image, (x, y), circle_image)
 
