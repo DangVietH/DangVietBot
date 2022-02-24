@@ -150,7 +150,7 @@ class Leveling(commands.Cog):
 
         rectangle_image = Image.new('RGBA', (IMAGE_WIDTH, IMAGE_HEIGHT))
         rectangle_draw = ImageDraw.Draw(rectangle_image)
-        rectangle_draw.rectangle((100, 100, IMAGE_WIDTH-100, IMAGE_HEIGHT-100), fill=(0, 0, 0, 127))
+        rectangle_draw.rectangle((20, 20, IMAGE_WIDTH-20, IMAGE_HEIGHT-20), fill=(0, 0, 0, 127))
         image = Image.alpha_composite(image, rectangle_image)
 
         draw = ImageDraw.Draw(image)
