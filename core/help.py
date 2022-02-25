@@ -17,7 +17,7 @@ class CustomHelp(commands.HelpCommand):
                 embed.add_field(name=cog_name, value=f"Commands: {len(command)}")
         embed.set_footer(text=f'Use {self.context.clean_prefix}help [something] for more info on a command or category. \nExample: {self.context.clean_prefix}help Economy')
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(label='Invite', url='https://bit.ly/3daeOIe'))
+        view.add_item(discord.ui.Button(label='Invite', url='https://bit.ly/3BJa6Nj'))
         view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9'))
         await self.get_destination().send(embed=embed, view=view)
 
