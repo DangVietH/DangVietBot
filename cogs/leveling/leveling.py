@@ -1,19 +1,70 @@
-import nextcord as discord
-from nextcord.ext import commands, menus
+import discord
+from discord.ext import commands, menus
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils.menuUtils import MenuButtons
-from utils.configs import config_var
 from PIL import Image, ImageDraw, ImageFont
 import io
-from utils.imageUtils import get_image_from_url
+import requests
 
-cluster = AsyncIOMotorClient(config_var['mango_link'])
+"""
+I haven't use ext.page so i'll use menus
+to install menus, do pip install git+https://github.com/DevInfinix/pycord-ext-menus
+"""
+cluster = AsyncIOMotorClient('mongo link')
 db = cluster["levelling"]
 levelling = db['member']
 disable = db['disable']
 roled = db['roles']
 upchannel = db['channel']
 image_cursor = db['image']
+
+
+class MenuButtons(discord.ui.View, menus.MenuPages):
+    def __init__(self, source):
+        super().__init__(timeout=None)
+        self._source = source
+        self.current_page = 0
+        self.ctx = None
+        self.message = None
+
+    async def start(self, ctx, *, channel=None, wait=False):
+        # We wont be using wait/channel, you can implement them yourself. This is to match the MenuPages signature.
+        await self._source._prepare_once()
+        self.ctx = ctx
+        self.message = await self.send_initial_message(ctx, ctx.channel)
+
+    async def _get_kwargs_from_page(self, page):
+        value = await super()._get_kwargs_from_page(page)
+        if 'view' not in value:
+            value.update({'view': self})
+        return value
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user != self._ctx.author:
+            await interaction.response.send_message("You can't use them", ephemeral=True)
+            return False
+        else:
+            return True
+
+    # This is extremely similar to Custom MenuPages(I will not explain these)
+    @discord.ui.button(emoji='⏪', style=discord.ButtonStyle.blurple)
+    async def first_page(self, button, interaction):
+        await self.show_page(0)
+
+    @discord.ui.button(emoji='◀️', style=discord.ButtonStyle.blurple)
+    async def before_page(self, button, interaction):
+        await self.show_checked_page(self.current_page - 1)
+
+    @discord.ui.button(emoji='⏹', style=discord.ButtonStyle.blurple)
+    async def stop_page(self, button, interaction):
+        self.stop()
+
+    @discord.ui.button(emoji='▶️', style=discord.ButtonStyle.blurple)
+    async def next_page(self, button, interaction):
+        await self.show_checked_page(self.current_page + 1)
+
+    @discord.ui.button(emoji='⏩', style=discord.ButtonStyle.blurple)
+    async def last_page(self, button, interaction):
+        await self.show_page(self._source.get_max_pages() - 1)
 
 
 class GuildLeaderboardPageSource(menus.ListPageSource):
@@ -143,11 +194,10 @@ class Leveling(commands.Cog):
         IMAGE_HEIGHT = 250
 
         img_link = "https://cdn.discordapp.com/attachments/875886792035946496/945619357512372274/com_wallpaper.png"
-        CustomImg = await image_cursor.find_one({"guild": ctx.guild.id, "member": ctx.author.id})
+        CustomImg = await image_cursor.find_one({"guild": ctx.guild.id, "member": user.id})
         if CustomImg is not None:
             img_link = CustomImg["image"]
-        image = Image.open(get_image_from_url(
-            img_link)).convert(
+        image = Image.open(io.BytesIO(requests.get(img_link).content)).convert(
             "RGBA"
         )
 
@@ -164,15 +214,15 @@ class Leveling(commands.Cog):
         font_small = ImageFont.truetype('font.ttf', 20)
 
         needed_xp = 100 * 2 * ((1 / 2) * lvl)
-        draw.text((248, 48), f"{user}", fill=(225, 0, 92), font=font_big)
-        draw.text((641, 48), f"Rank #{rank}", fill=(225, 0, 92), font=font_big)
-        draw.text((248, 130), f"Level {stats['level']}", fill=(225, 0, 92), font=font_small)
-        draw.text((641, 130), f"{xp} / {needed_xp} XP", fill=(225, 0, 92), font=font_small)
+        draw.text((248, 48), f"{user}", fill=(248, 191, 20), font=font_big)
+        draw.text((641, 48), f"Rank #{rank}", fill=(248, 191, 20), font=font_big)
+        draw.text((248, 130), f"Level {stats['level']}", fill=(248, 191, 20), font=font_small)
+        draw.text((641, 130), f"{xp} / {needed_xp} XP", fill=(248, 191, 20), font=font_small)
 
-        draw.rounded_rectangle((242, 182, 803, 208), fill=(70, 70, 70), outline=(225, 0, 92), radius=13, width=3)
+        draw.rounded_rectangle((242, 182, 803, 208), fill=(70, 70, 70), outline=(248, 191, 20), radius=13, width=3)
 
         bar_length = 245 + xp / needed_xp * 205
-        draw.rounded_rectangle((245, 185, bar_length, 205), fill=(225, 0, 92), radius=10)
+        draw.rounded_rectangle((245, 185, bar_length, 205), fill=(248, 191, 20), radius=10)
 
         AVATAR_SIZE = 200
         avatar_asset = user.avatar.replace(format='jpg', size=128)
@@ -215,7 +265,7 @@ class Leveling(commands.Cog):
             to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = MenuButtons(source=GuildLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
+        pages = MenuButtons(GuildLeaderboardPageSource(data))
         await pages.start(ctx)
 
     @commands.command(help="See global rank")
@@ -230,7 +280,7 @@ class Leveling(commands.Cog):
                          f"**Server:** {self.bot.get_guild(x['guild'])} **Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = MenuButtons(source=GlobalLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
+        pages = MenuButtons(GlobalLeaderboardPageSource(data))
         await pages.start(ctx)
 
     @commands.Cog.listener()
