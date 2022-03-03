@@ -1,70 +1,20 @@
-import discord
-from discord.ext import commands, menus
+import nextcord as discord
+from nextcord.ext import commands, menus
 from motor.motor_asyncio import AsyncIOMotorClient
 from PIL import Image, ImageDraw, ImageFont
 import io
-import requests
+from utils.imageUtils import get_image_from_url
+from utils.menuUtils import MenuButtons
+from utils.configs import config_var
 
-"""
-I haven't use ext.page so i'll use menus
-to install menus, do pip install git+https://github.com/DevInfinix/pycord-ext-menus
-"""
-cluster = AsyncIOMotorClient('mongo link')
+
+cluster = AsyncIOMotorClient(config_var['mango_link'])
 db = cluster["levelling"]
 levelling = db['member']
 disable = db['disable']
 roled = db['roles']
 upchannel = db['channel']
 image_cursor = db['image']
-
-
-class MenuButtons(discord.ui.View, menus.MenuPages):
-    def __init__(self, source):
-        super().__init__(timeout=None)
-        self._source = source
-        self.current_page = 0
-        self.ctx = None
-        self.message = None
-
-    async def start(self, ctx, *, channel=None, wait=False):
-        # We wont be using wait/channel, you can implement them yourself. This is to match the MenuPages signature.
-        await self._source._prepare_once()
-        self.ctx = ctx
-        self.message = await self.send_initial_message(ctx, ctx.channel)
-
-    async def _get_kwargs_from_page(self, page):
-        value = await super()._get_kwargs_from_page(page)
-        if 'view' not in value:
-            value.update({'view': self})
-        return value
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        if interaction.user != self._ctx.author:
-            await interaction.response.send_message("You can't use them", ephemeral=True)
-            return False
-        else:
-            return True
-
-    # This is extremely similar to Custom MenuPages(I will not explain these)
-    @discord.ui.button(emoji='⏪', style=discord.ButtonStyle.blurple)
-    async def first_page(self, button, interaction):
-        await self.show_page(0)
-
-    @discord.ui.button(emoji='◀️', style=discord.ButtonStyle.blurple)
-    async def before_page(self, button, interaction):
-        await self.show_checked_page(self.current_page - 1)
-
-    @discord.ui.button(emoji='⏹', style=discord.ButtonStyle.blurple)
-    async def stop_page(self, button, interaction):
-        self.stop()
-
-    @discord.ui.button(emoji='▶️', style=discord.ButtonStyle.blurple)
-    async def next_page(self, button, interaction):
-        await self.show_checked_page(self.current_page + 1)
-
-    @discord.ui.button(emoji='⏩', style=discord.ButtonStyle.blurple)
-    async def last_page(self, button, interaction):
-        await self.show_page(self._source.get_max_pages() - 1)
 
 
 class GuildLeaderboardPageSource(menus.ListPageSource):
@@ -197,9 +147,8 @@ class Leveling(commands.Cog):
         CustomImg = await image_cursor.find_one({"guild": ctx.guild.id, "member": user.id})
         if CustomImg is not None:
             img_link = CustomImg["image"]
-        image = Image.open(io.BytesIO(requests.get(img_link).content)).convert(
-            "RGBA"
-        )
+        image = Image.open(get_image_from_url(
+            img_link)).convert("RGBA")
 
         image = image.resize((IMAGE_WIDTH, IMAGE_HEIGHT))
 
@@ -265,7 +214,7 @@ class Leveling(commands.Cog):
             to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = MenuButtons(GuildLeaderboardPageSource(data))
+        pages = MenuButtons(source=GuildLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
     @commands.command(help="See global rank")
@@ -280,7 +229,7 @@ class Leveling(commands.Cog):
                          f"**Server:** {self.bot.get_guild(x['guild'])} **Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = MenuButtons(GlobalLeaderboardPageSource(data))
+        pages = MenuButtons(source=GlobalLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
     @commands.Cog.listener()
