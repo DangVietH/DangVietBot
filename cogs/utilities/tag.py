@@ -49,7 +49,7 @@ class Tags(commands.Cog):
     async def create(self, ctx):
         await ctx.send("Answer These Question In 10 minute!")
         questions = ["What is the tag name: ",
-                     "What is the tag value \n`Type end to abort the process`: "]
+                     "What is the tag value: "]
         answers = []
 
         def check(user):
@@ -66,24 +66,20 @@ class Tags(commands.Cog):
             else:
                 answers.append(msg.content)
 
-        end = "end"
-        if answers[1] == end.lower():
-            await ctx.send("Task abort successfully")
+        check = await cursor.find_one({"guild": ctx.guild.id})
+        if check is None:
+            await cursor.insert_one({"guild": ctx.guild.id, "tag": [
+                {"name": answers[0], "value": answers[1], "owner": ctx.author.id}
+            ]})
+            await ctx.send(f"Tag {answers[0]} successfully created")
         else:
-            check = await cursor.find_one({"guild": ctx.guild.id})
-            if check is None:
-                await cursor.insert_one({"guild": ctx.guild.id, "tag": [
-                    {"name": answers[0], "value": answers[1], "owner": ctx.author.id}
-                ]})
-                await ctx.send(f"Tag {answers[0]} successfully created")
+            is_exist = await cursor.find_one({"guild": ctx.guild.id, "tag.name": answers[0]})
+            if is_exist is not None:
+                await ctx.send("Tag already exist. Remember that tag name are case SENSITIVE")
             else:
-                is_exist = await cursor.find_one({"guild": ctx.guild.id, "tag.name": answers[0]})
-                if is_exist is not None:
-                    await ctx.send("Tag already exist. Remember that tag name are case SENSITIVE")
-                else:
-                    await cursor.update_one({"guild": ctx.guild.id}, {
-                        "$push": {"tag": {"name": answers[0], "value": answers[1], "owner": ctx.author.id}}})
-                    await ctx.send(f"Tag {answers[0]} successfully created")
+                await cursor.update_one({"guild": ctx.guild.id}, {
+                    "$push": {"tag": {"name": answers[0], "value": answers[1], "owner": ctx.author.id}}})
+                await ctx.send(f"Tag {answers[0]} successfully created")
 
     @tag.command(help="Remove a tag", aliases=['remove'])
     @commands.has_permissions(manage_guild=True)

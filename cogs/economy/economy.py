@@ -43,13 +43,13 @@ class Economy(commands.Cog):
             wallet = check['wallet']
             bank = check['bank']
             balance = wallet + bank
-            embed = discord.Embed(description=f"**Total:** <:DHBuck:901485795410599988> {balance}",
+            embed = discord.Embed(description=f"**Total:** 💵 {balance}",
                                   color=discord.Color.blue())
             embed.set_author(
                 icon_url=user.avatar.url,
                 name=f"{user} balance")
-            embed.add_field(name="Wallet", value=f"<:DHBuck:901485795410599988> {wallet}", inline=False)
-            embed.add_field(name="Bank", value=f"<:DHBuck:901485795410599988> {bank}", inline=False)
+            embed.add_field(name="Wallet", value=f"💵 {wallet}", inline=False)
+            embed.add_field(name="Bank", value=f"💵 {bank}", inline=False)
             await ctx.send(embed=embed)
 
     @commands.command(help="Who is the richest one in your server")
@@ -100,52 +100,17 @@ class Economy(commands.Cog):
         user = ctx.author
         await self.open_account(user)
 
-        name = ["Tom", "John", "Jim", "Jack", "Henry", "Tim", "Lucas"]
-        verbs = ["eat", "drink", "kicked", "paid", "build", "throw", "buy"]
-        noun = ['a cat', 'the cashier', 'a ball', "an apple", 'a house', 'a bee', 'a cow', 'a computer']
-
         check = await cursor.find_one({"id": user.id})
-        emojis = []
-        sentence = f"{name[random.randint(0, len(name) - 1)]} {verbs[random.randint(0, len(verbs) - 1)]} {noun[random.randint(0, len(noun) - 1)]}"
-
-        for s in sentence:
-            if s.isalpha():
-                emojis.append(f":regional_indicator_{s.lower()}:")
-            else:
-                emojis.append("  ")
-        await ctx.send("Convert the message below to text")
-        await ctx.send(''.join(emojis))
-        try:
-            message = await self.bot.wait_for('message', timeout=30.0)
-        except asyncio.TimeoutError:
-            newBal = check['wallet'] + 10
-            await cursor.update_one({"id": user.id}, {"$set": {"wallet": newBal}})
-            embed = discord.Embed(title="🤦 BAD WORK 🤦",
-                                  description="You didn't complete in time? You only receive <:DHBuck:901485795410599988> 10 because of that!!",
-                                  color=discord.Color.red())
-            await ctx.send(embed=embed)
-        else:
-            if message.content.lower() == sentence.lower():
-                random_money = random.randint(100, 10000)
-                await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
-                embed = discord.Embed(title="GOOD JOB",
-                                      description=f"Your receive <:DHBuck:901485795410599988> {random_money} for successfully converting it to a text",
-                                      color=discord.Color.green())
-                await message.reply(embed=embed)
-            else:
-                low_money = random.randint(10, 100)
-                await cursor.update_one({"id": user.id}, {"$inc": {"wallet": low_money}})
-                embed = discord.Embed(title="🤦 BAD WORK 🤦",
-                                      description=f"You didn't answer correctly. You only receive <:DHBuck:901485795410599988> {low_money}",
-                                      color=discord.Color.red())
-                await message.reply(embed=embed)
+        random_money = random.randint(100, 10000)
+        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
+        await ctx.send(f"You got 💵 {random_money} for working as a {random.choice(['police', 'programmer', 'bus driver', 'street preformer'])}")
 
     @commands.command(help="View the store", aliases=['store'])
     @commands.guild_only()
     async def shop(self, ctx):
         data = []
         for i in range(len(items_name)):
-            data.append((f"{items_name[i]} | <:DHBuck:901485795410599988> {items_price[i]}",
+            data.append((f"{items_name[i]} | 💵 {items_price[i]}",
                          items_description[i]))
         page = MenuButtons(source=ShopPageSource(data), disable_buttons_after=True, ctx=ctx)
         await page.start(ctx)
@@ -178,7 +143,7 @@ class Economy(commands.Cog):
                                                     {"$inc": {"inventory.$.amount": int(amount)}})
                         await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -cost}})
                         await ctx.send(
-                            f"You just brought {amount} {item_name} that cost <:DHBuck:901485795410599988> {cost}")
+                            f"You just brought {amount} {item_name} that cost 💵 {cost}")
                     break
 
     @commands.command(help="Sell your items")
@@ -205,7 +170,7 @@ class Economy(commands.Cog):
                     if is_amount_zero is not None:
                         await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}})
                     await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
-                    await ctx.send(f"Successfully sold {amount} {item_name} for <:DHBuck:901485795410599988> {price}")
+                    await ctx.send(f"Successfully sold {amount} {item_name} for 💵 {price}")
                 break
 
     @commands.command(help="See your items", aliases=["bag"])
@@ -232,7 +197,7 @@ class Economy(commands.Cog):
         await self.open_account(ctx.author)
         await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": 90000}})
         await ctx.send(
-            embed=discord.Embed(title="Daily Claimed", description="You just got 90000 <:DHBuck:901485795410599988>",
+            embed=discord.Embed(title="Daily Claimed", description="You just got 90000 💵",
                                 color=discord.Color.green()))
 
     @commands.command(help="we work for the right to work")
@@ -249,10 +214,10 @@ class Economy(commands.Cog):
             chance = random.randint(1, 100)
             if chance <= 50:
                 await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount}})
-                await ctx.send(f"You just won <:DHBuck:901485795410599988> {amount}")
+                await ctx.send(f"You just won 💵 {amount}")
             else:
                 await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": -amount}})
-                await ctx.send(f"You have lost <:DHBuck:901485795410599988> {amount}")
+                await ctx.send(f"You have lost 💵 {amount}")
 
     @commands.command(help="Deposit your money into the bank", aliases=['dep'])
     @commands.guild_only()
@@ -297,7 +262,7 @@ class Economy(commands.Cog):
                 await cursor.update_one({"id": ctx.author.id}, {"$inc": {"bank": -amount}})
                 await cursor.update_one({"id": user.id}, {"$inc": {"bank": amount}})
                 await ctx.message.add_reaction("✅")
-                await user.send(f"**{ctx.author}** just gave you <:DHBuck:901485795410599988> {amount}")
+                await user.send(f"**{ctx.author}** just gave you 💵 {amount}")
 
     @commands.command(help="It's a crime to steal someone", aliases=['steal'])
     @commands.cooldown(1, 86400, commands.BucketType.user)
@@ -312,7 +277,7 @@ class Economy(commands.Cog):
         else:
             total_check = check1['wallet'] + check1['bank']
             if total_check < 10000:
-                await ctx.send("You need <:DHBuck:901485795410599988> 10000 to rob someone")
+                await ctx.send("You need 💵 10000 to rob someone")
             else:
                 anti_rob_1 = await cursor.find_one({"id": user.id, "inventory.name": "robber_shield"})
                 if anti_rob_1 is not None:
@@ -320,11 +285,11 @@ class Economy(commands.Cog):
                     user_update = check2['wallet'] - 10
                     await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
                     await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
-                    await ctx.send(f"You tried to rob him but you only got <:DHBuck:901485795410599988> 10")
+                    await ctx.send(f"You tried to rob him but you only got 💵 10")
 
                 if amount > check2['wallet']:
                     await ctx.send(
-                        'You tried to rob him, but he caught you and force you to pay <:DHB_coin:901485795410599988> 1000')
+                        'You tried to rob him, but he caught you and force you to pay 💵 1000')
                     author_update = check1['wallet'] - 1000
                     user_update = check2['wallet'] + 1000
                     await cursor.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
@@ -335,7 +300,7 @@ class Economy(commands.Cog):
                     user_update = check2['wallet'] - amount
                     await cursor.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
                     await cursor.update_one({"id": user.id}, {"$set": {"wallet": user_update}})
-                    await ctx.send(f"Successfully rob <:DHBuck:901485795410599988> {amount} from {user.mention}")
+                    await ctx.send(f"Successfully rob 💵 {amount} from {user.mention}")
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="IT'S SCREENSHOT TIME!")
     async def nft(self, ctx):
@@ -374,7 +339,7 @@ class Economy(commands.Cog):
         else:
             price = random.randint(1, 100000)
             await nfts.insert_one({"name": answers[0], "link": answers[1], "price": price, "owner": ctx.author.id})
-            await ctx.send(f"NFT {answers[0]} created for <:FireCoin:920903065454903326> {price}")
+            await ctx.send(f"NFT {answers[0]} created for 💵 {price}")
 
     @nft.command(help="WHY DON'T SCREENSHOT", aliases=["buy"])
     async def purchase(self, ctx, *, name):
@@ -394,7 +359,7 @@ class Economy(commands.Cog):
                 await nfts.update_one({"name": name}, {"$set": {"owner": ctx.author.id}})
                 await ctx.send("Successfully bought the nft. **REMEMBER THAT NFTS IS DESTROYING OUR PLANET!**")
                 await og_owner.send(
-                    f"**{ctx.author}** just bought your nft name **{name}** and you receive <:FireCoin:920903065454903326> {check['price']}")
+                    f"**{ctx.author}** just bought your nft name **{name}** and you receive 💵 {check['price']}")
 
     @nft.command(help="IT'S SCREENSHOT TIME")
     async def view(self, ctx, *, name):
@@ -403,7 +368,7 @@ class Economy(commands.Cog):
             await ctx.send("NFT do not exist. Also nft are CASE SENSITIVE")
         else:
             embed = discord.Embed(title=f"{check['name']}",
-                                  description=f"**Price:** <:FireCoin:920903065454903326> {check['price']} \n**Owner:** {self.bot.get_user(check['owner'])}",
+                                  description=f"**Price:** 💵 {check['price']} \n**Owner:** {self.bot.get_user(check['owner'])}",
                                   color=discord.Color.from_rgb(225, 0, 92))
             embed.set_image(url=check['link'])
             await ctx.send(embed=embed)
@@ -428,7 +393,7 @@ class Economy(commands.Cog):
         async for x in stats:
             num += 1
             to_append = (f"{num}. {x['name']}",
-                         f"**Price:** <:FireCoin:920903065454903326> {x['price']} **Owner:** {self.bot.get_user(x['owner'])}")
+                         f"**Price:** 💵 {x['price']} **Owner:** {self.bot.get_user(x['owner'])}")
             data.append(to_append)
 
         pages = MenuButtons(source=NFTPageSource(data), disable_buttons_after=True, ctx=ctx)

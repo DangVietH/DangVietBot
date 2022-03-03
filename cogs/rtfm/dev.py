@@ -63,23 +63,7 @@ class Dev(commands.Cog):
             await req.read()
         ).parse_object_inv(url)
 
-    @commands.command(help="available modules")
-    async def rtfm_list(self, ctx):
-        aliases = {v: k for k, v in self.aliases.items()}
-        embed = discord.Embed(title="List of available docs", color=discord.Color.green())
-        embed.description = "\n".join(
-            [
-                "[{0}]({1}): {2}".format(
-                    target,
-                    link,
-                    "\u2800".join([f"`{i}`" for i in aliases[target] if i != target]),
-                )
-                for target, link in self.targets.items()
-            ]
-        )
-        await ctx.send(embed=embed)
-
-    @commands.command(help='Search through docs', aliases=["rtfd"])
+    @commands.group(help='Search through docs', aliases=["rtfd"], invoke_without_command=True, case_insensitive=True)
     async def rtfm(self, ctx, docs: str, *, term: str = None):
         docs = docs.lower()
         target = None
@@ -94,7 +78,7 @@ class Dev(commands.Cog):
             return await ctx.reply(
                 embed=ctx.error(
                     title="Invalid Documentation",
-                    description=f"Documentation {docs} is invalid. Must be one of \n{lis}",
+                    description=f"Documentation {docs} is invalid. If you want to find valid ones, do {ctx.prefix}rtfm list",
                 )
             )
         if not term:
@@ -122,3 +106,19 @@ class Dev(commands.Cog):
                 color=discord.Color.green(),
             )
         )
+
+    @rtfm.command(help="available modules")
+    async def list(self, ctx):
+        aliases = {v: k for k, v in self.aliases.items()}
+        embed = discord.Embed(title="List of available docs", color=discord.Color.green())
+        embed.description = "\n".join(
+            [
+                "[{0}]({1}): {2}".format(
+                    target,
+                    link,
+                    "\u2800".join([f"`{i}`" for i in aliases[target] if i != target]),
+                )
+                for target, link in self.targets.items()
+            ]
+        )
+        await ctx.send(embed=embed)
