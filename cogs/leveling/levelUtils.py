@@ -20,14 +20,19 @@ class LevelUtils(commands.Cog):
     @commands.command(help="Set background for your server rank")
     @commands.guild_only()
     async def setbackground(self, ctx, link):
-        stats = await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id})
-        if stats is None:
-            return await ctx.send("You haven't send a message in this server!!")
         if await image_cursor.find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is not None:
             await image_cursor.update_one({"guild": ctx.guild.id, "member": ctx.author.id}, {"$set": {"image": link}})
         else:
             await image_cursor.insert_one({"guild": ctx.guild.id, "member": ctx.author.id, "image": link})
         await ctx.send("New Background set")
+
+    @commands.command(help="Set background back to default")
+    @commands.guild_only()
+    async def resetbackground(self, ctx):
+        if await image_cursor.find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is None:
+            await ctx.send("You don't have a custom background")
+        await image_cursor.delete_one({"guild": ctx.guild.id, "member": ctx.author.id})
+        await ctx.send("👍")
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Level rewarding role setup")
     async def role(self, ctx):

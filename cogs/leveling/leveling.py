@@ -267,3 +267,5 @@ class Leveling(commands.Cog):
             result = await levelling.find_one({"guild": member.guild.id, "user": member.id})
             if result is not None:
                 await levelling.delete_one({"guild": member.guild.id, "user": member.id})
+            if await image_cursor.find_one({"guild": member.guild.id, "member": member.id}) is True:
+                await image_cursor.delete_one({"guild": member.guild.id, "member": member.id})
