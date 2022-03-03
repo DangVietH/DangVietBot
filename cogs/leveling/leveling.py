@@ -142,7 +142,10 @@ class Leveling(commands.Cog):
         IMAGE_WIDTH = 900
         IMAGE_HEIGHT = 250
 
-        img_link = await image_cursor.find_one({"guild": ctx.guild.id, "member": ctx.author.id})['image'] or "https://cdn.discordapp.com/attachments/875886792035946496/945619357512372274/com_wallpaper.png"
+        img_link = "https://cdn.discordapp.com/attachments/875886792035946496/945619357512372274/com_wallpaper.png"
+        CustomImg = await image_cursor.find_one({"guild": ctx.guild.id, "member": ctx.author.id})
+        if CustomImg is not None:
+            img_link = CustomImg["image"]
         image = Image.open(get_image_from_url(
             img_link)).convert(
             "RGBA"
