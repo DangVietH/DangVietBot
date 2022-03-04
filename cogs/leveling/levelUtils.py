@@ -147,18 +147,17 @@ class LevelUtils(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def add_xp(self, ctx, member: discord.Member, amount: int):
-        if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}):
-            await ctx.send("User has no account")
-        else:
-            await levelling.update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": amount}})
-            await ctx.send(f"Successfully added {amount} xp to {member}")
+        if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
+            return await ctx.send("User has no account")
+        await levelling.update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": amount}})
+        await ctx.send(f"Successfully added {amount} xp to {member}")
 
     @commands.command(help="Remove xp from member")
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def remove_xp(self, ctx, member: discord.Member, amount: int):
-        if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}):
-            await ctx.send("User has no account")
-        else:
-            await levelling.update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": -amount}})
-            await ctx.send(f"Successfully remove {amount} xp from {member}")
+        if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
+            return await ctx.send("User has no account")
+
+        await levelling.update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": -amount}})
+        await ctx.send(f"Successfully remove {amount} xp from {member}")
