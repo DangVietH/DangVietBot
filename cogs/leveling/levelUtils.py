@@ -8,7 +8,7 @@ cluster = AsyncIOMotorClient(config_var['mango_link'])
 db = cluster["levelling"]
 levelling = db['member']
 disable = db['disable']
-roled = db['roles']
+levelConfig = db['roles']
 upchannel = db['channel']
 image_cursor = db['image']
 
@@ -34,6 +34,12 @@ class LevelUtils(commands.Cog):
         await image_cursor.delete_one({"guild": ctx.guild.id, "member": ctx.author.id})
         await ctx.send("👍")
 
+    @commands.has_permissions(administrator=True)
+    @commands.guild_only()
+    async def setXpPermessage(self, ctx, level: int):
+        await levelConfig.update_one({"guild": ctx.guild.id}, {"$set": {"xp": level}})
+        await ctx.send(f"Xp per message set to {level}")
+
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Level rewarding role setup")
     async def role(self, ctx):
         embed = discord.Embed(title="Level rewarding role setup", color=discord.Color.random())
@@ -48,20 +54,20 @@ class LevelUtils(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def add(self, ctx, level: int, roles: discord.Role):
-        role_cursor = await roled.find_one({"guild": ctx.guild.id})
+        role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})
         if roles.id in role_cursor['role']:
             await ctx.send("That role is already added")
         else:
-            await roled.update_one({"guild": ctx.guild.id}, {"$push": {"role": roles.id, "level": level}})
+            await levelConfig.update_one({"guild": ctx.guild.id}, {"$push": {"role": roles.id, "level": level}})
             await ctx.send(f"{roles.name} role added.")
 
     @role.command(help="Remove the role from level")
     @commands.has_permissions(administrator=True)
     @commands.guild_only()
     async def remove(self, ctx, level: int, roles: discord.Role):
-        role_cursor = await roled.find_one({"guild": ctx.guild.id})
+        role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})
         if roles.id in role_cursor['role']:
-            await roled.update_one({"guild": ctx.guild.id}, {"$pull": {"role": roles.id, "level": level}})
+            await levelConfig.update_one({"guild": ctx.guild.id}, {"$pull": {"role": roles.id, "level": level}})
             await ctx.send(f"{roles.name} role remove.")
         else:
             await ctx.send("I don't remember I put that role in. do role list to see")
@@ -69,7 +75,7 @@ class LevelUtils(commands.Cog):
     @role.command(help="See list of rewarding roles")
     @commands.guild_only()
     async def list(self, ctx):
-        role_cursor = await roled.find_one({"guild": ctx.guild.id})
+        role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})
         levelrole = role_cursor['role']
         levelnum = role_cursor['level']
         embed = discord.Embed(title="Role Rewards")

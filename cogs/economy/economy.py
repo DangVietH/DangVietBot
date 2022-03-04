@@ -91,7 +91,7 @@ class Economy(commands.Cog):
 
         random_money = random.randint(1, 1000)
         await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
-        await ctx.send(f"Someone gave you <:DHBuck:901485795410599988> {random_money}")
+        await ctx.send(f"Someone gave you 💵 {random_money}")
 
     @commands.command(help="we work for the right to work")
     @commands.cooldown(1, 3600, commands.BucketType.user)
@@ -103,7 +103,9 @@ class Economy(commands.Cog):
         check = await cursor.find_one({"id": user.id})
         random_money = random.randint(100, 10000)
         await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
-        await ctx.send(f"You got 💵 {random_money} for working as a {random.choice(['police', 'programmer', 'bus driver', 'street preformer'])}")
+        jl = ['police', 'programmer', 'bus driver', 'street preformer', 'taxi driver', 'farmer', 'teacher', 'doctor']
+        career = random.choice(jl)
+        await ctx.send(f"You got 💵 {random_money} for working as a {career}")
 
     @commands.command(help="View the store", aliases=['store'])
     @commands.guild_only()

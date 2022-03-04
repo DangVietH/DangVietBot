@@ -12,7 +12,7 @@ cluster = AsyncIOMotorClient(config_var['mango_link'])
 db = cluster["levelling"]
 levelling = db['member']
 disable = db['disable']
-roled = db['roles']
+lvlConfig = db['roles']
 upchannel = db['channel']
 image_cursor = db['image']
 
@@ -77,8 +77,9 @@ class Leveling(commands.Cog):
                         insert = {'guild': message.guild.id, "user": message.author.id, 'level': 0, 'xp': 5}
                         await levelling.insert_one(insert)
                     else:
+                        lconf = await lvlConfig.find_one({"guild": message.guild.id})
                         await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
-                                                   {"$inc": {"xp": 10}})
+                                                   {"$inc": {"xp": int(lconf['xp'])}})
 
                         xp = stats['xp']
                         lvl = 0
@@ -103,9 +104,8 @@ class Leveling(commands.Cog):
                                 channel = self.bot.get_channel(lvl_channel["channel"])
                                 await channel.send(f"🎉 {message.author.mention} has reach level **{lvl}**!!🎉")
 
-                            role_reward = await roled.find_one({"guild": message.guild.id})
-                            levelrole = role_reward['role']
-                            levelnum = role_reward['level']
+                            levelrole = lconf['role']
+                            levelnum = lconf['level']
                             for i in range(len(levelrole)):
                                 if lvl == int(levelnum[i]):
                                     role = message.guild.get_role(int(levelrole[i]))
@@ -234,16 +234,14 @@ class Leveling(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        await roled.insert_one({"guild": guild.id, "role": [], "level": [],
-                                "xp": 10})
+        await lvlConfig.insert_one({"guild": guild.id, "role": [], "level": [], "xp": 10})
 
     @commands.Cog.listener()
     async def on_ready(self):
         for guild in self.bot.guilds:
-            results = await roled.find_one({"guild": guild.id})
+            results = await lvlConfig.find_one({"guild": guild.id})
             if results is None:
-                await roled.insert_one({"guild": guild.id, "role": [], "level": [],
-                                        "xp": 10})
+                await lvlConfig.insert_one({"guild": guild.id, "role": [], "level": [], "xp": 10})
 
     # remove data to save storage
     @commands.Cog.listener()
@@ -253,13 +251,13 @@ class Leveling(commands.Cog):
                 result = await levelling.find_one({"guild": guild.id, "user": member.id})
                 if result is not None:
                     await levelling.delete_one({"guild": guild.id, "user": member.id})
-        await roled.delete_one({"guild": guild.id})
+        await lvlConfig.delete_one({"guild": guild.id})
         is_disabled = await disable.find_one({"guild": guild.id})
         if is_disabled is not None:
             await disable.delete_one(is_disabled)
         check = await upchannel.find_one({"guild": guild.id})
         if check is not None:
-            await roled.delete_one({"guild": guild.id})
+            await lvlConfig.delete_one({"guild": guild.id})
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
