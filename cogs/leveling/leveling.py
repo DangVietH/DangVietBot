@@ -252,12 +252,12 @@ class Leveling(commands.Cog):
                 if result is not None:
                     await levelling.delete_one({"guild": guild.id, "user": member.id})
         await lvlConfig.delete_one({"guild": guild.id})
-        is_disabled = await disable.find_one({"guild": guild.id})
-        if is_disabled is not None:
-            await disable.delete_one(is_disabled)
-        check = await upchannel.find_one({"guild": guild.id})
-        if check is not None:
+        if await disable.find_one({"guild": guild.id}) is not None:
+            await disable.delete_one({"guild": guild.id})
+        if await upchannel.find_one({"guild": guild.id}) is not None:
             await lvlConfig.delete_one({"guild": guild.id})
+        if await image_cursor.find_one({"guild": guild.id}) is True:
+            await image_cursor.delete_one({"guild": guild.id})
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
