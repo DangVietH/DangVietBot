@@ -6,7 +6,7 @@ nextcord==2.0.0a9
 lavalink==3.1.5
 nextcord-ext-menus==1.5.2
 aiohttp==3.8.1
-dnspython==2.2.0
+dnspython==2.2.1
 git+https://github.com/Gorialis/jishaku
 PyNaCl==1.5.0
 ffmpeg==1.4
