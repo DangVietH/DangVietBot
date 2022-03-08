@@ -2,7 +2,7 @@ requests==2.27.1
 asyncpraw==7.5.0
 motor==2.5.1
 DateTime==4.4
-nextcord==2.0.0a8
+nextcord==2.0.0a9
 lavalink==3.1.5
 nextcord-ext-menus==1.5.2
 aiohttp==3.8.1
