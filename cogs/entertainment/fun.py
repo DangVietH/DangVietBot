@@ -79,18 +79,12 @@ class Fun(commands.Cog):
         else:
             await ctx.send(f"{ctx.author.mention} force DHB to slap {member.mention}")
 
-    @commands.command(help="Kill someone")
-    @commands.cooldown(1, 30, commands.BucketType.user)
-    async def kill(self, ctx, member: discord.Member = None):
-        await ctx.send(f"🔪{ctx.author.mention} force DHB to kill {member.mention}")
-
-    @commands.command(help="Yeet someone")
-    @commands.cooldown(1, 30, commands.BucketType.user)
-    async def yeet(self, ctx, member: discord.Member = None):
-        if member is None:
-            await ctx.sendy("Please type the member name")
-        else:
-            await ctx.send(f"{member.mention} has been yeeted")
+    @commands.command(help="Measure your pp size", aliases=["cock", 'dong'])
+    async def pp(self, ctx, *, member: discord.Member = None):
+        member = member or ctx.author
+        pp = random.randint(0, 50)
+        the_thing = "="
+        await ctx.send(embed=discord.Embed(title=f"{member} pp size", description=f"8{the_thing*pp}D", color=discord.Color.purple()))
 
     @commands.command(help="Emojify your text")
     @commands.cooldown(1, 10, commands.BucketType.user)
