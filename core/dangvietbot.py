@@ -1,5 +1,5 @@
 import nextcord as discord
-from nextcord.ext import commands
+from nextcord.ext import commands, ipc
 from motor.motor_asyncio import AsyncIOMotorClient
 from core.help import CustomHelp
 import datetime
@@ -13,6 +13,7 @@ cog_list = [
     'cogs.audio',
     'cogs.economy',
     'cogs.entertainment',
+    'cogs.ipc',
     'cogs.leveling',
     'cogs.moderation',
     'cogs.owner',
@@ -36,6 +37,8 @@ class DangVietBot(commands.Bot):
             activity=discord.Streaming(name="d!help", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
             **kwargs
         )
+
+        self.ipc = ipc.Server(self, secret_key=config_var['ipc'])
 
         # loading cogs
         for ext in cog_list:
@@ -93,3 +96,9 @@ class DangVietBot(commands.Bot):
                 return commands.when_mentioned_or(str(result["prefix"]))(self, message)
             else:
                 return commands.when_mentioned_or("d!")(self, message)
+
+    async def on_ipc_ready(self):
+        print("IPC is ready")
+
+    async def on_ipc_error(self, endpoint, error):
+        print(endpoint, "raised", error)

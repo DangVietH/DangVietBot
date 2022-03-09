@@ -5,6 +5,7 @@ DateTime==4.4
 nextcord==2.0.0a9
 lavalink==3.1.5
 nextcord-ext-menus==1.5.2
+nextcord-ext-ipc==2.2.1
 aiohttp==3.8.1
 dnspython==2.2.1
 git+https://github.com/Gorialis/jishaku

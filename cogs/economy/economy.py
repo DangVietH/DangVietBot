@@ -223,31 +223,44 @@ class Economy(commands.Cog):
 
     @commands.command(help="Deposit your money into the bank", aliases=['dep'])
     @commands.guild_only()
-    async def deposit(self, ctx, amount=1):
+    async def deposit(self, ctx, amount=None):
         user = ctx.author
         await self.open_account(user)
         check = await cursor.find_one({"id": user.id})
 
-        if amount > check['wallet']:
-            await ctx.send("You can't deposit more money than your wallet")
-        else:
-            await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -amount}})
-            await cursor.update_one({"id": user.id}, {"$inc": {"bank": amount}})
+        if amount.lower() == "all":
+            await cursor.update_one({"id": user.id}, {"$inc": {"bank": check['wallet']}})
+            await cursor.update_one({"id": user.id}, {"$set": {"wallet": 0}})
             await ctx.message.add_reaction("✅")
+        else:
+            amount = int(amount)
+            if amount > check['wallet']:
+                await ctx.send("You can't deposit more money than your wallet")
+            else:
+                await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -amount}})
+                await cursor.update_one({"id": user.id}, {"$inc": {"bank": amount}})
+                await ctx.message.add_reaction("✅")
 
     @commands.command(help="Withdraw your money from the bank")
     @commands.guild_only()
-    async def withdraw(self, ctx, amount=1):
+    async def withdraw(self, ctx, amount=None):
         user = ctx.author
         await self.open_account(user)
         check = await cursor.find_one({"id": user.id})
 
-        if amount > check['bank']:
-            await ctx.send("You can't deposit more money than your bank")
-        else:
-            await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amount}})
-            await cursor.update_one({"id": user.id}, {"$inc": {"bank": -amount}})
+        if amount.lower() == "all":
+            await cursor.update_one({"id": user.id}, {"$inc": {"wallet": check['bank']}})
+            await cursor.update_one({"id": user.id}, {"$set": {"bank": 0}})
             await ctx.message.add_reaction("✅")
+
+        else:
+            amount = int(amount)
+            if amount > check['bank']:
+                await ctx.send("You can't deposit more money than your bank")
+            else:
+                await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amount}})
+                await cursor.update_one({"id": user.id}, {"$inc": {"bank": -amount}})
+                await ctx.message.add_reaction("✅")
 
     @commands.command(help="Transfer money to someone", aliases=['send'])
     @commands.guild_only()
