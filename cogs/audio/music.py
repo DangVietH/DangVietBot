@@ -38,8 +38,7 @@ class QueuePageSource(menus.ListPageSource):
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(title=f"📀 Queue of {menu.ctx.author.guild.name} 📀", color=discord.Color.green())
-        for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.description = "\n".join([f"{name}: {value}" for name, value in entries])
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
         return embed
 
@@ -338,7 +337,7 @@ class Music(commands.Cog):
             num = 0
             for track in playerQueueWithCurrent:
                 num += 1
-                to_append = (f"{num}.", f"[**{track.title}**]({track.uri})")
+                to_append = (f"**{num}:**", f"[**{track.title}**]({track.uri})")
                 data.append(to_append)
 
             page = MenuButtons(source=QueuePageSource(data), disable_buttons_after=True, ctx=ctx)

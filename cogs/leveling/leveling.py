@@ -32,21 +32,6 @@ class GuildLeaderboardPageSource(menus.ListPageSource):
         return embed
 
 
-class TestGuildLeaderboardPageSource(menus.ListPageSource):
-    def __init__(self, data):
-        super().__init__(data, per_page=10)
-
-    async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green())
-        embed.set_author(
-            icon_url=menu.ctx.author.guild.icon.url,
-            name=f"Leaderboard of {menu.ctx.author.guild.name}")
-
-        embed.description = "\n".join([f"{name}: {value}" for name, value in entries])
-        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
-
-
 class GlobalLeaderboardPageSource(menus.ListPageSource):
     def __init__(self, data):
         super().__init__(data, per_page=10)
@@ -230,21 +215,6 @@ class Leveling(commands.Cog):
             data.append(to_append)
 
         pages = MenuButtons(source=GuildLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
-        await pages.start(ctx)
-
-    @commands.command(help="See test server ranks")
-    @commands.guild_only()
-    async def ttop(self, ctx):
-        # for le queue
-        stats = levelling.find().sort("xp", -1)
-        data = []
-        num = 0
-        async for x in stats:
-            num += 1
-            to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
-            data.append(to_append)
-
-        pages = MenuButtons(source=TestGuildLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
     @commands.command(help="See global rank")
