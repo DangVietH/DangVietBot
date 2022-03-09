@@ -79,7 +79,6 @@ class Info(commands.Cog):
     async def about(self, ctx):
         embed = discord.Embed(title="Bot information", color=discord.Color.random())
         embed.add_field(name="Developer", value=f"DvH#9980")
-        embed.add_field(name="Version", value="0.6.0")
         embed.add_field(name="Written in", value="Python 3.10.1")
         embed.add_field(name="Library", value="[nextcord 2.0](https://github.com/nextcord/nextcord)")
         embed.add_field(name="Create at", value="8/13/2021")

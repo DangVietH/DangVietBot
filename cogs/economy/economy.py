@@ -28,7 +28,7 @@ class Economy(commands.Cog):
     async def open_account(self, user):
         users = await cursor.find_one({"id": user.id})
         if users is None:
-            insert = {"id": user.id, "job": "None", "wallet": 0, "bank": 0, "inventory": [], "rank": "None"}
+            insert = {"id": user.id, "job": "None", "wallet": 0, "bank": 0, "inventory": [], "rank": "None", "stock": "None"}
             await cursor.insert_one(insert)
         else:
             return None
