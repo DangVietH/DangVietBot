@@ -235,7 +235,8 @@ class Leveling(commands.Cog):
     @commands.command(help="See test server ranks")
     @commands.guild_only()
     async def ttop(self, ctx):
-        stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
+        # for le queue
+        stats = levelling.find().sort("xp", -1)
         data = []
         num = 0
         async for x in stats:
