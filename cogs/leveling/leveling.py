@@ -243,7 +243,7 @@ class Leveling(commands.Cog):
             to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = MenuButtons(source=GuildLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
+        pages = MenuButtons(source=TestGuildLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
     @commands.command(help="See global rank")
