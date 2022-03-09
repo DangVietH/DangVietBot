@@ -1,19 +1,42 @@
 import nextcord as discord
-from nextcord.ext import commands
+from nextcord.ext import commands, tasks
 import datetime
 import asyncio
 import random
+from motor.motor_asyncio import AsyncIOMotorClient
+from utils.configs import config_var
+
+cluster = AsyncIOMotorClient(config_var['mango_link'])
+cursor = cluster["timer"]["giveaway"]
+
+
+def convert(time):
+    pos = ['s', 'm', 'h', 'd']
+
+    time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
+
+    unit = time[-1]
+
+    if unit not in pos:
+        return -1
+    try:
+        val = int(time[:-1])
+    except:
+        return -2
+
+    return val * time_dict[unit]
 
 
 class Giveaway(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.time_checker.start()
 
     @commands.command(help="start Giveaway")
     @commands.has_permissions(administrator=True)
     async def gstart(self, ctx):
         giveaway_questions = ['Which channel will I host the giveaway in?', 'What is the prize?',
-                              'How long should the giveaway run for (in seconds)?', ]
+                              'How long should the giveaway run for (ex: 3h, 1d)?', ]
         giveaway_answers = []
 
         def check(m):
@@ -39,7 +62,14 @@ class Giveaway(commands.Cog):
 
         channel = self.bot.get_channel(c_id)
         prize = str(giveaway_answers[1])
-        time = int(giveaway_answers[2])
+        time = giveaway_answers[2]
+
+        converted_time = convert(time)
+        if converted_time == -1:
+            return await ctx.send("You didn't answer the time correctly")
+
+        if converted_time == -2:
+            return await ctx.send("Time must be an integer")
 
         # message
         await ctx.send(
@@ -47,27 +77,16 @@ class Giveaway(commands.Cog):
 
         give = discord.Embed(color=discord.Color.green(), title="🎉 GIVEAWAY TIME! 🎉")
         give.add_field(name=f'{ctx.author.name} is giving away: {prize}!',
-                       value=f'React with 🎁 to enter!\n Ends in {round(time / 60, 2)} minutes!', inline=False)
+                       value=f'React with 🎁 to enter!\n Ends in {datetime.timedelta(seconds=converted_time)} minutes!',
+                       inline=False)
         end = datetime.datetime.utcnow() + datetime.timedelta(seconds=time)
         give.set_footer(text=f'Giveaway ends at {end} UTC!')
-        my_message = await channel.send(embed=give)
+        message = await channel.send(embed=give)
+        await message.add_reaction("🎁")
 
-        await my_message.add_reaction("🎁")
-        await asyncio.sleep(time)
-
-        new_message = await channel.fetch_message(my_message.id)
-
-        users = await new_message.reactions[0].users().flatten()
-        users.pop(users.index(self.bot.user))
-        winner = random.choice(users)
-
-        if winner is not None:
-            winning_announcement = discord.Embed(color=discord.Color.red(), title="🥳 THE GIVEAWAY HAS ENDED!")
-            winning_announcement.add_field(name=f'🎉 Prize: {prize}', value=f'🥳 **Winner**: {winner.mention}\n 🎫 **Number of Entrants**: {len(users)}', inline=False)
-            winning_announcement.set_footer(text='Thanks for entering!')
-            await channel.send(embed=winning_announcement)
-        elif winner is None:
-            await ctx.send("Nobody joined? Maybe next time 😉")
+        current_time = datetime.datetime.now()
+        final_time = current_time + datetime.timedelta(seconds=converted_time)
+        await cursor.insert_one({'message_id': message.id, 'time': final_time, "channel": c_id, "prize": prize})
 
     @commands.command(help="Reroll the giveaway")
     @commands.has_permissions(administrator=True)
@@ -78,4 +97,33 @@ class Giveaway(commands.Cog):
         users = await reroll_msg.reactions[0].users().flatten()
         users.pop(users.index(self.bot.user))
         winner = random.choice(users)
-        await ctx.send(f"The new winner is {winner.mention}!!")
+        embed = discord.Embed(color=discord.Color.red(), title="🥳 New Winner of the giveaway! 🥳", description=f'🥳 **Winner**: {winner.mention}\n 🎫 **Number of Entrants**: {len(users)}')
+        embed.set_footer(text='Thanks for entering the giveaway!')
+        await reroll_msg.edit(embed=embed)
+
+    @tasks.loop(seconds=10)
+    async def time_checker(self):
+        try:
+            all_timer = cursor.find({})
+            current_time = datetime.datetime.now()
+            async for x in all_timer:
+                if current_time >= x['time']:
+                    msg_id = x['message_id']
+                    channel = self.bot.get_channel(x['channel'])
+                    msg = await self.bot.fetch_message(msg_id)
+                    users = await msg.reactions[0].users().flatten()
+                    users.pop(users.index(self.bot.user))
+
+                    winner = random.choice(users)
+                    if winner is None:
+                        return await channel.send("No one has entered the giveaway. Maybe next time")
+                    embed = discord.Embed(color=discord.Color.red(), title="🥳 THE GIVEAWAY HAS ENDED!")
+                    embed.add_field(name=f"🎉 Prize: {x['prize']}",
+                                    value=f'🥳 **Winner**: {winner.mention}\n 🎫 **Number of Entrants**: {len(users)}',
+                                    inline=False)
+                    embed.set_footer(text='Thanks for entering the giveaway!')
+                    await msg.edit(embed=embed)
+                    await cursor.delete_one({'message_id': msg_id})
+
+        except Exception as e:
+            print(e)
