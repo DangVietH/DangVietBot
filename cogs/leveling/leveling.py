@@ -232,6 +232,20 @@ class Leveling(commands.Cog):
         pages = MenuButtons(source=GuildLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
+    @commands.command(help="See test server ranks")
+    @commands.guild_only()
+    async def ttop(self, ctx):
+        stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
+        data = []
+        num = 0
+        async for x in stats:
+            num += 1
+            to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
+            data.append(to_append)
+
+        pages = MenuButtons(source=GuildLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
+        await pages.start(ctx)
+
     @commands.command(help="See global rank")
     @commands.guild_only()
     async def gtop(self, ctx):
