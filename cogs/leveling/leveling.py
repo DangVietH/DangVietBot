@@ -32,6 +32,21 @@ class GuildLeaderboardPageSource(menus.ListPageSource):
         return embed
 
 
+class TestGuildLeaderboardPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.green())
+        embed.set_author(
+            icon_url=menu.ctx.author.guild.icon.url,
+            name=f"Leaderboard of {menu.ctx.author.guild.name}")
+
+        embed.description = "\n".join([f"{name}: {value}" for name, value in entries])
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
 class GlobalLeaderboardPageSource(menus.ListPageSource):
     def __init__(self, data):
         super().__init__(data, per_page=10)

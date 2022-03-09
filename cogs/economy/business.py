@@ -38,7 +38,7 @@ industries = [
 ]
 
 
-class Business(Economy):
+class Business(commands.Cog):
     @commands.command(help="List all industries")
     async def industryList(self, ctx):
         embed = discord.Embed(title="Industries", color=discord.Color.random(), description="\n".join([f"{i}" for i in industries]))
@@ -88,7 +88,9 @@ class Business(Economy):
             "logo": str(answers[2]),
             "industry": str(answers[3]),
             "ceo": ctx.author.id,
-            "revenue": 1000
+            "revenue": 1000,
+            "stock amount": 100,
+            "stock value": 0
         })
         await ctx.send(f"Your new company has been created. Time for some shady business!")
 
