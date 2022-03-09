@@ -1,4 +1,3 @@
-import os
 from core.dangvietbot import DangVietBot
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
@@ -16,5 +15,5 @@ async def block_blacklist_user(ctx):
 bot.add_check(block_blacklist_user)
 
 if __name__ == '__main__':
-    bot.ipc.start()
+    # bot.ipc.start()
     bot.run()
