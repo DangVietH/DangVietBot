@@ -97,6 +97,7 @@ class Info(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(help="See list of servers")
+    @commands.is_owner()
     async def guildlist(self, ctx):
         data = []
         for guild in self.bot.guilds:

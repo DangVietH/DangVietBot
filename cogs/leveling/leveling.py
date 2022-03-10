@@ -219,6 +219,7 @@ class Leveling(commands.Cog):
 
     @commands.command(help="See global rank")
     @commands.guild_only()
+    @commands.is_owner()
     async def gtop(self, ctx):
         stats = levelling.find().sort("xp", -1)
         data = []
