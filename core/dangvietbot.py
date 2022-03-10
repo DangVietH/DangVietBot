@@ -1,7 +1,7 @@
 import nextcord as discord
 from nextcord.ext import commands, ipc
 from motor.motor_asyncio import AsyncIOMotorClient
-from core.testhelp import CustomHelp
+from core.help import CustomHelp
 import datetime
 from utils.configs import config_var
 
