@@ -1,11 +1,12 @@
 import nextcord as discord
 from nextcord.ext import commands, ipc
 from motor.motor_asyncio import AsyncIOMotorClient
-from core.testhelp import DangVietHelp
+
 import datetime
 from utils.configs import config_var
+from core.help import CustomHelp
 
-# from core.help import CustomHelp
+# from core.testhelp import DangVietHelp
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["custom_prefix"]["prefix"]
@@ -32,7 +33,7 @@ class DangVietBot(commands.Bot):
             intents=discord.Intents.all(),
             strip_after_prefix=True,
             case_insensitive=True,
-            help_command=DangVietHelp(),
+            help_command=CustomHelp(),
             description="One bot Many functionality",
             owner_id=860876181036335104,
             enable_debug_events=True,
