@@ -20,7 +20,7 @@ class HelpPageSource(menus.ListPageSource):
         return embed
 
 
-class CustomHelp(commands.HelpCommand):
+class DangVietHelp(commands.HelpCommand):
     def get_command_signature(self, command):
         return f'{self.context.clean_prefix}{command.qualified_name} {command.signature}'
 
