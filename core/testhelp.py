@@ -7,12 +7,12 @@ from utils.menuUtils import MenuButtons
 
 class HelpPageSource(menus.ListPageSource):
     def __init__(self, hdata, data):
-        self.helpcommand = hdata
+        self._helpcommand = hdata
         super().__init__(data, per_page=1)
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(color=discord.Color.from_rgb(225, 0, 92))
-        embed.description = f"Use {self.helpcommand.clean_prefix}help [something] for more info on a command or category."
+        embed.description = f"Use {self._helpcommand.context.clean_prefix}help [something] for more info on a command or category."
         embed.set_author(name=f"DangVietBot Help", icon_url="https://cdn.discordapp.com/avatars/875589545532485682/a5123a4fa15dad3beca44144d6749189.png?size=1024")
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1])
@@ -30,11 +30,11 @@ class DangVietHelp(commands.HelpCommand):
             name = 'No Category' if cog is None else cog.qualified_name
             filtered = await self.filter_commands(commands, sort=True)
             if filtered:
-                value = '\u2002'.join(f"- {self.context.clean_prefix}{c.name}" for c in filtered)
+                value = '\u2002'.join(f"- {self.context.clean_prefix}{c.name} : {c.short_doc}" for c in filtered)
                 if cog and cog.description:
-                    data.append((f"**{cog} Commands**", value))
+                    data.append((f"**{name} Commands**", value))
 
-        page = MenuButtons(source=HelpPageSource(self.context, data), disable_buttons_after=True, ctx=self.context)
+        page = MenuButtons(source=HelpPageSource(self, data), disable_buttons_after=True, ctx=self.context)
         await page.start(self.context)
 
     async def send_cog_help(self, cog_):
