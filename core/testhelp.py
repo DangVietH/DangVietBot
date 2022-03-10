@@ -30,7 +30,7 @@ class DangVietHelp(commands.HelpCommand):
             name = 'No Category' if cog is None else cog.qualified_name
             filtered = await self.filter_commands(commands, sort=True)
             if filtered:
-                value = '\u2002'.join(f"- {self.context.clean_prefix}{c.name}: {c.help}" for c in filtered)
+                value = '\u2002'.join(f"- {self.context.clean_prefix}{c.name}" for c in filtered)
                 if cog and cog.description:
                     data.append((f"**{cog} Commands**", value))
 
