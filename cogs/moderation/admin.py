@@ -147,9 +147,9 @@ class Admin(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def mute(self, ctx, member: discord.Member, *, reason=None):
         guild = ctx.guild
-        mutedRole = discord.utils.get(guild.roles, name="DHB_muted")
+        mutedRole = discord.utils.get(guild.roles, name="muted")
         if not mutedRole:
-            mutedRole = await guild.create_role(name="DHB_muted")
+            mutedRole = await guild.create_role(name="muted")
 
             for channel in guild.channels:
                 await channel.set_permissions(mutedRole,
@@ -192,9 +192,9 @@ class Admin(commands.Cog):
             await ctx.send("Time must be an integer")
         else:
             guild = ctx.guild
-            mutedRole = discord.utils.get(guild.roles, name="DHB_muted")
+            mutedRole = discord.utils.get(guild.roles, name="muted")
             if not mutedRole:
-                mutedRole = await guild.create_role(name="DHB_muted")
+                mutedRole = await guild.create_role(name="muted")
 
                 for channel in guild.channels:
                     await channel.set_permissions(mutedRole,
@@ -237,7 +237,7 @@ class Admin(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def unmute(self, ctx, member: discord.Member, *, reason=None):
         mutedRole = discord.utils.get(ctx.guild.roles,
-                                      name="DHB_muted")
+                                      name="muted")
 
         await member.remove_roles(mutedRole)
         await member.send(f"You were unmuted in the **{ctx.guild.name}**. Make sure you behave well 😉")
