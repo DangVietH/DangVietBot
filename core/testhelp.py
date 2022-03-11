@@ -79,8 +79,7 @@ class CustomHelp(commands.HelpCommand):
                     inline=False
                 )
         elif mapping:
-            embed.description = f"""
-**List of categories:**
+            embed.add_field(name="List of categories:", value=f"""
 Music
 
 Economy
@@ -110,7 +109,7 @@ Misc
 BotUtils
 
 Tags
-            """
+            """)
         return embed
 
     async def bot_help_embed(self, mapping: dict) -> discord.Embed:
