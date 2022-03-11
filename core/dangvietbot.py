@@ -4,9 +4,9 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 import datetime
 from utils.configs import config_var
-# from core.help import CustomHelp
+from core.help import CustomHelp
 
-from core.testhelp import CustomHelp
+# from core.testhelp import CustomHelp
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["custom_prefix"]["prefix"]
