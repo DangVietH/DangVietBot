@@ -128,8 +128,15 @@ class Dev(commands.Cog):
     @rtfm.command(help="available modules")
     async def list(self, ctx):
         aliases = {v: k for k, v in self.aliases.items()}
-        data = []
-        for target, link in self.targets.items():
-            data.append((target, link, "\u2800".join([f"`{i}`" for i in aliases[target] if i != target])))
-        page = MenuButtons(source=RtfmPageSource(data), disable_buttons_after=True, ctx=ctx)
-        await page.start(ctx)
+        embed = discord.Embed(title="List of available docs", color=discord.Color.green())
+        embed.description = "\n".join(
+            [
+                "[{0}]({1}): {2}".format(
+                    target,
+                    link,
+                    "\u2800".join([f"`{i}`" for i in aliases[target] if i != target]),
+                )
+                for target, link in self.targets.items()
+            ]
+        )
+        await ctx.send(embed=embed)
