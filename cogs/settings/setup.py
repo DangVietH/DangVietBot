@@ -99,7 +99,7 @@ class Setup(commands.Cog):
         await ctx.send(embed=embed)
 
     @prefix.command(help="Set custom prefix")
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_permissions(manage_guild=True)
     async def set(self, ctx, *, prefixes):
         result = await pcursor.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -111,7 +111,7 @@ class Setup(commands.Cog):
             await ctx.send(f"Server prefix update to `{prefixes}`")
 
     @prefix.command(help="Set prefix back to default")
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_permissions(manage_guild=True)
     async def remove(self, ctx):
         result = await pcursor.find_one({"guild": ctx.guild.id})
         if result is None:
