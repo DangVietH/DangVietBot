@@ -18,6 +18,17 @@ class RtfmPageSource(menus.ListPageSource):
         return embed
 
 
+class RtfmListPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.green(), title="List of available docs")
+        embed.description = "\n".join([f"[{target}]({link}): {aliases}" for target, link, aliases in entries])
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
 class Dev(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -117,15 +128,8 @@ class Dev(commands.Cog):
     @rtfm.command(help="available modules")
     async def list(self, ctx):
         aliases = {v: k for k, v in self.aliases.items()}
-        embed = discord.Embed(title="List of available docs", color=discord.Color.green())
-        embed.description = "\n".join(
-            [
-                "[{0}]({1}): {2}".format(
-                    target,
-                    link,
-                    "\u2800".join([f"`{i}`" for i in aliases[target] if i != target]),
-                )
-                for target, link in self.targets.items()
-            ]
-        )
-        await ctx.send(embed=embed)
+        data = []
+        for target, link in self.targets.items():
+            data.append((target, link, "\u2800".join([f"`{i}`" for i in aliases[target] if i != target])))
+        page = MenuButtons(source=RtfmPageSource(data), disable_buttons_after=True, ctx=ctx)
+        await page.start(ctx)
