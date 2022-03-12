@@ -376,7 +376,7 @@ class Admin(commands.Cog):
             print(e)
 
     @commands.command(help="Unban member")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(ban_members=True)
     async def unban(self, ctx, member_id: int, *, reason=None):
         user = self.bot.get_user(int(member_id))
         await ctx.guild.unban(user)
@@ -407,28 +407,28 @@ class Admin(commands.Cog):
         await ctx.channel.purge(limit=None)
 
     @commands.command(help="Lock channel")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     async def lock(self, ctx, channel: discord.TextChannel = None):
         channel = channel or ctx.channel
         await channel.set_permissions(ctx.guild.default_role, send_messages=False)
         await ctx.send('Channel locked.')
 
     @commands.command(help="Unlock channel")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     async def unlock(self, ctx, channel: discord.TextChannel = None):
         channel = channel or ctx.channel
         await channel.set_permissions(ctx.guild.default_role, send_messages=True)
         await ctx.send('Channel unlocked.')
 
     @commands.command(help="Lock all channel")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     async def lock_all(self, ctx):
         for channel in ctx.guild.channels:
             if isinstance(channel, discord.TextChannel):
                 await channel.set_permissions(ctx.guild.default_role, send_messages=False)
 
-    @commands.command(help="Lock all channel")
-    @commands.has_permissions(administrator=True)
+    @commands.command(help="Unlock all channel")
+    @commands.has_permissions(manage_channels=True)
     async def unlock_all(self, ctx):
         for channel in ctx.guild.channels:
             if isinstance(channel, discord.TextChannel):

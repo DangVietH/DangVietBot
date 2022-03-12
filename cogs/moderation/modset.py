@@ -67,16 +67,6 @@ class ModSet(commands.Cog):
                                       description=f"Total case: {user_check['total_cases']}", color=discord.Color.red())
                 await ctx.send(embed=embed)
 
-    @commands.command(help="Remove that member cases")
-    @commands.has_permissions(administrator=True)
-    async def forgive(self, ctx, member: discord.Member):
-        user_check = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-        if user_check is None:
-            await ctx.send("Looks like a good person already 🥰")
-        else:
-            await user_case.delete_one(user_check)
-            await ctx.send("🕊 You forgive him!!")
-
     @commands.Cog.listener()
     async def on_ready(self):
         for guild in self.bot.guilds:

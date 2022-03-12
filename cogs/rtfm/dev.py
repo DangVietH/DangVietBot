@@ -1,9 +1,21 @@
 import warnings
 import nextcord as discord
-from nextcord.ext import commands
+from nextcord.ext import commands, menus
 import cogs.rtfm.rtfm_utils as rtfm
+from utils.menuUtils import MenuButtons
 
 # directly taken and modify from https://github.com/BruceCodesGithub/OG-Robocord/blob/main/cogs/rtfm.py
+
+
+class RtfmPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.green(), title="Best matches I can find")
+        embed.description = "\n".join([f"[`{name}`]({value})" for name, value in entries])
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
 
 
 class Dev(commands.Cog):
@@ -92,20 +104,15 @@ class Dev(commands.Cog):
 
         results = rtfm.finder(
             term, list(cache.items()), key=lambda x: x[0], lazy=False
-        )[:10]
+        )
 
         if not results:
             return await ctx.reply(
                 f"No results found when searching for {term} in {docs}"
             )
 
-        await ctx.reply(
-            embed=discord.Embed(
-                title=f"Best matches for {term} in {docs}",
-                description="\n".join([f"[`{key}`]({url})" for key, url in results]),
-                color=discord.Color.green(),
-            )
-        )
+        page = MenuButtons(source=RtfmPageSource(results), disable_buttons_after=True, ctx=ctx)
+        await page.start(ctx)
 
     @rtfm.command(help="available modules")
     async def list(self, ctx):

@@ -29,7 +29,7 @@ class Setup(commands.Cog):
         await ctx.send(embed=embed)
 
     @welcome.command(help="Setup welcome channel")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     async def channel(self, ctx, channel: discord.TextChannel):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -42,7 +42,7 @@ class Setup(commands.Cog):
             await ctx.send(f"Welcome channel updated to {channel.mention}")
 
     @welcome.command(help="Remove welcome system")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     async def remove(self, ctx):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is not None:
@@ -52,7 +52,7 @@ class Setup(commands.Cog):
             await ctx.send("You don't have a welcome system")
 
     @welcome.command(help="Create your welcome message. Use var to see the list of variables")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     async def text(self, ctx, *, text):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -70,7 +70,7 @@ class Setup(commands.Cog):
             await ctx.send(f"Welcome message updated to ```{text}```")
 
     @welcome.command(help="Setup welcome dm")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     async def dm(self, ctx, *, text):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -80,7 +80,7 @@ class Setup(commands.Cog):
             await ctx.send(f"Welcome dm updated to ```{text}```")
 
     @welcome.command(help="Custom image. Make sure it's a link", aliases=["img"])
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     async def image(self, ctx, *, link: str):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -99,7 +99,7 @@ class Setup(commands.Cog):
         await ctx.send(embed=embed)
 
     @prefix.command(help="Set custom prefix")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_messages=True)
     async def set(self, ctx, *, prefixes):
         result = await pcursor.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -111,7 +111,7 @@ class Setup(commands.Cog):
             await ctx.send(f"Server prefix update to `{prefixes}`")
 
     @prefix.command(help="Set prefix back to default")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_messages=True)
     async def remove(self, ctx):
         result = await pcursor.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -185,7 +185,7 @@ class Setup(commands.Cog):
         await ctx.send(embed=embed)
 
     @gc.command(help="Set global chat channel")
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_permissions(manage_channels=True)
     async def set(self, ctx, channel: discord.TextChannel):
         result = await gcursor.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -196,7 +196,7 @@ class Setup(commands.Cog):
             await ctx.send(f"Global chat channel updated to {channel.mention}")
 
     @gc.command(help="Remove your server from global chat")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     async def remove(self, ctx):
         result = await gcursor.find_one({"guild": ctx.guild.id})
         if result is not None:

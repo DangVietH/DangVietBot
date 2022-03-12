@@ -34,7 +34,7 @@ class LevelUtils(commands.Cog):
         await image_cursor.delete_one({"guild": ctx.guild.id, "member": ctx.author.id})
         await ctx.send("👍")
 
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     @commands.guild_only()
     async def setXpPermessage(self, ctx, level: int):
         await levelConfig.update_one({"guild": ctx.guild.id}, {"$set": {"xp": level}})
@@ -51,7 +51,7 @@ class LevelUtils(commands.Cog):
         await ctx.send(embed=embed)
 
     @role.command(help="Set up the roles")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     @commands.guild_only()
     async def add(self, ctx, level: int, roles: discord.Role):
         role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})
@@ -62,7 +62,7 @@ class LevelUtils(commands.Cog):
             await ctx.send(f"{roles.name} role added.")
 
     @role.command(help="Remove the role from level")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     @commands.guild_only()
     async def remove(self, ctx, level: int, roles: discord.Role):
         role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})
@@ -93,7 +93,7 @@ class LevelUtils(commands.Cog):
         await ctx.send(embed=embed)
 
     @lvl.command(help="Setup level up channel if you like to")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     @commands.guild_only()
     async def set(self, ctx, channel: discord.TextChannel):
         result = await upchannel.find_one({"guild": ctx.guild.id})
@@ -106,7 +106,7 @@ class LevelUtils(commands.Cog):
             await ctx.send(f"Level up channel updated to {channel.mention}")
 
     @lvl.command(help="Remove level up channel")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     @commands.guild_only()
     async def remove(self, ctx):
         result = await upchannel.find_one({"guild": ctx.guild.id})
@@ -116,7 +116,7 @@ class LevelUtils(commands.Cog):
             await upchannel.delete_one(result)
 
     @lvl.command(help="Disable levelling")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     @commands.guild_only()
     async def disable(self, ctx):
         check = await disable.find_one({"guild": ctx.guild.id})
@@ -133,7 +133,7 @@ class LevelUtils(commands.Cog):
             await ctx.send('Levelling disabled')
 
     @lvl.command(help="Re-enable levelling")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     @commands.guild_only()
     async def renable(self, ctx):
         check = await disable.find_one({"guild": ctx.guild.id})
@@ -144,7 +144,7 @@ class LevelUtils(commands.Cog):
             await ctx.send('Leveling already enabled')
 
     @commands.command(help="Add xp to member")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     @commands.guild_only()
     async def add_xp(self, ctx, member: discord.Member, amount: int):
         if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
@@ -153,7 +153,7 @@ class LevelUtils(commands.Cog):
         await ctx.send(f"Successfully added {amount} xp to {member}")
 
     @commands.command(help="Remove xp from member")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     @commands.guild_only()
     async def remove_xp(self, ctx, member: discord.Member, amount: int):
         if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
