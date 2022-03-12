@@ -11,4 +11,4 @@ class IpcRoutes(commands.Cog):
         if guild is None:
             return None
 
-        return guild.id
+        return guild.id, guild.name
