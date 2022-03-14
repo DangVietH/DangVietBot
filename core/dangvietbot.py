@@ -34,20 +34,19 @@ class DangVietBot(commands.Bot):
             activity=discord.Streaming(name="d!help", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
             **kwargs
         )
-        self.mongo = config_var['mango_link']
-
-        # loading cogs
-        for ext in coglist:
-            try:
-                self.load_extension(ext)
-            except Exception as e:
-                print(f"Failed to load extension {ext}: {e}")
+        self.mongo = AsyncIOMotorClient(config_var['mango_link'])
 
     def run(self):
         super().run(config_var['token'], reconnect=True)
 
-    async def on_ready(self):
-        print(f"{self.user} is online! \nUsing nextcord {discord.__version__} \nDevelop by DvH#9980")
+    async def setup_hook(self):
+        print(f"{self.user} is online! \nUsing discord {discord.__version__} \nDevelop by DvH#9980")
+        # loading cogs
+        for ext in coglist:
+            try:
+                await self.load_extension(ext)
+            except Exception as e:
+                print(f"Failed to load extension {ext}: {e}")
 
     async def on_message(self, message):
         if message.author.bot:
@@ -84,8 +83,7 @@ class DangVietBot(commands.Bot):
         await guild.system_channel.send(embed=embed)
 
     async def get_prefix(self, message):
-        cluster = AsyncIOMotorClient(self.mongo)
-        cursor = cluster["custom_prefix"]["prefix"]
+        cursor = self.mongo["custom_prefix"]["prefix"]
         if not message.guild:
             return commands.when_mentioned_or("d!")(self, message)
         else:

@@ -237,13 +237,6 @@ class Leveling(commands.Cog):
     async def on_guild_join(self, guild):
         await lvlConfig.insert_one({"guild": guild.id, "role": [], "level": [], "xp": 10})
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        for guild in self.bot.guilds:
-            results = await lvlConfig.find_one({"guild": guild.id})
-            if results is None:
-                await lvlConfig.insert_one({"guild": guild.id, "role": [], "level": [], "xp": 10})
-
     # remove data to save storage
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):

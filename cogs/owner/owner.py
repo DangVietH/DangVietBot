@@ -21,7 +21,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     async def load(self, ctx, *, cog=None):
         try:
-            self.bot.load_extension(f"cogs.{cog}")
+            await self.bot.load_extension(f"cogs.{cog}")
         except Exception as e:
             await ctx.send(f'**ERROR:** {type(e).__name__} - {e}')
         else:
@@ -31,7 +31,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     async def unload(self, ctx, *, cog=None):
         try:
-            self.bot.unload_extension(f"cogs.{cog}")
+            await self.bot.unload_extension(f"cogs.{cog}")
         except Exception as e:
             await ctx.send(f'**ERROR:** {type(e).__name__} - {e}')
         else:
@@ -41,7 +41,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     async def reload(self, ctx, *, cog=None):
         try:
-            self.bot.reload_extension(f"cogs.{cog}")
+            await self.bot.reload_extension(f"cogs.{cog}")
         except Exception as e:
             await ctx.send(f'**ERROR:** {type(e).__name__} - {e}')
         else:

@@ -17,6 +17,11 @@ class LevelUtils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def add_to_db(self, guild):
+        results = await levelConfig.find_one({"guild": guild.id})
+        if results is None:
+            await levelConfig.insert_one({"guild": guild.id, "role": [], "level": [], "xp": 10})
+
     @commands.command(help="Set background for your server rank")
     @commands.guild_only()
     async def setbackground(self, ctx, link):
@@ -34,14 +39,16 @@ class LevelUtils(commands.Cog):
         await image_cursor.delete_one({"guild": ctx.guild.id, "member": ctx.author.id})
         await ctx.send("👍")
 
-    @commands.has_permissions(manage_channels=True)
+    @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
     async def setXpPermessage(self, ctx, level: int):
+        await self.add_to_db(ctx.guild)
         await levelConfig.update_one({"guild": ctx.guild.id}, {"$set": {"xp": level}})
         await ctx.send(f"Xp per message set to {level}")
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Level rewarding role setup")
     async def role(self, ctx):
+        await self.add_to_db(ctx.guild)
         embed = discord.Embed(title="Level rewarding role setup", color=discord.Color.random())
         command = self.bot.get_command("role")
         if isinstance(command, commands.Group):
@@ -85,6 +92,7 @@ class LevelUtils(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Level channel setup")
     async def lvl(self, ctx):
+        await self.add_to_db(ctx.guild)
         embed = discord.Embed(title="Level up utils", color=discord.Color.random())
         command = self.bot.get_command("lvl")
         if isinstance(command, commands.Group):

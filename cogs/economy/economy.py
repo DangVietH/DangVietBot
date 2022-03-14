@@ -30,8 +30,6 @@ class Economy(commands.Cog):
         if users is None:
             insert = {"id": user.id, "job": "None", "wallet": 0, "bank": 0, "inventory": [], "rank": "None", "stock": "None"}
             await cursor.insert_one(insert)
-        else:
-            return None
 
     @commands.command(help="See how much money you have", aliases=["bal"])
     async def balance(self, ctx, user: discord.Member = None):

@@ -24,7 +24,7 @@ class RtfmListPageSource(menus.ListPageSource):
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(color=discord.Color.green(), title="List of available docs")
-        embed.description = "\n".join([f"[{target}]({link}): {aliases}" for target, link, aliases in entries])
+        embed.description = "\n".join([f"[`{target}`]({link}): {aliases}" for target, link, aliases in entries])
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
         return embed
 

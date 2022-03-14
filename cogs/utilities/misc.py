@@ -4,7 +4,6 @@ import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
 import datetime
-import aiohttp
 
 cluster = AsyncIOMotorClient(config_var["mango_link"])
 timer = cluster["timer"]['remind']
@@ -33,8 +32,9 @@ def convert(time):
 class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    async def cog_load(self):
         self.time_checker.start()
-        self.session = aiohttp.ClientSession(loop=bot.loop)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
