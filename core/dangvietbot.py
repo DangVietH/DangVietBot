@@ -38,7 +38,7 @@ class DangVietBot(commands.Bot):
         self.ipc = ipc.Server(self, secret_key=config_var['ipc'])
 
         # loading cogs
-        for ext in self.coglist:
+        for ext in coglist:
             try:
                 self.load_extension(ext)
             except Exception as e:
