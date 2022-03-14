@@ -1,29 +1,23 @@
-import nextcord as discord
-from nextcord.ext import commands, ipc
+import discord
+from discord.ext import commands, ipc
 from motor.motor_asyncio import AsyncIOMotorClient
 
 import datetime
 from utils.configs import config_var
 from core.help import CustomHelp
 
-# from core.testhelp import CustomHelp
-
-cluster = AsyncIOMotorClient(config_var['mango_link'])
-cursor = cluster["custom_prefix"]["prefix"]
-bcursor = cluster['bot']['blacklist']
-
-cog_list = [
-    'cogs.audio',
-    'cogs.economy',
-    'cogs.entertainment',
-    'cogs.ipc',
-    'cogs.leveling',
-    'cogs.moderation',
-    'cogs.owner',
-    'cogs.rtfm',
-    'cogs.settings',
-    'cogs.utilities',
-    'jishaku']
+coglist = [
+            'cogs.audio',
+            'cogs.economy',
+            'cogs.entertainment',
+            'cogs.ipc',
+            'cogs.leveling',
+            'cogs.moderation',
+            'cogs.owner',
+            'cogs.rtfm',
+            'cogs.settings',
+            'cogs.utilities',
+            'jishaku']
 
 
 class DangVietBot(commands.Bot):
@@ -40,11 +34,11 @@ class DangVietBot(commands.Bot):
             activity=discord.Streaming(name="d!help", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
             **kwargs
         )
-
+        self.mongo = config_var['mango_link']
         self.ipc = ipc.Server(self, secret_key=config_var['ipc'])
 
         # loading cogs
-        for ext in cog_list:
+        for ext in self.coglist:
             try:
                 self.load_extension(ext)
             except Exception as e:
@@ -91,6 +85,8 @@ class DangVietBot(commands.Bot):
         await guild.system_channel.send(embed=embed)
 
     async def get_prefix(self, message):
+        cluster = AsyncIOMotorClient(self.mongo)
+        cursor = cluster["custom_prefix"]["prefix"]
         if not message.guild:
             return commands.when_mentioned_or("d!")(self, message)
         else:
@@ -99,9 +95,6 @@ class DangVietBot(commands.Bot):
                 return commands.when_mentioned_or(str(result["prefix"]))(self, message)
             else:
                 return commands.when_mentioned_or("d!")(self, message)
-
-    async def on_ipc_ready(self):
-        print("IPC is ready")
 
     async def on_ipc_error(self, endpoint, error):
         print(endpoint, "raised", error)

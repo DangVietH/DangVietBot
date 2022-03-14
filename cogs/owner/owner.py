@@ -1,5 +1,5 @@
-import nextcord as discord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
 
@@ -19,8 +19,11 @@ class Owner(commands.Cog):
 
     @commands.command(help="Load a cog")
     @commands.is_owner()
-    async def load(self, ctx, *, cog):
+    async def load(self, ctx, *, cog=None):
         try:
+            if cog is None:
+                for extension in self.bot.extensions:
+                    return self.bot.load_extension(extension)
             self.bot.load_extension(f"cogs.{cog}")
         except Exception as e:
             await ctx.send(f'**ERROR:** {type(e).__name__} - {e}')
@@ -29,8 +32,11 @@ class Owner(commands.Cog):
 
     @commands.command(help="Unload a cog")
     @commands.is_owner()
-    async def unload(self, ctx, *, cog):
+    async def unload(self, ctx, *, cog=None):
         try:
+            if cog is None:
+                for extension in self.bot.extensions:
+                    return self.bot.unload_extension(extension)
             self.bot.unload_extension(f"cogs.{cog}")
         except Exception as e:
             await ctx.send(f'**ERROR:** {type(e).__name__} - {e}')
@@ -39,8 +45,11 @@ class Owner(commands.Cog):
 
     @commands.command(help="Reload a cog")
     @commands.is_owner()
-    async def reload(self, ctx, *, cog):
+    async def reload(self, ctx, *, cog=None):
         try:
+            if cog is None:
+                for extension in self.bot.extensions:
+                    return self.bot.reload_extension(extension)
             self.bot.reload_extension(f"cogs.{cog}")
         except Exception as e:
             await ctx.send(f'**ERROR:** {type(e).__name__} - {e}')

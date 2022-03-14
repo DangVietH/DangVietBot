@@ -1,6 +1,6 @@
 from typing import Optional, Set
-from nextcord.ext import commands
-import nextcord as discord
+import discord
+from discord.ext import commands
 
 # code base on https://github.com/DenverCoder1/Tutorial-Discord-Bot/blob/main/modules/help/help_command.py
 

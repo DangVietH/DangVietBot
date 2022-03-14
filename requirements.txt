@@ -2,10 +2,11 @@ requests==2.27.1
 asyncpraw==7.5.0
 motor==2.5.1
 DateTime==4.4
-nextcord==2.0.0a9
+git+https://github.com/Rapptz/discord.py
 lavalink==3.1.5
-nextcord-ext-menus==1.5.2
-nextcord-ext-ipc==2.2.1
+git+https://github.com/Rapptz/discord-ext-menus
+git+https://github.com/oliver-ni/discord-ext-menus-views
+git+https://github.com/Ext-Creators/discord-ext-ipc
 aiohttp==3.8.1
 dnspython==2.2.1
 git+https://github.com/Gorialis/jishaku

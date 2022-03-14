@@ -1,10 +1,10 @@
-import nextcord as discord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
 from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource, NFTPageSource
-from utils.menuUtils import MenuButtons
+from discord.ext.menus.views import ViewMenuPages
 from utils.configs import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
@@ -65,7 +65,7 @@ class Economy(commands.Cog):
                 to_append = (f"{num}: {is_user_in_guild}", f"**Wallet:** {x['wallet']}")
                 data.append(to_append)
 
-        pages = MenuButtons(source=GuildRichPageSource(data), disable_buttons_after=True, ctx=ctx)
+        pages = ViewMenuPages(source=GuildRichPageSource(data), clear_reactions_after=True)
         await pages.start(ctx)
 
     @commands.command(help="Who is the richest one around the world")
@@ -78,7 +78,7 @@ class Economy(commands.Cog):
             to_append = (f"{num}: {self.bot.get_user(x['id'])}", f"**Wallet:** {x['wallet']}")
             data.append(to_append)
 
-        pages = MenuButtons(source=GlobalRichPageSource(data), disable_buttons_after=True, ctx=ctx)
+        pages = ViewMenuPages(source=GlobalRichPageSource(data), clear_reactions_after=True)
         await pages.start(ctx)
 
     @commands.command(help="Beg some money")
@@ -190,7 +190,7 @@ class Economy(commands.Cog):
                 amount = item['amount']
                 to_append = (f"{name}", f"**Amount** {amount}")
                 data.append(to_append)
-            page = MenuButtons(source=InventoryPageSource(data), disable_buttons_after=True, ctx=ctx)
+            page = ViewMenuPages(source=InventoryPageSource(data), clear_reactions_after=True)
             await page.start(ctx)
 
     @commands.command(help="Claim your daily money")
@@ -410,6 +410,5 @@ class Economy(commands.Cog):
             to_append = (f"{num}. {x['name']}",
                          f"**Price:** 💵 {x['price']} **Owner:** {self.bot.get_user(x['owner'])}")
             data.append(to_append)
-
-        pages = MenuButtons(source=NFTPageSource(data), disable_buttons_after=True, ctx=ctx)
-        await pages.start(ctx)
+        page = ViewMenuPages(source=NFTPageSource(data), clear_reactions_after=True)
+        await page.start(ctx)

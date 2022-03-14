@@ -1,4 +1,4 @@
-from nextcord.ext import commands, ipc
+from discord.ext import commands, ipc
 
 
 class IpcRoutes(commands.Cog):
