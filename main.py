@@ -15,5 +15,5 @@ async def block_blacklist_user(ctx):
 bot.add_check(block_blacklist_user)
 
 if __name__ == '__main__':
-    # bot.ipc.start()
     bot.run()
+    # bot.ipc.start()
