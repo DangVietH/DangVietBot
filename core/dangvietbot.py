@@ -67,11 +67,6 @@ class DangVietBot(commands.Bot):
         else:
             await ctx.send(error)
 
-    async def on_message(self, message):
-        if message.author.bot:
-            return
-        await self.process_commands(message)
-
     async def on_guild_join(self, guild):
         embed = discord.Embed(title=f"Greetings {guild.name}",
                               description=f"Thanks for adding {self.user.name} into your server! To get started type d!help!",
