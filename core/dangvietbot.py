@@ -10,7 +10,6 @@ coglist = [
             'cogs.audio',
             'cogs.economy',
             'cogs.entertainment',
-            'cogs.ipc',
             'cogs.leveling',
             'cogs.moderation',
             'cogs.owner',
