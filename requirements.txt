@@ -6,7 +6,6 @@ git+https://github.com/Rapptz/discord.py
 lavalink==3.1.5
 git+https://github.com/Rapptz/discord-ext-menus
 git+https://github.com/oliver-ni/discord-ext-menus-views
-git+https://github.com/Ext-Creators/discord-ext-ipc
 aiohttp==3.8.1
 dnspython==2.2.1
 git+https://github.com/Gorialis/jishaku

@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, ipc
+from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 
 import datetime
@@ -35,7 +35,6 @@ class DangVietBot(commands.Bot):
             **kwargs
         )
         self.mongo = config_var['mango_link']
-        self.ipc = ipc.Server(self, secret_key=config_var['ipc'])
 
         # loading cogs
         for ext in coglist:
@@ -49,6 +48,11 @@ class DangVietBot(commands.Bot):
 
     async def on_ready(self):
         print(f"{self.user} is online! \nUsing nextcord {discord.__version__} \nDevelop by DvH#9980")
+
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+        await self.process_commands(message)
 
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.CommandNotFound):
@@ -90,6 +94,3 @@ class DangVietBot(commands.Bot):
                 return commands.when_mentioned_or(str(result["prefix"]))(self, message)
             else:
                 return commands.when_mentioned_or("d!")(self, message)
-
-    async def on_ipc_error(self, endpoint, error):
-        print(endpoint, "raised", error)
