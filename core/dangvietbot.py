@@ -62,7 +62,7 @@ class DangVietBot(commands.Bot):
         elif isinstance(error, commands.MissingPermissions):
             await ctx.send('You do not have permission to use this command')
         elif isinstance(error, commands.NotOwner):
-            await ctx.send("You're not the owner of the bot")
+            await ctx.send("You're not the owner of this bot")
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("You are missing a required argument for this command to work")
         elif isinstance(error, commands.CommandOnCooldown):
