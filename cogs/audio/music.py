@@ -129,7 +129,7 @@ class Music(commands.Cog):
                     80,
                     'youshallnotpass',
                     'singapore',
-                    'MAIN') # Host, Port, Password, Region, Name
+                    'MAIN')
 
         lavalink.add_event_hook(self.track_hook)
 
@@ -168,7 +168,7 @@ class Music(commands.Cog):
 
         # These are commands that require the bot to join a vc (i.e. initiating playback).
         # Commands such as volume/skip etc don't require the bot to be in a vc so don't need listing here.
-        should_connect = ctx.command.name in ('play',)
+        should_connect = ctx.command.name in ('play', 'join')
 
         if not ctx.author.voice or not ctx.author.voice.channel:
             # Our cog_command_error handler catches this and sends it to the vc.
@@ -201,9 +201,12 @@ class Music(commands.Cog):
             # When this track_hook receives a "QueueEndEvent" from lavalink.py
             # it indicates that there are no tracks left in the player's queue.
             # To save on resources, we can tell the bot to disconnect from the vc.
-            guild_id = int(event.player.guild_id)
-            guild = self.bot.get_guild(guild_id)
+            guild = self.bot.get_guild(int(event.player.guild_id))
             await guild.voice_client.disconnect(force=True)
+
+    @commands.command(help="Join a vc", aliases=['connect'])
+    async def join(self, ctx):
+        await ctx.send(f"Successfully joined {ctx.author.voice.channel.mention} and received input from {ctx.channel.mention}")
 
     @commands.command(help="Searches and plays a song from a given query.")
     async def play(self, ctx, *, query: str):
