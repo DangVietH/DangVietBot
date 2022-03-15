@@ -35,6 +35,36 @@ class Admin(commands.Cog):
         self.bot = bot
         self.time_checker.start()
 
+    async def modlogUtils(self, ctx, criminal, type_off, reason):
+        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+
+        embed = discord.Embed(title=f"Case {num_of_case}", description=f"{criminal.mention} has been {type_off.title()}ed for: {reason}",
+                              color=discord.Color.red(),
+                              timestamp=ctx.message.created_at)
+        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
+        await ctx.send(embed=embed)
+
+        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
+            "cases": {"Number": int(num_of_case), "user": f"{criminal.id}", "type": type_off, "Mod": f"{ctx.author.id}",
+                      "reason": str(reason)}}})
+        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
+
+        result = await cursors.find_one({"guild": ctx.guild.id})
+        if result is not None:
+            channel = self.bot.get_channel(result["channel"])
+            embed = discord.Embed(title=f"Case #{num_of_case.title()}: {type_off}!",
+                                  description=f"**User:** {criminal} \n**Mod:**{ctx.author} \n**Reason:** {reason}",
+                                  color=discord.Color.red(),
+                                  timestamp=ctx.message.created_at)
+            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
+            await channel.send(embed=embed)
+
+        if not criminal.bot:
+            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": criminal.id})
+            if check_user_case is None:
+                return await user_case.insert_one({"guild": ctx.guild.id, "user": criminal.id, "total_cases": 1})
+            await user_case.update_one({"guild": ctx.guild.id, "user": criminal.id}, {"$inc": {"total_cases": 1}})
+
     @commands.command(help="Warn member")
     @commands.has_permissions(administrator=True)
     async def warn(self, ctx, member: discord.Member, *, reason=None):
@@ -44,35 +74,7 @@ class Admin(commands.Cog):
         emb = discord.Embed(description=f"You have been warned in **{guild.name}** for: **{reason}**",
                             color=discord.Color.red())
         await member.send(embed=emb)
-
-        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-
-        embed = discord.Embed(title=f"Case {num_of_case}", description=f"{member.mention} has warned for: {reason}",
-                              color=discord.Color.red(),
-                              timestamp=ctx.message.created_at)
-        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-        await ctx.send(embed=embed)
-
-        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
-            "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "warning", "Mod": f"{ctx.author.id}",
-                      "reason": str(reason)}}})
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Warn!",
-                                  description=f"**User:** {member} \n**Mod:**{ctx.author} \n**Reason:** {reason}",
-                                  color=discord.Color.red(),
-                                  timestamp=ctx.message.created_at)
-            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-            await channel.send(embed=embed)
-
-        if not member.bot:
-            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-            if check_user_case is None:
-                return await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+        await self.modlogUtils(ctx, member, "warn", reason)
 
     @commands.command(help="Timeout a member")
     @commands.has_permissions(moderate_members=True)
@@ -86,75 +88,15 @@ class Admin(commands.Cog):
         await member.edit(timeout=duration)
 
         await member.send(f"You were timeout in **{ctx.guild.name}** for {reason}")
-
-        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-
-        embed = discord.Embed(title=f"Case {num_of_case}",
-                              description=f"{member.mention} has been timeout for: {reason}",
-                              color=discord.Color.red(),
-                              timestamp=ctx.message.created_at)
-        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-        await ctx.send(embed=embed)
-
-        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
-            "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "timeout",
-                      "Mod": f"{ctx.author.id}",
-                      "reason": str(reason)}}})
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Timeout!",
-                                  description=f"**User:** {member} \n**Mod:**{ctx.author} \n**Reason:** {reason}",
-                                  color=discord.Color.red(),
-                                  timestamp=ctx.message.created_at)
-            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-            await channel.send(embed=embed)
-
-        if not member.bot:
-            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-            if check_user_case is None:
-                return await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+        await self.modlogUtils(ctx, member, "timeout", reason)
 
     @commands.command(help="Untimeout a member")
     @commands.has_permissions(moderate_members=True)
     async def untimeout(self, ctx, member: discord.Member,  *, reason=None):
         await member.edit(timeout=None)
-
         await member.send(f"You were timeout in **{ctx.guild.name}** for {reason}")
 
-        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-
-        embed = discord.Embed(title=f"Case {num_of_case}",
-                              description=f"{member.mention} has been untimeout for: {reason}",
-                              color=discord.Color.red(),
-                              timestamp=ctx.message.created_at)
-        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-        await ctx.send(embed=embed)
-
-        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
-            "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "timeout",
-                      "Mod": f"{ctx.author.id}",
-                      "reason": str(reason)}}})
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Untimeout!",
-                                  description=f"**User:** {member} \n**Mod:**{ctx.author} \n**Reason:** {reason}",
-                                  color=discord.Color.red(),
-                                  timestamp=ctx.message.created_at)
-            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-            await channel.send(embed=embed)
-
-        if not member.bot:
-            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-            if check_user_case is None:
-                return await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+        await self.modlogUtils(ctx, member, "untimeout", reason)
 
     @commands.command(help="Mute member")
     @commands.has_permissions(manage_messages=True)
@@ -171,35 +113,7 @@ class Admin(commands.Cog):
                                               read_message_history=True,
                                               read_messages=False)
         await member.add_roles(mutedRole, reason=reason)
-        await member.send(f"You were muted in **{guild.name}** for {reason}")
-
-        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-
-        embed = discord.Embed(title=f"Case {num_of_case}",
-                              description=f"{member.mention} has been muted for: {reason}",
-                              color=discord.Color.red(),
-                              timestamp=ctx.message.created_at)
-        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-        await ctx.send(embed=embed)
-
-        await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "mute", "Mod": f"{ctx.author.id}", "reason": str(reason)}}})
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Mute!",
-                                  description=f"**User:** {member} \n**Mod:**{ctx.author} \n**Reason:** {reason}",
-                                  color=discord.Color.red(),
-                                  timestamp=ctx.message.created_at)
-            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-            await channel.send(embed=embed)
-
-        if not member.bot:
-            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-            if check_user_case is None:
-                return await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+        await self.modlogUtils(ctx, member, "mute", reason)
 
     @commands.command(help="Mute member but with a timer", aliases=['softmute'])
     @commands.has_permissions(manage_messages=True)
@@ -222,41 +136,11 @@ class Admin(commands.Cog):
                                               read_message_history=True,
                                               read_messages=False)
         await member.add_roles(mutedRole, reason=reason)
-        await member.send(f"You were temporarily muted for {converted_time} seconds in **{guild.name}** for {reason}")
-
-        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-
-        embed = discord.Embed(title=f"Case {num_of_case}",
-                              description=f"{member.mention} has temporarily muted for: {reason}",
-                              color=discord.Color.red(),
-                              timestamp=ctx.message.created_at)
-        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-        await ctx.send(embed=embed)
-
-        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
-            "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "mute", "Mod": f"{ctx.author.id}",
-                      "reason": str(reason)}}})
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Temporary Mute!",
-                                  description=f"**User:** {member} \n**Mod:**{ctx.author} \n**Reason:** {reason}",
-                                  color=discord.Color.red(),
-                                  timestamp=ctx.message.created_at)
-            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-            await channel.send(embed=embed)
-
-        if not member.bot:
-            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-            if check_user_case is None:
-                return await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+        await member.send(f"You were temporarily muted for {str(datetime.timedelta(seconds=converted_time))} in **{guild.name}** for {reason}")
         current_time = datetime.datetime.now()
         final_time = current_time + datetime.timedelta(seconds=converted_time)
-        await timer.insert_one(
-            {"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id, "role": mutedRole.id})
+        await timer.insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id})
+        await self.modlogUtils(ctx, member, "tempmute", reason)
 
     @commands.command(help="Unmute member")
     @commands.has_permissions(manage_messages=True)
@@ -267,34 +151,7 @@ class Admin(commands.Cog):
         await member.remove_roles(mutedRole)
         await member.send(f"You were unmuted in the **{ctx.guild.name}**. Make sure you behave well 😉")
 
-        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-
-        embed = discord.Embed(title=f"Case {num_of_case}", description=f"{member.mention} has been unmuted for: {reason}",
-                              color=discord.Color.red(),
-                              timestamp=ctx.message.created_at)
-        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-        await ctx.send(embed=embed)
-
-        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
-            "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "unmute", "Mod": f"{ctx.author.id}",
-                      "reason": str(reason)}}})
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Unmute!",
-                                  description=f"**User:** {member} \n**Mod:**{ctx.author} \n**Reason:** {reason}",
-                                  color=discord.Color.red(),
-                                  timestamp=ctx.message.created_at)
-            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-            await channel.send(embed=embed)
-
-        if not member.bot:
-            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-            if check_user_case is None:
-                return await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-            await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+        await self.modlogUtils(ctx, member, "unmute", reason)
 
     @commands.command(help="Kick member")
     @commands.has_permissions(kick_members=True)
@@ -303,22 +160,7 @@ class Admin(commands.Cog):
             await member.send(f"You've been kick from **{ctx.guild.name}** for {reason}")
         await member.kick(reason=reason)
 
-        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-        embed = discord.Embed(title=f"Case {num_of_case}", description=f"{member.mention} has been kicked for: {reason}",
-                              color=discord.Color.red(),
-                              timestamp=ctx.message.created_at)
-        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-        await ctx.send(embed=embed)
-
-        await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "kick", "Mod": f"{ctx.author.id}", "reason": str(reason)}}})
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Kick!", description=f"**User:** {member} \n**Mod:**{ctx.author} \n**Reason:** {reason}", color=discord.Color.red(), timestamp=ctx.message.created_at)
-            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-            await channel.send(embed=embed)
+        await self.modlogUtils(ctx, member, "kick", reason)
                     
     @commands.command(help="Ban member")
     @commands.has_permissions(ban_members=True)
@@ -327,22 +169,7 @@ class Admin(commands.Cog):
             await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for {reason}. What a shame 👎")
         await member.ban(reason=reason)
 
-        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-
-        embed = discord.Embed(title=f"Case {num_of_case}", description=f"{member.mention} has been BANNED for: {reason}",
-                              color=discord.Color.red(), timestamp=ctx.message.created_at)
-        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-        await ctx.send(embed=embed)
-
-        await cases.update_one({"guild": ctx.guild.id}, {"$push": {"cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "ban", "Mod": f"{ctx.author.id}", "reason": str(reason)}}})
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Ban!", description=f"**User:** {member} \n**Mod:**{ctx.author} \n**Reason:** {reason}", color=discord.Color.red(), timestamp=ctx.message.created_at)
-            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-            await channel.send(embed=embed)
+        await self.modlogUtils(ctx, member, "ban", reason)
 
     @commands.command(help="Ban member but temporarily", aliases=['softban'])
     @commands.has_permissions(ban_members=True)
@@ -356,37 +183,9 @@ class Admin(commands.Cog):
         else:
             if not member.bot:
                 await member.send(
-                    f"You've been banned for {converted_time} seconds from **{ctx.guild.name}** for {reason}. Don't worry, it will be a short time!!")
+                    f"You've been banned for {{str(datetime.timedelta(seconds=converted_time))}} from **{ctx.guild.name}** for {reason}. Don't worry, it will be a short time!!")
             await ctx.guild.ban(member)
-            num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-
-            embed = discord.Embed(title=f"Case {num_of_case}",
-                                  description=f"{member.mention} has been temporarily banned for: {reason}",
-                                  color=discord.Color.red(),
-                                  timestamp=ctx.message.created_at)
-            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-            await ctx.send(embed=embed)
-
-            await cases.update_one({"guild": ctx.guild.id}, {"$push": {
-                "cases": {"Number": int(num_of_case), "user": f"{member.id}", "type": "ban", "Mod": f"{ctx.author.id}",
-                          "reason": str(reason)}}})
-            await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-
-            result = await cursors.find_one({"guild": ctx.guild.id})
-            if result is not None:
-                channel = self.bot.get_channel(result["channel"])
-                embed = discord.Embed(title=f"Case #{num_of_case}: Temporary Ban!",
-                                      description=f"**User:** {member} \n**Mod:**{ctx.author} \n**Reason:** {reason}",
-                                      color=discord.Color.red(),
-                                      timestamp=ctx.message.created_at)
-                embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-                await channel.send(embed=embed)
-
-            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-            if check_user_case is None:
-                await user_case.insert_one({"guild": ctx.guild.id, "user": member.id, "total_cases": 1})
-            else:
-                await user_case.update_one({"guild": ctx.guild.id, "user": member.id}, {"$inc": {"total_cases": 1}})
+            await self.modlogUtils(ctx, member, "tempban", reason)
 
             current_time = datetime.datetime.now()
             final_time = current_time + datetime.timedelta(seconds=converted_time)
