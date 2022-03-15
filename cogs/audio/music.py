@@ -204,7 +204,7 @@ class Music(commands.Cog):
             guild = self.bot.get_guild(int(event.player.guild_id))
             await guild.voice_client.disconnect(force=True)
 
-    @commands.command(help="Join a vc", aliases=['connect'])
+    @commands.command(help="Join a vc to play some music", aliases=['connect'])
     async def join(self, ctx):
         await ctx.send(f"Successfully joined {ctx.author.voice.channel.mention} and received input from {ctx.channel.mention}")
 
