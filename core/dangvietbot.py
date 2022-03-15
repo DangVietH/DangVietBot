@@ -1,5 +1,5 @@
-import discord
-from discord.ext import commands
+import nextcord as discord
+from nextcord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 
 import datetime
@@ -35,17 +35,18 @@ class DangVietBot(commands.Bot):
         )
         self.mongo = AsyncIOMotorClient(config_var['mango_link'])
 
-    def run(self):
-        super().run(config_var['token'], reconnect=True)
-
-    async def setup_hook(self):
-        print(f"{self.user} is online! \nUsing discord {discord.__version__} \nDevelop by DvH#9980")
         # loading cogs
         for ext in coglist:
             try:
-                await self.load_extension(ext)
+                self.load_extension(ext)
             except Exception as e:
                 print(f"Failed to load extension {ext}: {e}")
+
+    def run(self):
+        super().run(config_var['token'], reconnect=True)
+
+    async def on_ready(self):
+        print(f"{self.user} is online! \nUsing nextcord {discord.__version__} \nDevelop by DvH#9980")
 
     async def on_message(self, message):
         if message.author.bot:

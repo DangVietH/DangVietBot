@@ -1,5 +1,5 @@
 from .dev import Dev
 
 
-async def setup(bot):
-    await bot.add_cog(Dev(bot))
+def setup(bot):
+    bot.add_cog(Dev(bot))

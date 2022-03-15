@@ -1,10 +1,10 @@
-import discord
-from discord.ext import commands, menus
+import nextcord as discord
+from nextcord.ext import commands, menus
 from motor.motor_asyncio import AsyncIOMotorClient
 from PIL import Image, ImageDraw, ImageFont
 import io
 from utils.imageUtils import get_image_from_url
-from discord.ext.menus.view import ViewMenuPages
+from utils.menuUtils import ViewMenuPages
 from utils.configs import config_var
 
 
@@ -214,7 +214,7 @@ class Leveling(commands.Cog):
             to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        page = ViewMenuPages(source=GuildLeaderboardPageSource(data), clear_reactions_after=True)
+        page = ViewMenuPages(source=GuildLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
         await page.start(ctx)
 
     @commands.command(help="See global rank")
@@ -230,7 +230,7 @@ class Leveling(commands.Cog):
                          f"**Server:** {self.bot.get_guild(x['guild'])} **Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = ViewMenuPages(source=GlobalLeaderboardPageSource(data), clear_reactions_after=True)
+        pages = ViewMenuPages(source=GlobalLeaderboardPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
     @commands.Cog.listener()

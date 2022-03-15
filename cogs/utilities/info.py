@@ -1,5 +1,5 @@
-import discord
-from discord.ext import commands, menus
+import nextcord as discord
+from nextcord.ext import commands, menus
 from utils.menuUtils import MenuButtons
 
 

@@ -1,8 +1,8 @@
-import discord
-from discord.ext import commands, menus
+import nextcord as discord
+from nextcord.ext import commands, menus
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
-from discord.ext.menus.views import ViewMenuPages
+from utils.menuUtils import ViewMenuPages
 from utils.configs import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
@@ -120,7 +120,7 @@ class Tags(commands.Cog):
             for thing in ta:
                 to_append = (thing['name'], f"**Owner:** {self.bot.get_user(thing['owner'])}")
                 data.append(to_append)
-            page = ViewMenuPages(source=TagPageSource(data), clear_reactions_after=True)
+            page = ViewMenuPages(source=TagPageSource(data), disable_buttons_after=True, ctx=ctx)
             await page.start(ctx)
 
     @commands.Cog.listener()

@@ -1,6 +1,6 @@
 import zlib
 import json
-from discord.ext import commands
+from nextcord.ext import commands
 
 
 class SocketFix(commands.Cog):

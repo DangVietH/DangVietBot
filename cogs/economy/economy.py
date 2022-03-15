@@ -1,10 +1,10 @@
-import discord
-from discord.ext import commands
+import nextcord as discord
+from nextcord.ext import commands
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
 from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource, NFTPageSource
-from discord.ext.menus.views import ViewMenuPages
+from utils.menuUtils import ViewMenuPages
 from utils.configs import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
@@ -63,7 +63,7 @@ class Economy(commands.Cog):
                 to_append = (f"{num}: {is_user_in_guild}", f"**Wallet:** {x['wallet']}")
                 data.append(to_append)
 
-        pages = ViewMenuPages(source=GuildRichPageSource(data), clear_reactions_after=True)
+        pages = ViewMenuPages(source=GuildRichPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
     @commands.command(help="Who is the richest one around the world")
@@ -76,7 +76,7 @@ class Economy(commands.Cog):
             to_append = (f"{num}: {self.bot.get_user(x['id'])}", f"**Wallet:** {x['wallet']}")
             data.append(to_append)
 
-        pages = ViewMenuPages(source=GlobalRichPageSource(data), clear_reactions_after=True)
+        pages = ViewMenuPages(source=GlobalRichPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
     @commands.command(help="Beg some money")
@@ -112,7 +112,7 @@ class Economy(commands.Cog):
         for i in range(len(items_name)):
             data.append((f"{items_name[i]} | 💵 {items_price[i]}",
                          items_description[i]))
-        page = MenuButtons(source=ShopPageSource(data), disable_buttons_after=True, ctx=ctx)
+        page = ViewMenuPages(source=ShopPageSource(data), disable_buttons_after=True, ctx=ctx)
         await page.start(ctx)
 
     @commands.command(help="Buy some items")

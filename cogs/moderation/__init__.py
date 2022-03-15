@@ -3,7 +3,7 @@ from .giveaway import Giveaway
 from .modset import ModSet
 
 
-async def setup(bot):
-    await bot.add_cog(Admin(bot))
-    await bot.add_cog(ModSet(bot))
-    await bot.add_cog(Giveaway(bot))
+def setup(bot):
+    bot.add_cog(Admin(bot))
+    bot.add_cog(ModSet(bot))
+    bot.add_cog(Giveaway(bot))

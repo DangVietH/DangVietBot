@@ -1,10 +1,9 @@
-import discord
-from discord.ext import commands, menus
+import nextcord as discord
+from nextcord.ext import commands, menus
 import lavalink
 import re
-from discord.ext.commands.errors import CheckFailure
-from discord.ext.menus.views import ViewMenuPages
-
+from nextcord.ext.commands.errors import CheckFailure
+from utils.menuUtils import ViewMenuPages
 # This cog is based on https://github.com/Devoxin/Lavalink.py/blob/master/examples/music.py
 
 
@@ -340,5 +339,5 @@ class Music(commands.Cog):
                 to_append = (f"**{num}:**", f"[**{track.title}**]({track.uri})")
                 data.append(to_append)
 
-            page = ViewMenuPages(source=QueuePageSource(data), clear_reactions_after=True)
+            page = ViewMenuPages(source=QueuePageSource(data), disable_buttons_after=True, ctx=ctx)
             await page.start(ctx)
