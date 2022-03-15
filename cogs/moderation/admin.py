@@ -16,7 +16,7 @@ cursor = cluster["moderation"]['automod']
 def convert(time):
     pos = ['s', 'm', 'h', 'd']
 
-    time_dict = {"s": 1/60, "m": (1/60)*60, "h": ((1/60)*60)*60, "d": (((1/60)*60)*60)*24}
+    time_dict = {"s": 1 / 60, "m": (1 / 60) * 60, "h": ((1 / 60) * 60) * 60, "d": (((1 / 60) * 60) * 60) * 24}
 
     unit = time[-1]
 
@@ -38,7 +38,8 @@ class Admin(commands.Cog):
     async def modlogUtils(self, ctx, criminal, type_off: str, reason: str):
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
 
-        embed = discord.Embed(title=f"Case {num_of_case}", description=f"{criminal.mention} has been {type_off.title()}ed for: {reason}",
+        embed = discord.Embed(title=f"Case {num_of_case}",
+                              description=f"{criminal.mention} has been {type_off.title()}ed for: {reason}",
                               color=discord.Color.red(),
                               timestamp=ctx.message.created_at)
         embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
@@ -52,7 +53,7 @@ class Admin(commands.Cog):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is not None:
             channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case.title()}: {type_off}!",
+            embed = discord.Embed(title=f"Case #{num_of_case}: {type_off.title()}!",
                                   description=f"**User:** {criminal} \n**Mod:**{ctx.author} \n**Reason:** {reason}",
                                   color=discord.Color.red(),
                                   timestamp=ctx.message.created_at)
@@ -92,7 +93,7 @@ class Admin(commands.Cog):
 
     @commands.command(help="Untimeout a member")
     @commands.has_permissions(moderate_members=True)
-    async def untimeout(self, ctx, member: discord.Member,  *, reason=None):
+    async def untimeout(self, ctx, member: discord.Member, *, reason=None):
         await member.edit(timeout=None)
         await member.send(f"You were timeout in **{ctx.guild.name}** for {reason}")
 
@@ -136,7 +137,8 @@ class Admin(commands.Cog):
                                               read_message_history=True,
                                               read_messages=False)
         await member.add_roles(mutedRole, reason=reason)
-        await member.send(f"You were temporarily muted for {str(datetime.timedelta(seconds=converted_time))} in **{guild.name}** for {reason}")
+        await member.send(
+            f"You were temporarily muted for {str(datetime.timedelta(seconds=converted_time))} in **{guild.name}** for {reason}")
         current_time = datetime.datetime.now()
         final_time = current_time + datetime.timedelta(seconds=converted_time)
         await timer.insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id})
@@ -161,7 +163,7 @@ class Admin(commands.Cog):
         await member.kick(reason=reason)
 
         await self.modlogUtils(ctx, member, "kick", reason)
-                    
+
     @commands.command(help="Ban member")
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason=None):
@@ -246,7 +248,7 @@ class Admin(commands.Cog):
     @commands.command(help="Clear messages in a certain amount", aliases=['purge'])
     @commands.has_permissions(manage_messages=True)
     async def clear(self, ctx, amount: int):
-        await ctx.channel.purge(limit=amount+1)
+        await ctx.channel.purge(limit=amount + 1)
 
     @commands.command(help="Clear all messages in that channel")
     @commands.has_permissions(manage_messages=True)
