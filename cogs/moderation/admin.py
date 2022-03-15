@@ -35,7 +35,7 @@ class Admin(commands.Cog):
         self.bot = bot
         self.time_checker.start()
 
-    async def modlogUtils(self, ctx, criminal, type_off, reason):
+    async def modlogUtils(self, ctx, criminal, type_off: str, reason: str):
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
 
         embed = discord.Embed(title=f"Case {num_of_case}", description=f"{criminal.mention} has been {type_off.title()}ed for: {reason}",
