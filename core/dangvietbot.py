@@ -41,7 +41,7 @@ class DangVietBot(commands.Bot):
         # loading cogs
         for ext in coglist:
             try:
-                self.load_extension(ext)
+                await self.load_extension(ext)
                 print(f"{ext} loaded")
             except Exception as e:
                 print(f"Failed to load extension {ext}: {e}")
