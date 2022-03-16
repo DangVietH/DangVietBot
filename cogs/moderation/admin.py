@@ -61,10 +61,11 @@ class Admin(commands.Cog):
             await channel.send(embed=embed)
 
         if not criminal.bot:
-            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": criminal.id})
-            if check_user_case is None:
-                return await user_case.insert_one({"guild": ctx.guild.id, "user": criminal.id, "total_cases": 1})
-            await user_case.update_one({"guild": ctx.guild.id, "user": criminal.id}, {"$inc": {"total_cases": 1}})
+            if "ban" not in type_off:
+                check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": criminal.id})
+                if check_user_case is None:
+                    return await user_case.insert_one({"guild": ctx.guild.id, "user": criminal.id, "total_cases": 1})
+                await user_case.update_one({"guild": ctx.guild.id, "user": criminal.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Warn member")
     @commands.has_permissions(administrator=True)

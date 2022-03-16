@@ -143,7 +143,7 @@ class Leveling(commands.Cog):
         IMAGE_WIDTH = 900
         IMAGE_HEIGHT = 250
 
-        img_link = "https://cdn.discordapp.com/attachments/875886792035946496/953179544255361105/abstract-3840x2160-colorful-8k-20675_1.jpg"
+        img_link = "https://cdn.discordapp.com/attachments/875886792035946496/953533593207062588/2159517.jpeg"
         CustomImg = await image_cursor.find_one({"guild": ctx.guild.id, "member": user.id})
         if CustomImg is not None:
             img_link = CustomImg["image"]
