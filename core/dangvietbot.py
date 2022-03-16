@@ -30,7 +30,7 @@ class DangVietBot(commands.Bot):
             description="One bot Many functionality",
             owner_id=860876181036335104,
             enable_debug_events=True,
-            activity=discord.Streaming(name="d!help", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+            activity=discord.Game(name="d!help"),
             **kwargs
         )
         self.mongo = AsyncIOMotorClient(config_var['mango_link'])
