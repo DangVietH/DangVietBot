@@ -26,7 +26,7 @@ class ViewMenuPages(discord.ui.View, menus.MenuPages):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         """Ensure that the user of the button is the one who called the help command"""
-        if interaction.user != self._ctx.author:
+        if interaction.user != self.ctx.author:
             await interaction.response.send_message("You can't use these buttons", ephemeral=True)
             return False
         else:
