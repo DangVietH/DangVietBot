@@ -1,5 +1,5 @@
-import nextcord as discord
-from nextcord.ext import commands, tasks
+import discord
+from discord.ext import commands, tasks
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
@@ -32,6 +32,9 @@ def convert(time):
 class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.time_checker.start()
+
+    async def cog_load(self):
         self.time_checker.start()
 
     @commands.Cog.listener()

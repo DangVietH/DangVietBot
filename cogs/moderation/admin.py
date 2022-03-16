@@ -1,5 +1,5 @@
-import nextcord as discord
-from nextcord.ext import commands, tasks
+import discord
+from discord.ext import commands, tasks
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
 import datetime
@@ -33,6 +33,8 @@ def convert(time):
 class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    async def cog_load(self):
         self.time_checker.start()
 
     async def modlogUtils(self, ctx, criminal, type_off: str, reason: str):

@@ -1,5 +1,5 @@
-import nextcord as discord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 
 import datetime
@@ -33,20 +33,21 @@ class DangVietBot(commands.Bot):
             activity=discord.Game(name="d!help"),
             **kwargs
         )
-        self.mongo = AsyncIOMotorClient(config_var['mango_link'])
-
-        # loading cogs
-        for ext in coglist:
-            try:
-                self.load_extension(ext)
-            except Exception as e:
-                print(f"Failed to load extension {ext}: {e}")
 
     def run(self):
         super().run(config_var['token'], reconnect=True)
 
+    async def setup_hook(self):
+        # loading cogs
+        for ext in coglist:
+            try:
+                self.load_extension(ext)
+                print(f"{ext} loaded")
+            except Exception as e:
+                print(f"Failed to load extension {ext}: {e}")
+
     async def on_ready(self):
-        print(f"{self.user} is online! \nUsing nextcord {discord.__version__} \nDevelop by DvH#9980")
+        print(f"{self.user} is online! \nUsing discord.py {discord.__version__} \nDevelop by DvH#9980")
 
     async def on_message(self, message):
         if message.author.bot:
@@ -83,7 +84,8 @@ class DangVietBot(commands.Bot):
         await guild.system_channel.send(embed=embed)
 
     async def get_prefix(self, message):
-        cursor = self.mongo["custom_prefix"]["prefix"]
+        cluster = AsyncIOMotorClient(config_var['mango_link'])
+        cursor = cluster["custom_prefix"]["prefix"]
         if not message.guild:
             return commands.when_mentioned_or("d!")(self, message)
         else:
