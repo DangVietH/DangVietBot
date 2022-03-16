@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
 import datetime
@@ -33,9 +33,6 @@ def convert(time):
 class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    async def cog_load(self):
-        self.time_checker.start()
 
     async def modlogUtils(self, ctx, criminal, type_off: str, reason: str):
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
@@ -195,31 +192,6 @@ class Admin(commands.Cog):
             current_time = datetime.datetime.now()
             final_time = current_time + datetime.timedelta(seconds=converted_time)
             await timer.insert_one({"guild": ctx.guild.id, "type": "ban", "time": final_time, "user": member.id})
-
-    @tasks.loop(seconds=10)
-    async def time_checker(self):
-        try:
-            all_timer = timer.find({})
-            current_time = datetime.datetime.now()
-            async for x in all_timer:
-                if current_time >= x['time']:
-                    if x['type'] == "mute":
-                        server = self.bot.get_guild(int(x['guild']))
-                        member = server.get_member(int(x['user']))
-                        mutedRole = server.get_role(int(x['role']))
-                        await member.remove_roles(mutedRole)
-
-                        await timer.delete_one({"user": member.id})
-                    elif x['type'] == "ban":
-                        server = self.bot.get_guild(int(x['guild']))
-                        user = self.bot.get_user(int(x['user']))
-                        await server.unban(user)
-
-                        await timer.delete_one({"user": user.id})
-                else:
-                    pass
-        except Exception as e:
-            print(e)
 
     @commands.command(help="Unban member")
     @commands.has_permissions(ban_members=True)

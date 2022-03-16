@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
@@ -32,10 +32,6 @@ def convert(time):
 class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.time_checker.start()
-
-    async def cog_load(self):
-        self.time_checker.start()
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -71,19 +67,6 @@ class Misc(commands.Cog):
             final_time = current_time + datetime.timedelta(seconds=converted_time)
             await timer.insert_one({"user": ctx.author.id, "time": final_time, "reason": reason})
             await ctx.send("⏰ Reminder set")
-
-    @tasks.loop(seconds=10)
-    async def time_checker(self):
-        try:
-            all_timer = timer.find({})
-            current_time = datetime.datetime.now()
-            async for x in all_timer:
-                if current_time >= x['time']:
-                    user = self.bot.get_user(x['user'])
-                    await user.send(f"**Reminder:** {x['reason']}")
-                    await timer.delete_one({"user": user.id})
-        except Exception as e:
-            print(e)
 
     @commands.command(help="Poll")
     async def poll(self, ctx, question, *options: str):

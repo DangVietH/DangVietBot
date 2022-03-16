@@ -15,7 +15,6 @@ class ViewMenuPages(discord.ui.View, menus.MenuPages):
         await self._source._prepare_once()
         self.ctx = ctx
         self.message = await self.send_initial_message(ctx, ctx.channel)
-        await ctx.message.add_reaction("✅")
 
     async def _get_kwargs_from_page(self, page):
         """This method calls ListPageSource.format_page class"""
@@ -50,5 +49,8 @@ class ViewMenuPages(discord.ui.View, menus.MenuPages):
 
     @discord.ui.button(emoji='⏹', style=discord.ButtonStyle.grey)
     async def stop_page(self, button, interaction):
-        await self.message.delete()
+        for item in self.children:
+            if isinstance(item, discord.Button):
+                item.disabled = True
+        await interaction.message.edit(view=self)
         self.stop()
