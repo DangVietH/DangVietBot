@@ -2,7 +2,6 @@ import nextcord as discord
 from nextcord.ext import commands
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
-import asyncio
 from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource, NFTPageSource
 from utils.menuUtils import ViewMenuPages
 from utils.configs import config_var
@@ -130,20 +129,20 @@ class Economy(commands.Cog):
                 if item_name == str(items_name[i]):
                     cost = int(items_price[i]) * amount
                     if cost > check['wallet']:
-                        await ctx.send("You don't have enough money in your wallet")
+                        return await ctx.send("You don't have enough money in your wallet")
+                    inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
+                    if inventory_check is None:
+                        await cursor.update_one({"id": user.id},
+                                                {"$push": {"inventory": {"name": item_name,
+                                                                         "price": int(items_price[i]),
+                                                                         "amount": int(amount)}}})
                     else:
-                        inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
-                        if inventory_check is None:
-                            await cursor.update_one({"id": user.id},
-                                                    {"$push": {"inventory": {"name": item_name,
-                                                                             "price": int(items_price[i]),
-                                                                             "amount": int(amount)}}})
-                        else:
-                            await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
-                                                    {"$inc": {"inventory.$.amount": int(amount)}})
-                        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -cost}})
-                        await ctx.send(
-                            f"You just brought {amount} {item_name} that cost 💵 {cost}")
+                        await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                                                {"$inc": {"inventory.$.amount": int(amount)}})
+                    await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -cost}})
+                    await ctx.send(
+                        f"You just brought {amount} {item_name} that cost 💵 {cost}")
+
                     break
 
     @commands.command(help="Sell your items")
@@ -160,17 +159,17 @@ class Economy(commands.Cog):
                 amounts = item['amount']
                 price = item["price"]
                 if amounts < amount:
-                    await ctx.send("Too much")
-                else:
-                    await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
-                                            {"$inc": {"inventory.$.amount": -amount}})
+                    return await ctx.send("Too much")
+                await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                                        {"$inc": {"inventory.$.amount": -amount}})
 
-                    is_amount_zero = await cursor.find_one(
-                        {"id": user.id, "inventory.name": str(item_name), "inventory.amount": 0})
-                    if is_amount_zero is not None:
-                        await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}})
-                    await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
-                    await ctx.send(f"Successfully sold {amount} {item_name} for 💵 {price}")
+                is_amount_zero = await cursor.find_one(
+                    {"id": user.id, "inventory.name": str(item_name), "inventory.amount": 0})
+                if is_amount_zero is not None:
+                    await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}})
+                await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
+                await ctx.send(f"Successfully sold {amount} {item_name} for 💵 {price}")
+
                 break
 
     @commands.command(help="See your items", aliases=["bag"])
@@ -207,17 +206,16 @@ class Economy(commands.Cog):
         await self.open_account(ctx.author)
         check = await cursor.find_one({"id": ctx.author.id})
         if check['wallet'] < amount:
-            await ctx.send("Too much")
+            return await ctx.send("Too much")
         elif amount <= 0:
-            await ctx.send("Too less")
+            return await ctx.send("Too less")
+        chance = random.randint(1, 100)
+        if chance <= 50:
+            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount}})
+            await ctx.send(f"You just won 💵 {amount}")
         else:
-            chance = random.randint(1, 100)
-            if chance <= 50:
-                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount}})
-                await ctx.send(f"You just won 💵 {amount}")
-            else:
-                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": -amount}})
-                await ctx.send(f"You have lost 💵 {amount}")
+            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": -amount}})
+            await ctx.send(f"You have lost 💵 {amount}")
 
     @commands.command(help="Deposit your money into the bank", aliases=['dep'])
     @commands.guild_only()
@@ -230,14 +228,13 @@ class Economy(commands.Cog):
             await cursor.update_one({"id": user.id}, {"$inc": {"bank": check['wallet']}})
             await cursor.update_one({"id": user.id}, {"$set": {"wallet": 0}})
             await ctx.message.add_reaction("✅")
-        else:
-            amount = int(amount)
-            if amount > check['wallet']:
-                await ctx.send("You can't deposit more money than your wallet")
-            else:
-                await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -amount}})
-                await cursor.update_one({"id": user.id}, {"$inc": {"bank": amount}})
-                await ctx.message.add_reaction("✅")
+            return
+        amount = int(amount)
+        if amount > check['wallet']:
+            return await ctx.send("You can't deposit more money than your wallet")
+        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -amount}})
+        await cursor.update_one({"id": user.id}, {"$inc": {"bank": amount}})
+        await ctx.message.add_reaction("✅")
 
     @commands.command(help="Withdraw your money from the bank")
     @commands.guild_only()
@@ -250,15 +247,13 @@ class Economy(commands.Cog):
             await cursor.update_one({"id": user.id}, {"$inc": {"wallet": check['bank']}})
             await cursor.update_one({"id": user.id}, {"$set": {"bank": 0}})
             await ctx.message.add_reaction("✅")
-
-        else:
-            amount = int(amount)
-            if amount > check['bank']:
-                await ctx.send("You can't deposit more money than your bank")
-            else:
-                await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amount}})
-                await cursor.update_one({"id": user.id}, {"$inc": {"bank": -amount}})
-                await ctx.message.add_reaction("✅")
+            return
+        amount = int(amount)
+        if amount > check['bank']:
+            return await ctx.send("You can't deposit more money than your bank")
+        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amount}})
+        await cursor.update_one({"id": user.id}, {"$inc": {"bank": -amount}})
+        await ctx.message.add_reaction("✅")
 
     @commands.command(help="Transfer money to someone", aliases=['send'])
     @commands.guild_only()
@@ -267,15 +262,13 @@ class Economy(commands.Cog):
         check = await cursor.find_one({"id": ctx.author.id})
         check2 = await cursor.find_one({"id": user.id})
         if check2 is None:
-            await ctx.send("They don't have an economy account")
-        else:
-            if amount > check['wallet']:
-                await ctx.send("You didn't have enough money in your bank to give someone")
-            else:
-                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"bank": -amount}})
-                await cursor.update_one({"id": user.id}, {"$inc": {"bank": amount}})
-                await ctx.message.add_reaction("✅")
-                await user.send(f"**{ctx.author}** just gave you 💵 {amount}")
+            return await ctx.send("They don't have an economy account")
+        if amount > check['wallet']:
+            return await ctx.send("You didn't have enough money in your bank to give someone")
+        await cursor.update_one({"id": ctx.author.id}, {"$inc": {"bank": -amount}})
+        await cursor.update_one({"id": user.id}, {"$inc": {"bank": amount}})
+        await ctx.message.add_reaction("✅")
+        await user.send(f"**{ctx.author}** just gave you 💵 {amount}")
 
     @commands.command(help="It's a crime to steal someone", aliases=['steal'])
     @commands.cooldown(1, 86400, commands.BucketType.user)
@@ -286,127 +279,29 @@ class Economy(commands.Cog):
         check1 = await cursor.find_one({"id": ctx.author.id})
         check2 = await cursor.find_one({"id": user.id})
         if check2 is None:
-            await ctx.send("They haven't registered yet")
+            return await ctx.send("They haven't registered yet")
+        total_check = check1['wallet'] + check1['bank']
+        if total_check < 10000:
+            return await ctx.send("You need 💵 10000 to rob someone")
+        anti_rob_1 = await cursor.find_one({"id": user.id, "inventory.name": "robber_shield"})
+        if anti_rob_1 is not None:
+            author_update = check1['wallet'] + 10
+            user_update = check2['wallet'] - 10
+            await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
+            await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
+            await ctx.send(f"You tried to rob him but you only got 💵 10")
+
+        if amount > check2['wallet']:
+            await ctx.send(
+                'You tried to rob him, but he caught you and force you to pay 💵 1000')
+            author_update = check1['wallet'] - 1000
+            user_update = check2['wallet'] + 1000
+            await cursor.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
+            await cursor.update_one({"id": user.id}, {"$set": {"wallet": user_update}})
+
         else:
-            total_check = check1['wallet'] + check1['bank']
-            if total_check < 10000:
-                await ctx.send("You need 💵 10000 to rob someone")
-            else:
-                anti_rob_1 = await cursor.find_one({"id": user.id, "inventory.name": "robber_shield"})
-                if anti_rob_1 is not None:
-                    author_update = check1['wallet'] + 10
-                    user_update = check2['wallet'] - 10
-                    await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
-                    await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
-                    await ctx.send(f"You tried to rob him but you only got 💵 10")
-
-                if amount > check2['wallet']:
-                    await ctx.send(
-                        'You tried to rob him, but he caught you and force you to pay 💵 1000')
-                    author_update = check1['wallet'] - 1000
-                    user_update = check2['wallet'] + 1000
-                    await cursor.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
-                    await cursor.update_one({"id": user.id}, {"$set": {"wallet": user_update}})
-
-                else:
-                    author_update = check1['wallet'] + amount
-                    user_update = check2['wallet'] - amount
-                    await cursor.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
-                    await cursor.update_one({"id": user.id}, {"$set": {"wallet": user_update}})
-                    await ctx.send(f"Successfully rob 💵 {amount} from {user.mention}")
-
-    @commands.group(invoke_without_command=True, case_insensitive=True, help="IT'S SCREENSHOT TIME!")
-    async def nft(self, ctx):
-        embed = discord.Embed(title="Nft", color=discord.Color.random())
-        command = self.bot.get_command("nft")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"nft {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
-        await ctx.send(embed=embed)
-
-    @nft.command(help="Create an nft")
-    async def create(self, ctx):
-        await self.open_account(ctx.author)
-
-        await ctx.send("Answer These Question In 1 minute!")
-        questions = ["Enter Name: ", "Enter Image link: "]
-        answers = []
-
-        def check(user):
-            return user.author == ctx.author and user.channel == ctx.channel
-
-        for question in questions:
-            await ctx.send(question)
-
-            try:
-                msg = await self.bot.wait_for('message', timeout=60.0, check=check)
-            except asyncio.TimeoutError:
-                await ctx.send("Type Faster Next Time!")
-                return
-            else:
-                answers.append(msg.content)
-
-        check = await nfts.find_one({"name": answers[0]})
-        if check is not None:
-            await ctx.send("NFT already exists")
-        else:
-            price = random.randint(1, 100000)
-            await nfts.insert_one({"name": answers[0], "link": answers[1], "price": price, "owner": ctx.author.id})
-            await ctx.send(f"NFT {answers[0]} created for 💵 {price}")
-
-    @nft.command(help="WHY DON'T SCREENSHOT", aliases=["buy"])
-    async def purchase(self, ctx, *, name):
-        await self.open_account(ctx.author)
-        check = await nfts.find_one({"name": name})
-        if check is None:
-            await ctx.send("NFT do not exist. Also nft are CASE SENSITIVE")
-        else:
-            user = await cursor.find_one({"id": ctx.author.id})
-            if user['wallet'] < check['price']:
-                await ctx.send("You don't have enough FireCoin")
-            else:
-                og_owner = self.bot.get_user(check['owner'])
-                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": -check['price']}})
-                await cursor.update_one({"id": og_owner.id}, {"$inc": {"wallet": check['price']}})
-                await cursor.update_one({"id": og_owner.id}, {"$inc": {"price": random.randint(1, 1000)}})
-                await nfts.update_one({"name": name}, {"$set": {"owner": ctx.author.id}})
-                await ctx.send("Successfully bought the nft. **REMEMBER THAT NFTS IS DESTROYING OUR PLANET!**")
-                await og_owner.send(
-                    f"**{ctx.author}** just bought your nft name **{name}** and you receive 💵 {check['price']}")
-
-    @nft.command(help="IT'S SCREENSHOT TIME")
-    async def view(self, ctx, *, name):
-        check = await nfts.find_one({"name": name})
-        if check is None:
-            await ctx.send("NFT do not exist. Also nft are CASE SENSITIVE")
-        else:
-            embed = discord.Embed(title=f"{check['name']}",
-                                  description=f"**Price:** 💵 {check['price']} \n**Owner:** {self.bot.get_user(check['owner'])}",
-                                  color=discord.Color.from_rgb(225, 0, 92))
-            embed.set_image(url=check['link'])
-            await ctx.send(embed=embed)
-
-    @nft.command(help="after someone just screenshot it")
-    @commands.is_owner()
-    async def delete(self, ctx, *, name):
-        check = await nfts.find_one({"name": name})
-        if check is None:
-            await ctx.send("NFT do not exist. Also nft are CASE SENSITIVE")
-        else:
-            og_owner = self.bot.get_user(check['owner'])
-            await nfts.delete_one({"name": name})
-            await ctx.send("NFT deleted")
-            await og_owner.send(f"Your nft just get deleted by the bot developer!")
-
-    @nft.command(help="View all nfts to screenshot")
-    async def list(self, ctx):
-        stats = nfts.find()
-        data = []
-        num = 0
-        async for x in stats:
-            num += 1
-            to_append = (f"{num}. {x['name']}",
-                         f"**Price:** 💵 {x['price']} **Owner:** {self.bot.get_user(x['owner'])}")
-            data.append(to_append)
-        page = ViewMenuPages(source=NFTPageSource(data), clear_reactions_after=True)
-        await page.start(ctx)
+            author_update = check1['wallet'] + amount
+            user_update = check2['wallet'] - amount
+            await cursor.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
+            await cursor.update_one({"id": user.id}, {"$set": {"wallet": user_update}})
+            await ctx.send(f"Successfully rob 💵 {amount} from {user.mention}")

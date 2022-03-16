@@ -1,5 +1,6 @@
 import nextcord as discord
-from nextcord.ext import commands
+from nextcord.ext import commands, menus
+from utils.menuUtils import ViewMenuPages
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
 
@@ -10,7 +11,22 @@ cases = modb['cases']
 user_case = modb['user']
 
 
-class ModSet(commands.Cog):
+class GuildLeaderboardPageSource(menus.ListPageSource):
+    def __init__(self, data):
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.green())
+        embed.set_author(
+            icon_url=menu.ctx.author.guild.icon.url,
+            name=f"Leaderboard of {menu.ctx.author.guild.name}")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
+class ModUtils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -28,23 +44,21 @@ class ModSet(commands.Cog):
     async def channel(self, ctx, channel: discord.TextChannel):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is None:
-            if result is None:
-                insert = {"guild": ctx.guild.id, "channel": channel.id}
-                await cursors.insert_one(insert)
-                await ctx.send(f"Modlog channel set to {channel.mention}")
-            elif result is not None:
-                await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
-                await ctx.send(f"Modlog channel updated to {channel.mention}")
+            insert = {"guild": ctx.guild.id, "channel": channel.id}
+            await cursors.insert_one(insert)
+            await ctx.send(f"Modlog channel set to {channel.mention}")
+            return
+        await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
+        await ctx.send(f"Modlog channel updated to {channel.mention}")
 
     @modlog.command(help="Remove modlog system if you like to")
     @commands.has_permissions(administrator=True)
     async def remove(self, ctx):
         result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            await cursors.delete_one(result)
-            await ctx.send("Modlog system has been remove")
-        else:
-            await ctx.send("You don't have a Modlog channel")
+        if result is None:
+            return await ctx.send("You don't have a Modlog channel")
+        await cursors.delete_one(result)
+        await ctx.send("Modlog system has been remove")
 
     @commands.command(help="Look at your server cases", aliases=["case"])
     async def caselist(self, ctx, member: discord.Member = None):
