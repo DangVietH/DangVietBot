@@ -14,7 +14,7 @@ user_case = modb['user']
 class GuildCasePageSource(menus.ListPageSource):
     def __init__(self, casenum, data):
         self.casenum = casenum
-        super().__init__(data, per_page=10)
+        super().__init__(data, per_page=5)
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(color=discord.Color.red(), title=f"List of cases in {menu.ctx.author.guild.name}", description=f"**Total case:** {self.casenum}")
@@ -28,7 +28,7 @@ class UserCasePageSource(menus.ListPageSource):
     def __init__(self, member, casenum, data):
         self.member = member
         self.casenum = casenum
-        super().__init__(data, per_page=10)
+        super().__init__(data, per_page=5)
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(color=discord.Color.red(), title=f"{self.member} cases", description=f"**Total case:** {self.casenum}")

@@ -8,12 +8,13 @@ from utils.menuUtils import ViewMenuPages
 
 
 class RtfmPageSource(menus.ListPageSource):
-    def __init__(self, name, data):
-        self.docname = name
+    def __init__(self, term, docs, data):
+        self.term = term
+        self.docs = docs
         super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green(), title=f"Best matches I can find in {self.docname}")
+        embed = discord.Embed(color=discord.Color.green(), title=f"Best matches I can find for {self.term} in {self.docs}")
         embed.description = "\n".join([f"[`{name}`]({value})" for name, value in entries])
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
         return embed
@@ -120,7 +121,7 @@ class Dev(commands.Cog):
                 f"No results found when searching for {term} in {docs}"
             )
 
-        page = ViewMenuPages(source=RtfmPageSource(term, results), disable_buttons_after=True, ctx=ctx)
+        page = ViewMenuPages(source=RtfmPageSource(term, docs, results), disable_buttons_after=True, ctx=ctx)
         await page.start(ctx)
 
     @rtfm.command(help="available modules")
