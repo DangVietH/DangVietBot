@@ -14,7 +14,7 @@ user_case = modb['user']
 class GuildCasePageSource(menus.ListPageSource):
     def __init__(self, casenum, data):
         self.casenum = casenum
-        super().__init__(data, per_page=5)
+        super().__init__(data, per_page=4)
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(color=discord.Color.red(), title=f"List of cases in {menu.ctx.author.guild.name}", description=f"**Total case:** {self.casenum}")
@@ -28,10 +28,10 @@ class UserCasePageSource(menus.ListPageSource):
     def __init__(self, member, casenum, data):
         self.member = member
         self.casenum = casenum
-        super().__init__(data, per_page=5)
+        super().__init__(data, per_page=4)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.red(), title=f"{self.member} cases", description=f"**Total case:** {self.casenum}")
+        embed = discord.Embed(color=discord.Color.red(), title=f"List of {self.member} cases", description=f"**Total case:** {self.casenum}")
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
@@ -105,7 +105,7 @@ class ModUtils(commands.Cog):
         for case in results['cases']:
             if member.id == int(case['user']):
                 udata.append((f"Case {case['Number']}",
-                              f"**Type:** {case['type']}\n**Mod:**{self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
+                              f"**Type:** {case['type']}\n**Mod:** {self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
 
         page = ViewMenuPages(source=UserCasePageSource(member, user_check['total_cases'], udata),
                              disable_buttons_after=True, ctx=ctx)

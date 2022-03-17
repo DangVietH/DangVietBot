@@ -54,14 +54,14 @@ class Admin(commands.Cog):
         if result is not None:
             channel = self.bot.get_channel(result["channel"])
             embed = discord.Embed(title=f"Case #{num_of_case}: {type_off.title()}!",
-                                  description=f"**User:** {criminal} \n**Mod:**{ctx.author} \n**Reason:** {reason}",
+                                  description=f"**User:** {criminal} ({criminal.id}) \n**Mod:** {ctx.author} ({ctx.author.id})\n**Reason:** {reason}",
                                   color=discord.Color.red(),
                                   timestamp=ctx.message.created_at)
             embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
             await channel.send(embed=embed)
 
         if not criminal.bot:
-            if "ban" not in type_off:
+            if "ban" or "kick" not in type_off:
                 check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": criminal.id})
                 if check_user_case is None:
                     return await user_case.insert_one({"guild": ctx.guild.id, "user": criminal.id, "total_cases": 1})
