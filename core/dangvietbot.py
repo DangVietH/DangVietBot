@@ -24,6 +24,7 @@ class DangVietBot(commands.Bot):
         super().__init__(
             command_prefix=self.get_prefix,
             intents=discord.Intents.all(),
+            help_command=CustomHelp(),
             strip_after_prefix=True,
             case_insensitive=True,
             description="One bot Many functionality",
