@@ -1,8 +1,8 @@
-import discord
-from discord.ext import commands
+import nextcord as discord
+from nextcord.ext import commands
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
-from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource
+from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource, NFTPageSource
 from utils.menuUtils import ViewMenuPages
 from utils.configs import config_var
 
@@ -62,7 +62,7 @@ class Economy(commands.Cog):
                 to_append = (f"{num}: {is_user_in_guild}", f"**Wallet:** {x['wallet']}")
                 data.append(to_append)
 
-        pages = ViewMenuPages(GuildRichPageSource(data))
+        pages = ViewMenuPages(source=GuildRichPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
     @commands.command(help="Who is the richest one around the world")
@@ -75,7 +75,7 @@ class Economy(commands.Cog):
             to_append = (f"{num}: {self.bot.get_user(x['id'])}", f"**Wallet:** {x['wallet']}")
             data.append(to_append)
 
-        pages = ViewMenuPages(GlobalRichPageSource(data))
+        pages = ViewMenuPages(source=GlobalRichPageSource(data), disable_buttons_after=True, ctx=ctx)
         await pages.start(ctx)
 
     @commands.command(help="Beg some money")
@@ -111,7 +111,7 @@ class Economy(commands.Cog):
         for i in range(len(items_name)):
             data.append((f"{items_name[i]} | 💵 {items_price[i]}",
                          items_description[i]))
-        page = ViewMenuPages(ShopPageSource(data))
+        page = ViewMenuPages(source=ShopPageSource(data), disable_buttons_after=True, ctx=ctx)
         await page.start(ctx)
 
     @commands.command(help="Buy some items")
@@ -187,7 +187,7 @@ class Economy(commands.Cog):
                 amount = item['amount']
                 to_append = (f"{name}", f"**Amount** {amount}")
                 data.append(to_append)
-            page = ViewMenuPages(InventoryPageSource(data))
+            page = ViewMenuPages(source=InventoryPageSource(data), clear_reactions_after=True)
             await page.start(ctx)
 
     @commands.command(help="Claim your daily money")

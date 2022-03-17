@@ -1,5 +1,5 @@
-import discord
-from discord.ext import commands, menus
+import nextcord as discord
+from nextcord.ext import commands, menus
 from utils.menuUtils import ViewMenuPages
 
 
@@ -80,7 +80,7 @@ class Info(commands.Cog):
         embed = discord.Embed(title="Bot information", color=discord.Color.random())
         embed.add_field(name="Developer", value=f"DvH#9980")
         embed.add_field(name="Written in", value="Python 3.10.1")
-        embed.add_field(name="Library", value="[discord.py 2.0](https://github.com/Rapptz/discord.py)")
+        embed.add_field(name="Library", value="[nextcord 2.0](https://github.com/nextcord/nextcord)")
         embed.add_field(name="Create at", value="8/13/2021")
         embed.add_field(name="Command's", value=f"{len(self.bot.commands)}")
         embed.add_field(name="Server's", value=f"{len(self.bot.guilds)}")
@@ -103,5 +103,5 @@ class Info(commands.Cog):
         for guild in self.bot.guilds:
             to_append = (f"{guild.name}", f"**Owner** {guild.owner} **Member** {guild.member_count} **ID** {guild.id}")
             data.append(to_append)
-        menu = ViewMenuPages(source=ServerPageSource(data))
+        menu = ViewMenuPages(source=ServerPageSource(data), disable_buttons_after=True, ctx=ctx)
         await menu.start(ctx)

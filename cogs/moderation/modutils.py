@@ -1,5 +1,5 @@
-import discord
-from discord.ext import commands, menus
+import nextcord as discord
+from nextcord.ext import commands, menus
 from utils.menuUtils import ViewMenuPages
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var

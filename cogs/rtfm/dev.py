@@ -1,6 +1,6 @@
 import warnings
-import discord
-from discord.ext import commands, menus
+import nextcord as discord
+from nextcord.ext import commands, menus
 import cogs.rtfm.rtfm_utils as rtfm
 from utils.menuUtils import ViewMenuPages
 
@@ -95,6 +95,9 @@ class Dev(commands.Cog):
                 target = target_name
 
         if not target:
+            lis = "\n".join(
+                [f"{index}. {value}" for index, value in list(self.targets.keys())]
+            )
             return await ctx.reply(
                 embed=ctx.error(
                     title="Invalid Documentation",
@@ -119,7 +122,7 @@ class Dev(commands.Cog):
                 f"No results found when searching for {term} in {docs}"
             )
 
-        page = ViewMenuPages(RtfmPageSource(results))
+        page = ViewMenuPages(source=RtfmPageSource(results), disable_buttons_after=True, ctx=ctx)
         await page.start(ctx)
 
     @rtfm.command(help="available modules")

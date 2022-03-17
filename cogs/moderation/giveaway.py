@@ -1,5 +1,5 @@
-import discord
-from discord.ext import commands
+import nextcord as discord
+from nextcord.ext import commands, tasks
 import datetime
 import asyncio
 import random
@@ -30,6 +30,7 @@ def convert(time):
 class Giveaway(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.time_checker.start()
 
     @commands.command(help="start Giveaway")
     @commands.has_permissions(administrator=True)
@@ -99,3 +100,30 @@ class Giveaway(commands.Cog):
         embed = discord.Embed(color=discord.Color.red(), title="🥳 New Winner of the giveaway! 🥳", description=f'🥳 **Winner**: {winner.mention}\n 🎫 **Number of Entrants**: {len(users)}')
         embed.set_footer(text='Thanks for entering the giveaway!')
         await reroll_msg.edit(embed=embed)
+
+    @tasks.loop(seconds=10)
+    async def time_checker(self):
+        try:
+            all_timer = cursor.find({})
+            current_time = datetime.datetime.now()
+            async for x in all_timer:
+                if current_time >= x['time']:
+                    msg_id = x['message_id']
+                    channel = self.bot.get_channel(x['channel'])
+                    msg = await self.bot.fetch_message(msg_id)
+                    users = await msg.reactions[0].users().flatten()
+                    users.pop(users.index(self.bot.user))
+
+                    winner = random.choice(users)
+                    if winner is None:
+                        return await channel.send("No one has entered the giveaway. Maybe next time")
+                    embed = discord.Embed(color=discord.Color.red(), title="🥳 THE GIVEAWAY HAS ENDED!")
+                    embed.add_field(name=f"🎉 Prize: {x['prize']}",
+                                    value=f'🥳 **Winner**: {winner.mention}\n 🎫 **Number of Entrants**: {len(users)}',
+                                    inline=False)
+                    embed.set_footer(text='Thanks for entering the giveaway!')
+                    await msg.edit(embed=embed)
+                    await cursor.delete_one({'message_id': msg_id})
+
+        except Exception as e:
+            print(e)
