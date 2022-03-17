@@ -11,15 +11,27 @@ cases = modb['cases']
 user_case = modb['user']
 
 
-class GuildLeaderboardPageSource(menus.ListPageSource):
-    def __init__(self, data):
+class GuildCasePageSource(menus.ListPageSource):
+    def __init__(self, casenum, data):
+        self.casenum = casenum
         super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green())
-        embed.set_author(
-            icon_url=menu.ctx.author.guild.icon.url,
-            name=f"Leaderboard of {menu.ctx.author.guild.name}")
+        embed = discord.Embed(color=discord.Color.red(), title=f"List of cases in {menu.ctx.author.guild.name}", description=f"**Total case:** {self.casenum}")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
+class UserCasePageSource(menus.ListPageSource):
+    def __init__(self, member, casenum, data):
+        self.member = member
+        self.casenum = casenum
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.red(), title=f"List of cases in {menu.ctx.author.guild.name}", description=f"**Total case:** {self.casenum}")
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
@@ -30,8 +42,15 @@ class ModUtils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def add_to_db(self, guild):
+        results = await cases.find_one({"guild": guild.id})
+        if results is None:
+            insert = {"guild": guild.id, "num": 0, "cases": []}
+            await cases.insert_one(insert)
+
     @commands.group(invoke_without_command=True, help="Modlog and case")
     async def modlog(self, ctx):
+        await self.add_to_db(ctx.guild)
         embed = discord.Embed(title="Modlog", color=discord.Color.random(), description="Set up modlog system")
         command = self.bot.get_command("welcome")
         if isinstance(command, commands.Group):
@@ -60,31 +79,34 @@ class ModUtils(commands.Cog):
         await cursors.delete_one(result)
         await ctx.send("Modlog system has been remove")
 
-    @commands.command(help="Look at your server cases", aliases=["case"])
-    async def caselist(self, ctx, member: discord.Member = None):
-        if member is None:
-            results = await cases.find_one({"guild": ctx.guild.id})
-            embed = discord.Embed(title=f"{ctx.guild.name} caselist", description=f"Total case: {results['num']}",
-                                  color=discord.Color.red())
-            if len(results['cases']) < 1:
-                await ctx.send("Looks like all your server members are good people 🥰")
-            for case in results['cases']:
-                embed.add_field(name=f"Case {case['Number']}",
-                                value=f"**Type:** {case['type']}\n **User:** {self.bot.get_user(int(case['user']))}\n**Mod:**{self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}")
-            await ctx.send(embed=embed)
-        else:
-            user_check = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
-            if user_check is None:
-                await ctx.send("Looks like a good person 🥰")
-            else:
-                embed = discord.Embed(title=f"{self.bot.get_user(int(user_check['user']))} cases",
-                                      description=f"Total case: {user_check['total_cases']}", color=discord.Color.red())
-                await ctx.send(embed=embed)
+    @commands.command(help="Look at server cases", aliases=["case"])
+    @commands.guild_only()
+    async def caselist(self, ctx):
+        await self.add_to_db(ctx.guild)
+        results = await cases.find_one({"guild": ctx.guild.id})
+        gdata = []
+        if len(results['cases']) < 1:
+            return await ctx.send("Looks like all your server members are good people! Good job!")
+        for case in results['cases']:
+            gdata.append((f"Case {case['Number']}",
+                          f"**Type:** {case['type']}\n **User:** {self.bot.get_user(int(case['user']))}\n**Mod:**{self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
+        page = ViewMenuPages(source=GuildCasePageSource(results['num'], gdata), disable_buttons_after=True, ctx=ctx)
+        await page.start(ctx)
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        for guild in self.bot.guilds:
-            results = await cases.find_one({"guild": guild.id})
-            if results is None:
-                insert = {"guild": guild.id, "num": 0, "cases": []}
-                await cases.insert_one(insert)
+    @commands.command(help="Look at user cases", aliases=["ucase"])
+    @commands.guild_only()
+    async def usercase(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        udata = []
+        user_check = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})
+        results = await cases.find_one({"guild": ctx.guild.id})
+        if user_check is None:
+            return await ctx.send("Looks like a good person 🥰")
+        for case in results['cases']:
+            if member.id == int(case['user']):
+                udata.append((f"Case {case['Number']}",
+                              f"**Type:** {case['type']}\n**Mod:**{self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
+
+        page = ViewMenuPages(source=UserCasePageSource(member, user_check['total_cases'], udata),
+                             disable_buttons_after=True, ctx=ctx)
+        await page.start(ctx)

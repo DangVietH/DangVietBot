@@ -24,7 +24,7 @@ class LevelUtils(commands.Cog):
 
     @commands.command(help="Set background for your server rank")
     @commands.guild_only()
-    async def setbackground(self, ctx, link):
+    async def setbackground(self, ctx, *, link):
         if await image_cursor.find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is not None:
             await image_cursor.update_one({"guild": ctx.guild.id, "member": ctx.author.id}, {"$set": {"image": link}})
         else:
@@ -37,7 +37,7 @@ class LevelUtils(commands.Cog):
         if await image_cursor.find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is None:
             await ctx.send("You don't have a custom background")
         await image_cursor.delete_one({"guild": ctx.guild.id, "member": ctx.author.id})
-        await ctx.send("👍")
+        await ctx.send("Background reset")
 
     @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
