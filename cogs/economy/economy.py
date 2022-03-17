@@ -2,7 +2,7 @@ import nextcord as discord
 from nextcord.ext import commands
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
-from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource, NFTPageSource
+from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource
 from utils.menuUtils import ViewMenuPages
 from utils.configs import config_var
 
@@ -13,7 +13,7 @@ nfts = db["nft"]
 
 items_name = ["chicken", "parrot", "watch", "horse", "sword", "rifle", "laptop", "platinum", "silver", "gold",
               "diamonds",
-              "robber_shield"]
+              "robber-shield"]
 items_price = [10, 20, 42, 70, 102, 499, 1000, 20000, 50000, 200000, 599999, 1542649]
 items_description = ["KFC GO BRRR", "talking birb machine", "moniter ye time", "Juan",
                      "fight others", "hunt animals", "work on it", "Show of your status", "cool kid",

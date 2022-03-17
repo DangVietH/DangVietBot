@@ -26,7 +26,6 @@ class DangVietBot(commands.Bot):
             intents=discord.Intents.all(),
             strip_after_prefix=True,
             case_insensitive=True,
-            help_command=CustomHelp(),
             description="One bot Many functionality",
             owner_id=860876181036335104,
             enable_debug_events=True,
