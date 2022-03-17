@@ -31,7 +31,7 @@ class UserCasePageSource(menus.ListPageSource):
         super().__init__(data, per_page=10)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.red(), title=f"List of cases in {menu.ctx.author.guild.name}", description=f"**Total case:** {self.casenum}")
+        embed = discord.Embed(color=discord.Color.red(), title=f"{self.member} cases", description=f"**Total case:** {self.casenum}")
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
