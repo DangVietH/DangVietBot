@@ -18,6 +18,32 @@ class Reaction(commands.Cog):
             return
         else:
             check = await cursor.find_one({"id": payload.message_id})
+            if check is not None:
+                if payload.message_id == check['id']:
+                    emojis = []
+                    roles = []
+
+                    for emoji in check['emojis']:
+                        emojis.append(emoji)
+
+                    for role in check['roles']:
+                        roles.append(role)
+
+                    guild = self.bot.get_guild(payload.guild_id)
+
+                    for i in range(len(emojis)):
+                        chose_emoji = str(payload.emoji)
+                        if chose_emoji == emojis[i]:
+                            selected_role = roles[i]
+
+                            role = guild.get_role(int(selected_role))
+
+                            await payload.member.add_roles(role)
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, payload):
+        check = await cursor.find_one({"id": payload.message_id})
+        if check is not None:
             if payload.message_id == check['id']:
                 emojis = []
                 roles = []
@@ -36,33 +62,9 @@ class Reaction(commands.Cog):
                         selected_role = roles[i]
 
                         role = guild.get_role(int(selected_role))
-
-                        await payload.member.add_roles(role)
-
-    @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload):
-        check = await cursor.find_one({"id": payload.message_id})
-        if payload.message_id == check['id']:
-            emojis = []
-            roles = []
-
-            for emoji in check['emojis']:
-                emojis.append(emoji)
-
-            for role in check['roles']:
-                roles.append(role)
-
-            guild = self.bot.get_guild(payload.guild_id)
-
-            for i in range(len(emojis)):
-                chose_emoji = str(payload.emoji)
-                if chose_emoji == emojis[i]:
-                    selected_role = roles[i]
-
-                    role = guild.get_role(int(selected_role))
-                    member = await(guild.fetch_member(payload.user_id))
-                    if member is not None:
-                        await member.remove_roles(role)
+                        member = await(guild.fetch_member(payload.user_id))
+                        if member is not None:
+                            await member.remove_roles(role)
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):

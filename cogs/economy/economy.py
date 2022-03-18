@@ -2,8 +2,7 @@ import discord
 from discord.ext import commands
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
-from cogs.economy.econUtils import InventoryPageSource, GuildRichPageSource, GlobalRichPageSource, ShopPageSource
-from utils.menuUtils import ViewMenuPages
+from utils.menuUtils import ViewMenuPages, DefaultPageSource
 from utils.configs import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
@@ -62,7 +61,7 @@ class Economy(commands.Cog):
                 to_append = (f"{num}: {is_user_in_guild}", f"**Wallet:** {x['wallet']}")
                 data.append(to_append)
 
-        pages = ViewMenuPages(GuildRichPageSource(data))
+        pages = ViewMenuPages(DefaultPageSource(f"Richest user in {ctx.guild.name}", data))
         await pages.start(ctx)
 
     @commands.command(help="Who is the richest one around the world")
@@ -75,7 +74,7 @@ class Economy(commands.Cog):
             to_append = (f"{num}: {self.bot.get_user(x['id'])}", f"**Wallet:** {x['wallet']}")
             data.append(to_append)
 
-        pages = ViewMenuPages(GlobalRichPageSource(data))
+        pages = ViewMenuPages(DefaultPageSource(f"Richest user in the world", data))
         await pages.start(ctx)
 
     @commands.command(help="Beg some money")
@@ -111,7 +110,7 @@ class Economy(commands.Cog):
         for i in range(len(items_name)):
             data.append((f"{items_name[i]} | 💵 {items_price[i]}",
                          items_description[i]))
-        page = ViewMenuPages(ShopPageSource(data))
+        page = ViewMenuPages(DefaultPageSource(f"Shop", data))
         await page.start(ctx)
 
     @commands.command(help="Buy some items")
@@ -187,8 +186,8 @@ class Economy(commands.Cog):
                 amount = item['amount']
                 to_append = (f"{name}", f"**Amount** {amount}")
                 data.append(to_append)
-            page = ViewMenuPages(InventoryPageSource(data))
-            await page.start(ctx)
+            pages = ViewMenuPages(DefaultPageSource(f"{ctx.author} Inventory", data))
+            await pages.start(ctx)
 
     @commands.command(help="Claim your daily money")
     @commands.cooldown(1, 60 * 60 * 24, commands.BucketType.user)

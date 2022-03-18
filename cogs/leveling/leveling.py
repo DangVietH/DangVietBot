@@ -1,10 +1,10 @@
 import discord
-from discord.ext import commands, menus
+from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from PIL import Image, ImageDraw, ImageFont
 import io
 from utils.imageUtils import get_image_from_url
-from utils.menuUtils import ViewMenuPages
+from utils.menuUtils import ViewMenuPages, DefaultPageSource
 from utils.configs import config_var
 
 
@@ -15,51 +15,6 @@ disable = db['disable']
 lvlConfig = db['roles']
 upchannel = db['channel']
 image_cursor = db['image']
-
-
-class GuildLeaderboardPageSource(menus.ListPageSource):
-    def __init__(self, data):
-        super().__init__(data, per_page=10)
-
-    async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green())
-        embed.set_author(
-            icon_url=menu.ctx.author.guild.icon.url,
-            name=f"Leaderboard of {menu.ctx.author.guild.name}")
-        for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=False)
-        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
-
-
-class GlobalLeaderboardPageSource(menus.ListPageSource):
-    def __init__(self, data):
-        super().__init__(data, per_page=10)
-
-    async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green())
-        embed.set_author(
-            icon_url="https://upload.wikimedia.org/wikipedia/commons/7/7f/Rotating_earth_animated_transparent.gif",
-            name="Global Leaderboard")
-        for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=False)
-        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
-
-
-class RoleListPageSource(menus.ListPageSource):
-    def __init__(self, data):
-        super().__init__(data, per_page=10)
-
-    async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green())
-        embed.set_author(
-            icon_url=menu.ctx.author.guild.icon.url,
-            name=f"Level roles")
-        for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1])
-        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
 
 
 class Leveling(commands.Cog):
@@ -214,7 +169,7 @@ class Leveling(commands.Cog):
             to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        page = ViewMenuPages(GuildLeaderboardPageSource(data))
+        page = ViewMenuPages(DefaultPageSource(f"Leaderboard of {ctx.guild.name}", data))
         await page.start(ctx)
 
     @commands.command(help="See global rank")
@@ -230,7 +185,7 @@ class Leveling(commands.Cog):
                          f"**Server:** {self.bot.get_guild(x['guild'])} **Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = ViewMenuPages(GlobalLeaderboardPageSource(data))
+        pages = ViewMenuPages(DefaultPageSource(f"Global Leaderboard", data))
         await pages.start(ctx)
 
     @commands.Cog.listener()

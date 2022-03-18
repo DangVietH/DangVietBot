@@ -1,24 +1,12 @@
 import discord
-from discord.ext import commands, menus
+from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
-from utils.menuUtils import ViewMenuPages
+from utils.menuUtils import ViewMenuPages, DefaultPageSource
 from utils.configs import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["bot"]["tag"]
-
-
-class TagPageSource(menus.ListPageSource):
-    def __init__(self, data):
-        super().__init__(data, per_page=10)
-
-    async def format_page(self, menu, entries):
-        embed = discord.Embed(color=discord.Color.green(), title=f"{menu.ctx.author.guild.name} Tags")
-        for entry in entries:
-            embed.add_field(name=entry[0], value=entry[1], inline=False)
-        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
 
 
 class Tags(commands.Cog):
@@ -120,7 +108,7 @@ class Tags(commands.Cog):
             for thing in ta:
                 to_append = (thing['name'], f"**Owner:** {self.bot.get_user(thing['owner'])}")
                 data.append(to_append)
-            page = ViewMenuPages(source=TagPageSource(data), disable_buttons_after=True, ctx=ctx)
+            page = ViewMenuPages(DefaultPageSource(f"Tags of {ctx.guild.name}", data))
             await page.start(ctx)
 
     @commands.Cog.listener()

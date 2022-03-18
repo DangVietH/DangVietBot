@@ -4,7 +4,6 @@ import lavalink
 import re
 from discord.ext.commands.errors import CheckFailure
 from utils.menuUtils import ViewMenuPages
-# This cog is based on https://github.com/Devoxin/Lavalink.py/blob/master/examples/music.py
 
 
 class NotConnectedToVoice(CheckFailure):

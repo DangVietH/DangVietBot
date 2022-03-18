@@ -1,5 +1,6 @@
 import discord
 from discord.ext import menus
+import datetime
 
 
 class ViewMenuPages(discord.ui.View, menus.MenuPages):
@@ -15,6 +16,7 @@ class ViewMenuPages(discord.ui.View, menus.MenuPages):
         await self._source._prepare_once()
         self.ctx = ctx
         self.message = await self.send_initial_message(ctx, ctx.channel)
+        await ctx.message.add_reaction("✅")
 
     async def _get_kwargs_from_page(self, page):
         """This method calls ListPageSource.format_page class"""
@@ -49,8 +51,18 @@ class ViewMenuPages(discord.ui.View, menus.MenuPages):
 
     @discord.ui.button(emoji='🗑', style=discord.ButtonStyle.red)
     async def stop_page(self, button, interaction):
-        for item in self.children:
-            if isinstance(item, discord.Button):
-                item.disabled = True
-        await interaction.message.edit(view=self)
         self.stop()
+        await self.message.delete()
+
+
+class DefaultPageSource(menus.ListPageSource):
+    def __init__(self, title, data):
+        self.title = title
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.green(), title=self.title, timestamp=datetime.datetime.utcnow())
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1])
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
