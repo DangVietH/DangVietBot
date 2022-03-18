@@ -1,5 +1,5 @@
-import nextcord as discord
-from nextcord.ext import commands, menus
+import discord
+from discord.ext import commands, menus
 from utils.menuUtils import ViewMenuPages
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
@@ -90,7 +90,7 @@ class ModUtils(commands.Cog):
         for case in results['cases']:
             gdata.append((f"Case {case['Number']}",
                           f"**Type:** {case['type']}\n **User:** {self.bot.get_user(int(case['user']))}\n**Mod:**{self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
-        page = ViewMenuPages(source=GuildCasePageSource(results['num'], gdata), disable_buttons_after=True, ctx=ctx)
+        page = ViewMenuPages(GuildCasePageSource(results['num'], gdata))
         await page.start(ctx)
 
     @commands.command(help="Look at user cases", aliases=["ucase"])
@@ -107,6 +107,5 @@ class ModUtils(commands.Cog):
                 udata.append((f"Case {case['Number']}",
                               f"**Type:** {case['type']}\n**Mod:** {self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
 
-        page = ViewMenuPages(source=UserCasePageSource(member, user_check['total_cases'], udata),
-                             disable_buttons_after=True, ctx=ctx)
+        page = ViewMenuPages(UserCasePageSource(member, user_check['total_cases'], udata),)
         await page.start(ctx)

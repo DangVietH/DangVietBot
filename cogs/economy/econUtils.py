@@ -1,5 +1,5 @@
-import nextcord as discord
-from nextcord.ext import menus
+import discord
+from discord.ext import menus
 
 
 class InventoryPageSource(menus.ListPageSource):

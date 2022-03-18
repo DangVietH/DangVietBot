@@ -1,5 +1,5 @@
-import nextcord as discord
-from nextcord.ext import commands, menus
+import discord
+from discord.ext import commands, menus
 from utils.menuUtils import ViewMenuPages
 
 
@@ -80,7 +80,7 @@ class Info(commands.Cog):
         embed = discord.Embed(title="Bot information", color=discord.Color.random())
         embed.add_field(name="Developer", value=f"DvH#9980")
         embed.add_field(name="Written in", value="Python 3.10.1")
-        embed.add_field(name="Library", value="[nextcord 2.0](https://github.com/nextcord/nextcord)")
+        embed.add_field(name="Library", value="[discord.py 2.0](https://github.com/Rapptz/discord.py)")
         embed.add_field(name="Create at", value="8/13/2021")
         embed.add_field(name="Command's", value=f"{len(self.bot.commands)}")
         embed.add_field(name="Server's", value=f"{len(self.bot.guilds)}")
@@ -89,8 +89,8 @@ class Info(commands.Cog):
 
     @commands.command(help="Invite the bot")
     async def invite(self, ctx):
-        embed = discord.Embed(title='List of invite', description=f"""
-[All permission]({self.bot.default_invite_link})
+        embed = discord.Embed(title='List of invite', description="""
+[All permission](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=549755813887&scope=bot%20applications.commands)
 [Admin permission](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=8&scope=bot%20applications.commands)
 [Minimal permission](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=274948541504&scope=bot%20applications.commands)
         """)
@@ -103,5 +103,5 @@ class Info(commands.Cog):
         for guild in self.bot.guilds:
             to_append = (f"{guild.name}", f"**Owner** {guild.owner} **Member** {guild.member_count} **ID** {guild.id}")
             data.append(to_append)
-        menu = ViewMenuPages(source=ServerPageSource(data), disable_buttons_after=True, ctx=ctx)
+        menu = ViewMenuPages(source=ServerPageSource(data))
         await menu.start(ctx)

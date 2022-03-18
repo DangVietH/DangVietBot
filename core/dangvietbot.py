@@ -1,5 +1,5 @@
-import nextcord as discord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 
 import datetime
@@ -24,31 +24,30 @@ class DangVietBot(commands.Bot):
         super().__init__(
             command_prefix=self.get_prefix,
             intents=discord.Intents.all(),
-            help_command=CustomHelp(),
             strip_after_prefix=True,
             case_insensitive=True,
+            help_command=CustomHelp(),
             description="One bot Many functionality",
             owner_id=860876181036335104,
             enable_debug_events=True,
-            activity=discord.Streaming(name="d!help", url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
+            activity=discord.Game(name="d!help"),
             **kwargs
         )
-        self.mongo = AsyncIOMotorClient(config_var['mango_link'])
-        self.default_invite_link = "https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=549755813887&scope=bot%20applications.commands"
-        self.repo_link = "https://github.com/DangVietH/DangVietBot"
-
-        # loading cogs
-        for ext in coglist:
-            try:
-                self.load_extension(ext)
-            except Exception as e:
-                print(f"Failed to load extension {ext}: {e}")
 
     def run(self):
         super().run(config_var['token'], reconnect=True)
 
+    async def setup_hook(self):
+        # loading cogs
+        for ext in coglist:
+            try:
+                await self.load_extension(ext)
+                print(f"{ext} loaded")
+            except Exception as e:
+                print(f"Failed to load extension {ext}: {e}")
+
     async def on_ready(self):
-        print(f"{self.user} is online! \nUsing nextcord {discord.__version__} \nDevelop by DvH#9980")
+        print(f"{self.user} is online! \nUsing discord.py {discord.__version__} \nDevelop by DvH#9980")
 
     async def on_message(self, message):
         if message.author.bot:
@@ -78,14 +77,15 @@ class DangVietBot(commands.Bot):
                               color=discord.Color.from_rgb(225, 0, 92))
         embed.add_field(name="Note", value="I'm still WIP, so some features may be bugged or ugly.", inline=False)
         embed.add_field(name="Links",
-                        value=f"[invite]({self.default_invite_link}) \n[Support Server](https://discord.gg/cnydBRnHU9)",
+                        value="[invite](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=549755813887&scope=bot%20applications.commands) \n[Support Server](https://discord.gg/cnydBRnHU9)",
                         inline=False)
         embed.set_thumbnail(
             url="https://cdn.discordapp.com/avatars/875589545532485682/a5123a4fa15dad3beca44144d6749189.png?size=1024")
         await guild.system_channel.send(embed=embed)
 
     async def get_prefix(self, message):
-        cursor = self.mongo["custom_prefix"]["prefix"]
+        cluster = AsyncIOMotorClient(config_var['mango_link'])
+        cursor = cluster["custom_prefix"]["prefix"]
         if not message.guild:
             return commands.when_mentioned_or("d!")(self, message)
         else:
