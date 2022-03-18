@@ -70,7 +70,7 @@ class Setup(commands.Cog):
             await ctx.send(f"Welcome message updated to ```{text}```")
 
     @welcome.command(help="Setup welcome dm")
-    @commands.has_permissions(manage_channels=True)
+    @commands.has_permissions(manage_messages=True)
     async def dm(self, ctx, *, text):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -80,7 +80,7 @@ class Setup(commands.Cog):
             await ctx.send(f"Welcome dm updated to ```{text}```")
 
     @welcome.command(help="Custom image. Make sure it's a link", aliases=["img"])
-    @commands.has_permissions(manage_channels=True)
+    @commands.has_permissions(manage_messages=True)
     async def image(self, ctx, *, link: str):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:

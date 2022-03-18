@@ -35,7 +35,7 @@ class Giveaway(commands.Cog):
         self.time_checker.start()
 
     @commands.command(help="start Giveaway")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_messages=True)
     async def gstart(self, ctx):
         giveaway_questions = ['Which channel will I host the giveaway in?', 'What is the prize?',
                               'How long should the giveaway run for (ex: 3h, 1d)?', ]
@@ -91,7 +91,7 @@ class Giveaway(commands.Cog):
         await cursor.insert_one({'message_id': message.id, 'time': final_time, "channel": c_id, "prize": prize})
 
     @commands.command(help="Reroll the giveaway")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_messages=True)
     async def greroll(self, ctx, msg_id):
         reroll_msg = await ctx.fetch_message(msg_id)
         if reroll_msg.author.id != self.bot.user.id:

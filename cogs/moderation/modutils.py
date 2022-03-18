@@ -59,7 +59,7 @@ class ModUtils(commands.Cog):
         await ctx.send(embed=embed)
 
     @modlog.command(help="Set up channel")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     async def channel(self, ctx, channel: discord.TextChannel):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -71,7 +71,7 @@ class ModUtils(commands.Cog):
         await ctx.send(f"Modlog channel updated to {channel.mention}")
 
     @modlog.command(help="Remove modlog system if you like to")
-    @commands.has_permissions(administrator=True)
+    @commands.has_permissions(manage_channels=True)
     async def remove(self, ctx):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is None:

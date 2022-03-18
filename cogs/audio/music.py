@@ -4,6 +4,7 @@ import lavalink
 import re
 from discord.ext.commands.errors import CheckFailure
 from discord.ext.menus.views import ViewMenuPages
+from utils.menuUtils import SecondPageSource
 
 
 class NotConnectedToVoice(CheckFailure):
@@ -28,17 +29,6 @@ class NoPerm(CheckFailure):
     """No voice permission"""
 
     pass
-
-
-class QueuePageSource(menus.ListPageSource):
-    def __init__(self, data):
-        super().__init__(data, per_page=10)
-
-    async def format_page(self, menu, entries):
-        embed = discord.Embed(title=f"📀 Queue of {menu.ctx.author.guild.name} 📀", color=discord.Color.green())
-        embed.description = "\n".join([f"{name}: {value}" for name, value in entries])
-        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
 
 
 url_rx = re.compile(r'https?://(?:www\.)?.+')
@@ -341,5 +331,5 @@ class Music(commands.Cog):
                 to_append = (f"**{num}:**", f"[**{track.title}**]({track.uri})")
                 data.append(to_append)
 
-            page = ViewMenuPages(source=QueuePageSource(data), clear_reactions_after=True)
+            page = ViewMenuPages(source=SecondPageSource(f"📀 Queue of {ctx.author.guild.name} 📀", data), clear_reactions_after=True)
             await page.start(ctx)

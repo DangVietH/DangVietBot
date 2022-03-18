@@ -2,7 +2,8 @@ import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
-
+from discord.ext.menus.views import ViewMenuPages
+from utils.menuUtils import SecondPageSource
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 db = cluster["levelling"]
@@ -85,10 +86,12 @@ class LevelUtils(commands.Cog):
         role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})
         levelrole = role_cursor['role']
         levelnum = role_cursor['level']
-        embed = discord.Embed(title="Role Rewards")
+        data = []
         for i in range(len(levelrole)):
-            embed.add_field(name=f"Level {levelnum[i]}", value=f"Role reward: {ctx.guild.get_role(levelrole[i]).name}")
-        await ctx.send(embed=embed)
+            data.append((f"Level **{levelnum[i]}** role reward", ctx.guild.get_role(levelrole[i]).mention))
+        page = ViewMenuPages(source=SecondPageSource(f"{ctx.author.guild.name} role rewards", data),
+                             clear_reactions_after=True)
+        await page.start(ctx)
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Level channel setup")
     async def lvl(self, ctx):
@@ -124,7 +127,7 @@ class LevelUtils(commands.Cog):
             await upchannel.delete_one(result)
 
     @lvl.command(help="Disable levelling")
-    @commands.has_permissions(manage_channels=True)
+    @commands.has_permissions(manage_guild=True)
     @commands.guild_only()
     async def disable(self, ctx):
         check = await disable.find_one({"guild": ctx.guild.id})
@@ -141,7 +144,7 @@ class LevelUtils(commands.Cog):
             await ctx.send('Levelling disabled')
 
     @lvl.command(help="Re-enable levelling")
-    @commands.has_permissions(manage_channels=True)
+    @commands.has_permissions(manage_guild=True)
     @commands.guild_only()
     async def renable(self, ctx):
         check = await disable.find_one({"guild": ctx.guild.id})
@@ -152,7 +155,7 @@ class LevelUtils(commands.Cog):
             await ctx.send('Leveling already enabled')
 
     @commands.command(help="Add xp to member")
-    @commands.has_permissions(manage_channels=True)
+    @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
     async def add_xp(self, ctx, member: discord.Member, amount: int):
         if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
@@ -161,7 +164,7 @@ class LevelUtils(commands.Cog):
         await ctx.send(f"Successfully added {amount} xp to {member}")
 
     @commands.command(help="Remove xp from member")
-    @commands.has_permissions(manage_channels=True)
+    @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
     async def remove_xp(self, ctx, member: discord.Member, amount: int):
         if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
