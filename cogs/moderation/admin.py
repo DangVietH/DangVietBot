@@ -179,20 +179,19 @@ class Admin(commands.Cog):
     async def tempban(self, ctx, member: discord.User, time, *, reason=None):
         converted_time = convert(time)
         if converted_time == -1:
-            await ctx.send("You didn't answer the time correctly")
+            return await ctx.send("You didn't answer the time correctly")
 
         elif converted_time == -2:
-            await ctx.send("Time must be an integer")
-        else:
-            if not member.bot:
-                await member.send(
-                    f"You've been banned for {{str(datetime.timedelta(seconds=converted_time))}} from **{ctx.guild.name}** for {reason}. Don't worry, it will be a short time!!")
-            await ctx.guild.ban(member)
-            await self.modlogUtils(ctx, member, "tempban", reason)
+            return await ctx.send("Time must be an integer")
+        if not member.bot:
+            await member.send(
+                f"You've been banned for {str(datetime.timedelta(seconds=converted_time))} from **{ctx.guild.name}** for {reason}. Don't worry, it will be a short time!!")
+        await ctx.guild.ban(member)
+        await self.modlogUtils(ctx, member, "tempban", reason)
 
-            current_time = datetime.datetime.now()
-            final_time = current_time + datetime.timedelta(seconds=converted_time)
-            await timer.insert_one({"guild": ctx.guild.id, "type": "ban", "time": final_time, "user": member.id})
+        current_time = datetime.datetime.now()
+        final_time = current_time + datetime.timedelta(seconds=converted_time)
+        await timer.insert_one({"guild": ctx.guild.id, "type": "ban", "time": final_time, "user": member.id})
 
     @tasks.loop(seconds=10)
     async def time_checker(self):
