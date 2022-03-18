@@ -2,7 +2,7 @@ import warnings
 import discord
 from discord.ext import commands, menus
 import cogs.rtfm.rtfm_utils as rtfm
-from utils.menuUtils import ViewMenuPages
+from discord.ext.menus.views import ViewMenuPages
 
 # directly taken and modify from https://github.com/BruceCodesGithub/OG-Robocord/blob/main/cogs/rtfm.py
 
@@ -121,7 +121,7 @@ class Dev(commands.Cog):
                 f"No results found when searching for {term} in {docs}"
             )
 
-        page = ViewMenuPages(RtfmPageSource(term, docs, results))
+        page = ViewMenuPages(source=RtfmPageSource(term, docs, results), clear_reactions_after=True)
         await page.start(ctx)
 
     @rtfm.command(help="available modules")

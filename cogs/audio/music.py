@@ -3,7 +3,7 @@ from discord.ext import commands, menus
 import lavalink
 import re
 from discord.ext.commands.errors import CheckFailure
-from utils.menuUtils import ViewMenuPages
+from discord.ext.menus.views import ViewMenuPages
 
 
 class NotConnectedToVoice(CheckFailure):
@@ -341,5 +341,5 @@ class Music(commands.Cog):
                 to_append = (f"**{num}:**", f"[**{track.title}**]({track.uri})")
                 data.append(to_append)
 
-            page = ViewMenuPages(QueuePageSource(data))
+            page = ViewMenuPages(source=QueuePageSource(data), clear_reactions_after=True)
             await page.start(ctx)
