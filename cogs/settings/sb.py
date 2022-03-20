@@ -38,7 +38,7 @@ class Star(commands.Cog):
     async def on_raw_reaction_add(self, payload):
         if not self.bot.get_guild(payload.guild_id):
             return
-        if await rcursor.find_one({{"id": payload.message_id}}) is not None:
+        if await rcursor.find_one({{"id": payload.message_id}}) is None:
             return
 
         guildstats = await cursor.find_one({'guild': payload.guild_id})
@@ -72,7 +72,7 @@ class Star(commands.Cog):
     async def on_raw_reaction_remove(self, payload):
         if not self.bot.get_guild(payload.guild_id):
             return
-        if await rcursor.find_one({{"id": payload.message_id}}) is not None:
+        if await rcursor.find_one({{"id": payload.message_id}}) is None:
             return
 
         guildstats = await cursor.find_one({'guild': payload.guild_id})
