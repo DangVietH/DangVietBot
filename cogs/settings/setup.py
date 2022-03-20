@@ -14,6 +14,8 @@ rcursor = cluster["react_role"]['reaction_roles']
 
 gcursor = cluster['bot']['gc']
 
+scursor = cluster['sb']['config']
+
 
 class Setup(commands.Cog):
     def __init__(self, bot):
@@ -41,7 +43,7 @@ class Setup(commands.Cog):
             await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
             await ctx.send(f"Welcome channel updated to {channel.mention}")
 
-    @welcome.command(help="Remove welcome system")
+    @welcome.command(help="Remove welcome system", aliases=['disable'])
     @commands.has_permissions(manage_channels=True)
     async def remove(self, ctx):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
@@ -204,3 +206,39 @@ class Setup(commands.Cog):
             await ctx.send("Your server has been remove from global chat")
         else:
             await ctx.send("You don't have a global chat system")
+
+    @commands.group(invoke_without_command=True, case_insensitive=True, help="Global chat setup", aliases=['sb', 'star'])
+    async def starboard(self, ctx):
+        embed = discord.Embed(title="Starboard", color=discord.Color.random(), description="Create reaction roles")
+        command = self.bot.get_command("starboard")
+        if isinstance(command, commands.Group):
+            for subcommand in command.commands:
+                embed.add_field(name=f"starboard|sb|star {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
+        await ctx.send(embed=embed)
+
+    @starboard.command(help="Setup starboard channel")
+    @commands.is_owner()
+    async def channel(self, ctx, channel: discord.TextChannel):
+        result = await scursor.find_one({"guild": ctx.guild.id})
+        if result is None:
+            await scursor.insert_one({"guild": ctx.guild.id, "channel": channel.id, "emoji": "⭐", "threshold": 2, "age": 3600 * 24})
+            await ctx.send(f"Starboard channel set to {channel.mention}")
+            return
+        await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
+        await ctx.send(f"Starboard channel updated to {channel.mention}")
+
+    @starboard.command(help="Set starboard emoji threshold")
+    @commands.is_owner()
+    async def threshold(self, ctx, threshold: int):
+        if await scursor.find_one({"guild": ctx.guild.id}) is None:
+            return await ctx.send("You don't have a starboard system")
+        await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"threshold": threshold}})
+        await ctx.send(f"Starboard threshold updated to {threshold}")
+
+    @starboard.command(help="Disable starboard system")
+    @commands.is_owner()
+    async def disable(self, ctx):
+        if await scursor.find_one({"guild": ctx.guild.id}) is None:
+            return await ctx.send("You don't have a starboard system")
+        await scursor.delete_one({"guild": ctx.guild.id})
+        await ctx.send("Starboard system disabled")

@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, menus
+from discord.ext import commands
 import lavalink
 import re
 from discord.ext.commands.errors import CheckFailure

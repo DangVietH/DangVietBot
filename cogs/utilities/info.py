@@ -49,14 +49,14 @@ class Info(commands.Cog):
         embed.add_field(name="Badges", value=hypesquad_class, inline=False)
         embed.add_field(name="Create at", value=user.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'), inline=True)
         embed.add_field(name="Join at", value=user.joined_at.__format__('%A, %d. %B %Y @ %H:%M:%S'), inline=True)
-        embed.set_thumbnail(url=user.avatar.url)
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
+        embed.set_thumbnail(url=user.display_avatar.url)
+        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=embed)
 
     @commands.command(help="Get user avatar")
     async def avatar(self, ctx, user: discord.Member = None):
         user = user or ctx.author
-        await ctx.send(user.avatar.url)
+        await ctx.send(user.display_avatar.url)
 
     @commands.command(help="Server information")
     async def serverinfo(self, ctx):

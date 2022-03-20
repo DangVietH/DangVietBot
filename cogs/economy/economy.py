@@ -290,7 +290,7 @@ class Economy(commands.Cog):
             await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
             await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
             await ctx.send(f"You tried to rob him but you only got 💵 10")
-
+            return
         if amount > check2['wallet']:
             await ctx.send(
                 'You tried to rob him, but he caught you and force you to pay 💵 1000')
@@ -298,7 +298,7 @@ class Economy(commands.Cog):
             user_update = check2['wallet'] + 1000
             await cursor.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
             await cursor.update_one({"id": user.id}, {"$set": {"wallet": user_update}})
-
+            return
         else:
             author_update = check1['wallet'] + amount
             user_update = check2['wallet'] - amount
