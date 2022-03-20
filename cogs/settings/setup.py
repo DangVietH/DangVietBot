@@ -204,6 +204,18 @@ class Setup(commands.Cog):
                 embed.add_field(name=f"starboard|sb|star {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
         await ctx.send(embed=embed)
 
+    @starboard.command(help="Show starboard stats")
+    async def stats(self, ctx):
+        result = await scursor.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return await ctx.send("You don't have a starboard system")
+        embed = discord.Embed(title="Starboard Stats", color=discord.Color.random())
+        embed.add_field(name="Starboard Channel", value=f"{self.bot.get_channel(result['channel']).mention}")
+        embed.add_field(name="Starboard Emojis", value=f"{result['emojis']}")
+        embed.add_field(name="Starboard Threshold", value=f"{result['threshold']}")
+        embed.add_field(name="Starboard Message Expire", value=f"{result['age']}")
+        await ctx.send(embed=embed)
+
     @starboard.command(help="Setup starboard channel")
     @commands.has_permissions(manage_channels=True)
     async def channel(self, ctx, channel: discord.TextChannel):

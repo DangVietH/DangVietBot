@@ -9,7 +9,6 @@ cluster = AsyncIOMotorClient(config_var['mango_link'])
 
 cursor = cluster['sb']['config']
 msg_cursor = cluster['sb']['msg']
-rcursor = cluster["react_role"]['reaction_roles']
 
 
 class Star(commands.Cog):
@@ -37,8 +36,6 @@ class Star(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         if not self.bot.get_guild(payload.guild_id):
-            return
-        if await rcursor.find_one({{"id": payload.message_id}}) is None:
             return
 
         guildstats = await cursor.find_one({'guild': payload.guild_id})
@@ -71,8 +68,6 @@ class Star(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
         if not self.bot.get_guild(payload.guild_id):
-            return
-        if await rcursor.find_one({{"id": payload.message_id}}) is None:
             return
 
         guildstats = await cursor.find_one({'guild': payload.guild_id})
