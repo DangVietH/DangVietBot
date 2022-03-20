@@ -27,8 +27,8 @@ class CustomHelp(commands.HelpCommand):
 
         filtered = await self.filter_commands(cog_.get_commands(), sort=True)
         for command in filtered:
-            embed.add_field(name=command.name,
-                            value=f"```{command.short_doc}```" or 'No description Provided', inline=False)
+            embed.add_field(name=f"- {command.name}",
+                            value=f"    {self.get_command_signature(command)}\n`{command.short_doc}`", inline=False)
         await self.get_destination().send(embed=embed)
 
     async def send_group_help(self, group):
@@ -38,8 +38,8 @@ class CustomHelp(commands.HelpCommand):
         if isinstance(group, commands.Group):
             filtered = await self.filter_commands(group.commands, sort=True)
             for command in filtered:
-                embed.add_field(name=command.name,
-                                value=f"```{command.short_doc}```" or 'No description Provided', inline=False)
+                embed.add_field(name=f"- {command.name}",
+                                value=f"    {self.get_command_signature(command)}\n`{command.short_doc}`", inline=False)
         await self.get_destination().send(embed=embed)
 
     async def send_command_help(self, command):
