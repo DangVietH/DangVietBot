@@ -96,7 +96,7 @@ class Giveaway(commands.Cog):
         reroll_msg = await ctx.fetch_message(msg_id)
         if reroll_msg.author.id != self.bot.user.id:
             return await ctx.send("Invalid Message ID.")
-        users = await reroll_msg.reactions[0].users().flatten()
+        users = [user async for user in reroll_msg.reactions[0].users()]
         users.pop(users.index(self.bot.user))
         winner = random.choice(users)
         embed = discord.Embed(color=discord.Color.red(), title="🥳 New Winner of the giveaway! 🥳", description=f'🥳 **Winner**: {winner.mention}\n 🎫 **Number of Entrants**: {len(users)}')
@@ -113,7 +113,7 @@ class Giveaway(commands.Cog):
                     msg_id = x['message_id']
                     channel = self.bot.get_channel(x['channel'])
                     msg = await self.bot.fetch_message(msg_id)
-                    users = await msg.reactions[0].users().flatten()
+                    users = [user async for user in msg.reactions[0].users()]
                     users.pop(users.index(self.bot.user))
 
                     winner = random.choice(users)

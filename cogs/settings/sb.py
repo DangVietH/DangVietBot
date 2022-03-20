@@ -51,7 +51,7 @@ class Star(commands.Cog):
             msg = await channel.fetch_message(payload.message_id)
             reacts = list(filter(lambda r: str(r.emoji) == emoji, msg.reactions))
             if reacts:
-                react = await msg.reactions[0].users().flatten()
+                react = [user async for user in msg.reactions[0].users()]
                 if msg.author.id in react:
                     react.pop(react.index(msg.author.id))
                 if len(react) >= guildstats['threshold']:
@@ -83,7 +83,7 @@ class Star(commands.Cog):
             msg = await channel.fetch_message(payload.message_id)
             reacts = list(filter(lambda r: str(r.emoji) == emoji, msg.reactions))
             if reacts:
-                react = await msg.reactions[0].users().flatten()
+                react = [user async for user in msg.reactions[0].users()]
                 if msg.author.id in react:
                     react.pop(react.index(msg.author.id))
                 msgstats = await msg_cursor.find_one({'message': payload.message_id})

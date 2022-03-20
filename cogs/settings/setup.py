@@ -212,7 +212,7 @@ class Setup(commands.Cog):
         embed = discord.Embed(title="Starboard Stats", color=discord.Color.random())
         embed.add_field(name="Starboard Channel", value=f"{self.bot.get_channel(result['channel']).mention}")
         embed.add_field(name="Starboard Emojis", value=f"{result['emojis']}")
-        embed.add_field(name="Starboard Threshold", value=f"{result['threshold']}")
+        embed.add_field(name="Starboard Threshold", value=f"{result['threshold']} seconds")
         embed.add_field(name="Starboard Message Expire", value=f"{result['age']}")
         await ctx.send(embed=embed)
 
@@ -227,7 +227,7 @@ class Setup(commands.Cog):
         await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
         await ctx.send(f"Starboard channel updated to {channel.mention}")
 
-    @starboard.command(help="Set starboard emoji threshold")
+    @starboard.command(help="Set starboard emoji amount", aliases=["amount"])
     @commands.has_permissions(manage_messages=True)
     async def threshold(self, ctx, threshold: int):
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
