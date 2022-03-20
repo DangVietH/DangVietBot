@@ -58,11 +58,11 @@ class Star(commands.Cog):
                     msgstats = await msg_cursor.find_one({'message': payload.message_id})
 
                     if msgstats is None:
-                        starmsg = await star_channel.send(f"{len(react)} {emoji} | {channel.mention}", embed=self.embedGenerator(msg))
+                        starmsg = await star_channel.send(f"**{len(react)}** {emoji} **|** {channel.mention}", embed=self.embedGenerator(msg))
                         await msg_cursor.insert_one({'message': payload.message_id, 'star_msg': starmsg.id, 'amount': len(react)})
                     else:
                         starbordMessage = await star_channel.fetch_message(msgstats['star_msg'])
-                        await starbordMessage.edit(f"{len(react)} {emoji} | {channel.mention}", embed=self.embedGenerator(msg))
+                        await starbordMessage.edit(f"**{len(react)}** {emoji} **|** {channel.mention}", embed=self.embedGenerator(msg))
                         await msg_cursor.update_one({'message': payload.message_id}, {'$inc': {'amount': 1}})
 
     @commands.Cog.listener()

@@ -119,7 +119,7 @@ class Leveling(commands.Cog):
         font_small = ImageFont.truetype('font.ttf', 20)
 
         needed_xp = 100 * 2 * ((1 / 2) * lvl)
-        draw.text((248, 48), f"{user[:16]}", fill=(225, 0, 92), font=font_big)
+        draw.text((248, 48), f"{user}", fill=(225, 0, 92), font=font_big)
         draw.text((641, 48), f"Rank #{rank}", fill=(225, 0, 92), font=font_big)
         draw.text((248, 130), f"Level {stats['level']}", fill=(225, 0, 92), font=font_small)
         draw.text((641, 130), f"{xp} / {needed_xp} XP", fill=(225, 0, 92), font=font_small)
