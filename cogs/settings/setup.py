@@ -153,7 +153,7 @@ class Setup(commands.Cog):
     async def create(self, ctx):
         await ctx.send("Answer These Question In Next 10Min!")
 
-        questions = ["Enter Message: ", "Enter Emojis: ", "Enter Roles (id): ", "Enter Channel: "]
+        questions = ["Enter Message: ", "Enter Emojis: ", "Enter Roles (only type role id): ", "Enter Channel: "]
         answers = []
 
         def check(user):

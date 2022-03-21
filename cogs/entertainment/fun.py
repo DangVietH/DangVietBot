@@ -63,7 +63,7 @@ class Fun(commands.Cog):
         comment = random_sub.num_comments
         link = random_sub.permalink
 
-        embed = discord.Embed(title=f'__{name}__', color=discord.Color.purple(), url=f"https://reddit.com{link}")
+        embed = discord.Embed(title=f'{name}', color=discord.Color.purple(), url=f"https://reddit.com{link}")
         embed.set_image(url=url)
         embed.set_footer(text=f"⬆️ {upvote} | 💬 {comment}", icon_url='https://www.vectorico.com/download/social_media/Reddit-Icon.png')
         await ctx.send(embed=embed)
@@ -103,6 +103,45 @@ class Fun(commands.Cog):
                 emojis.append(s)
         await ctx.send(''.join(emojis))
 
+    @commands.command(help="Show your gay pride")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def gay(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        await ctx.send(f"https://some-random-api.ml/canvas/gay?avatar={member.display_avatar.url}")
+
+    @commands.command(help="Get a horny permission's card")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def horny(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        await ctx.send(f"https://some-random-api.ml/canvas/horny?avatar={member.display_avatar.url}")
+
+    @commands.command(help="U R arrested")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def jail(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        await ctx.send(f"https://some-random-api.ml/canvas/jail?avatar={member.display_avatar.url}")
+
+    @commands.command(help="GET TRIGGERED")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def triggered(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        await ctx.send(f"https://some-random-api.ml/canvas/triggered?avatar={member.display_avatar.url}")
+
+    @commands.command(help="Oh no")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def wasted(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        await ctx.send(f"https://some-random-api.ml/canvas/wasted?avatar={member.display_avatar.url}")
+
+    @commands.command(help="Make a fake youtube comment")
+    async def ytcomment(self, ctx, name="No Name", *, comment="Nothing you idiot"):
+        await ctx.send(f"https://some-random-api.ml/canvas/youtube-comment?avatar={ctx.author.display_avatar.url}&username={name}&comment={comment}")
+
+    @commands.command(help="Make a fake tweet")
+    async def tweet(self, ctx, name="No Name", *, comment="Nothing you idiot"):
+        await ctx.send(
+            f"https://some-random-api.ml/canvas/tweet?avatar={ctx.author.display_avatar.url}&displayname={name}&comment={comment}&username={ctx.author.name}")
+
     @commands.command(name="8ball", help="ask anything")
     async def _8ball(self, ctx, *, question):
         answer = [
@@ -127,7 +166,7 @@ class Fun(commands.Cog):
             'Outlook not so good',
             'Very doubtful'
         ]
-        await ctx.send(f"🎱 {random.choice(answer)}")
+        await ctx.send(f"**Q:** {question}\n**A:** {random.choice(answer)}")
 
     @commands.command(help="Steal their data")
     @commands.cooldown(1, 30, commands.BucketType.user)
