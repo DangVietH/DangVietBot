@@ -69,7 +69,7 @@ class Star(commands.Cog):
                         current_time = datetime.datetime.now()
                         final_time = current_time + datetime.timedelta(seconds=guildstats['age'])
                         starmsg = await star_channel.send(f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
-                        await msg_cursor.insert_one({'message': payload.message_id, 'star_msg': starmsg.id, 'amount': len(react), 'guild': payload.guild_id, 'end': final_time})
+                        await msg_cursor.insert_one({'message': payload.message_id, 'star_msg': starmsg.id, 'amount': len(react), 'guild': payload.guild_id, 'end': final_time, 'channel': payload.channel_id})
                     else:
                         starbordMessage = await star_channel.fetch_message(msgstats['star_msg'])
                         await starbordMessage.edit(f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
@@ -120,6 +120,15 @@ class Star(commands.Cog):
                     pass
         except Exception as e:
             print(e)
+
+    @commands.Cog.listener()
+    async def on_message_edit(self, before, after):
+        check = await msg_cursor.find_one({"message": after.id})
+        if check is not None:
+            guildstats = await cursor.find_one({'guild': after.guild.id})
+            star_channel = self.bot.get_channel(guildstats['channel'])
+            starmsg = await star_channel.fetch_message(check['star_msg'])
+            await starmsg.edit(f"{guildstats['emoji']} **{check['amount']} |** {self.bot.get_channel(check['channel']).mention}", embed=self.embedGenerator(after))
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):

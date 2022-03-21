@@ -2,7 +2,7 @@ requests==2.27.1
 asyncpraw==7.5.0
 motor==2.5.1
 DateTime==4.4
-wavelink==v1.2.3
+lavalink==3.1.5
 git+https://github.com/Rapptz/discord.py
 git+https://github.com/Rapptz/discord-ext-menus
 git+https://github.com/oliver-ni/discord-ext-menus-views

@@ -328,7 +328,7 @@ class Music(commands.Cog):
             num = 0
             for track in playerQueueWithCurrent:
                 num += 1
-                to_append = (f"**{num}:**", f"[**{track.title}**]({track.uri})")
+                to_append = (f"**{num}**", f"[**{track.title}**]({track.uri})")
                 data.append(to_append)
 
             page = ViewMenuPages(source=SecondPageSource(f"📀 Queue of {ctx.author.guild.name} 📀", data), clear_reactions_after=True)
