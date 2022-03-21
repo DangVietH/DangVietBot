@@ -179,12 +179,10 @@ class Setup(commands.Cog):
     async def set(self, ctx, channel: discord.TextChannel):
         result = await gcursor.find_one({"guild": ctx.guild.id})
         if result is None:
-            webhook = await channel.create_webhook(name="DangVietBot Global Chat", avatar=self.bot.user.avatar.url)
-            await gcursor.insert_one({"guild": ctx.guild.id, "channel": channel.id, "webhook": webhook.url})
+            await gcursor.insert_one({"guild": ctx.guild.id, "channel": channel.id})
             await ctx.send(f"Global chat channel set to {channel.mention}")
         elif result is not None:
-            webhook = await channel.create_webhook(name="DangVietBot Global Chat", avatar=self.bot.user.avatar.url)
-            await gcursor.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id, "webhook": webhook.url}})
+            await gcursor.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
             await ctx.send(f"Global chat channel updated to {channel.mention}")
 
     @gc.command(help="Remove your server from global chat")

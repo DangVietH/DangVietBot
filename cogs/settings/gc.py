@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
-import aiohttp
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 
@@ -22,16 +21,15 @@ class GlobalChat(commands.Cog):
                     if not message.content:
                         return
                     else:
-                        alGuild = cursor.find()
-                        async for guild in alGuild:
-                            if guild['guild'] != message.guild.id:
-                                async with aiohttp.ClientSession() as session:
-                                    webhook = discord.Webhook.from_url(guild['webhook'], session=session)
-                                    await webhook.send(
-                                        content=message.content,
-                                        username=message.author,
-                                        avatar_url=message.author.display_avatar.url
-                                    )
+                        alChannels = cursor.find()
+                        async for channel in alChannels:
+                            if channel['channel'] != message.channel.id:
+                                embed = discord.Embed(description=message.content, timestamp=datetime.datetime.utcnow(),
+                                                      color=discord.Color.from_rgb(225, 0, 92))
+                                embed.set_author(icon_url=message.author.avatar.url, name=f'{message.author}')
+                                embed.set_footer(icon_url=message.guild.icon.url,
+                                                 text=f"Message sent from {message.guild.name}")
+                                await self.bot.get_channel(channel['channel']).send(embed=embed)
             else:
                 return None
 
