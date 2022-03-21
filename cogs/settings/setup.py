@@ -160,7 +160,7 @@ class Setup(commands.Cog):
 
         bot_msg = await channel.send(answers[0])
 
-        insert = {"id": bot_msg.id, "emojis": emojis, "roles": roles}
+        insert = {"id": bot_msg.id, "emojis": emojis, "roles": roles, "guild": ctx.guild.id}
         await rcursor.insert_one(insert)
         for emoji in emojis:
             await bot_msg.add_reaction(emoji)
@@ -212,8 +212,9 @@ class Setup(commands.Cog):
         embed = discord.Embed(title="Starboard Stats", color=discord.Color.random())
         embed.add_field(name="Starboard Channel", value=f"{self.bot.get_channel(result['channel']).mention}")
         embed.add_field(name="Starboard Emojis", value=f"{result['emojis']}")
-        embed.add_field(name="Starboard Threshold", value=f"{result['threshold']} seconds")
-        embed.add_field(name="Starboard Message Expire", value=f"{result['age']}")
+        embed.add_field(name="Starboard Threshold", value=f"{result['threshold']}")
+        embed.add_field(name="Starboard Message Expire", value=f"{result['age']} seconds")
+        embed.add_field(name="Starboard Ignored Channels", value=f"{[self.bot.get_channel(channel).mention for channel in result['ignoreChannel']]}")
         await ctx.send(embed=embed)
 
     @starboard.command(help="Setup starboard channel")
@@ -221,11 +222,44 @@ class Setup(commands.Cog):
     async def channel(self, ctx, channel: discord.TextChannel):
         result = await scursor.find_one({"guild": ctx.guild.id})
         if result is None:
-            await scursor.insert_one({"guild": ctx.guild.id, "channel": channel.id, "emoji": "⭐", "threshold": 2, "age": 3600 * 24})
+            await scursor.insert_one({
+                "guild": ctx.guild.id,
+                "channel": channel.id,
+                "emoji": "⭐",
+                "threshold": 2,
+                "age": 3600 * 24,
+                "ignoreChannel": [],
+                "lock": False,
+                "selfStar": False
+            })
             await ctx.send(f"Starboard channel set to {channel.mention}")
             return
         await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
         await ctx.send(f"Starboard channel updated to {channel.mention}")
+
+    @starboard.command(help="Ignore channels from starboard")
+    @commands.has_permissions(manage_channels=True)
+    async def ignoreChannel(self, ctx, channel: commands.Greedy[discord.TextChannel]):
+        result = await scursor.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return await ctx.send("You don't have a starboard system")
+        for c in channel:
+            if c in result['ignoreChannel']:
+                continue
+            await scursor.update_one({"guild": ctx.guild.id}, {"$push": {"ignoreChannel": c.id}})
+        await ctx.send(f"Ignored channels {[x.mention for x in channel]}")
+
+    @starboard.command(help="Un ignore channels from starboard")
+    @commands.has_permissions(manage_channels=True)
+    async def unignoreChannel(self, ctx, channel: commands.Greedy[discord.TextChannel]):
+        result = await scursor.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return await ctx.send("You don't have a starboard system")
+        for c in channel:
+            if c in result['ignoreChannel']:
+                continue
+            await scursor.update_one({"guild": ctx.guild.id}, {"$pull": {"ignoreChannel": c.id}})
+        await ctx.send(f"Unignored channels {[x.mention for x in channel]}")
 
     @starboard.command(help="Set starboard emoji amount", aliases=["amount"])
     @commands.has_permissions(manage_messages=True)
@@ -234,6 +268,22 @@ class Setup(commands.Cog):
             return await ctx.send("You don't have a starboard system")
         await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"threshold": threshold}})
         await ctx.send(f"Starboard threshold updated to {threshold}")
+
+    @starboard.command(help="Lock starboard")
+    @commands.has_permissions(manage_guild=True)
+    async def lock(self, ctx):
+        if await scursor.find_one({"guild": ctx.guild.id}) is None:
+            return await ctx.send("You don't have a starboard system")
+        await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": True}})
+        await ctx.send("Starboard locked")
+
+    @starboard.command(help="Lock starboard")
+    @commands.has_permissions(manage_guild=True)
+    async def unlock(self, ctx):
+        if await scursor.find_one({"guild": ctx.guild.id}) is None:
+            return await ctx.send("You don't have a starboard system")
+        await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": False}})
+        await ctx.send("Starboard unlocked")
 
     @starboard.command(help="Disable starboard system")
     @commands.has_permissions(manage_channels=True)

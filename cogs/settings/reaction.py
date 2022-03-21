@@ -70,3 +70,9 @@ class Reaction(commands.Cog):
         check = await cursor.find_one({"id": payload.message_id})
         if check is not None:
             await cursor.delete_one(check)
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
+        result = await cursor.find_one({"guild": guild.id})
+        if result is not None:
+            await cursor.delete_one({"guild": guild.id})

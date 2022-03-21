@@ -46,7 +46,11 @@ class Star(commands.Cog):
         channel = self.bot.get_channel(payload.channel_id)
         emoji = guildstats['emoji']
         if str(payload.emoji) == emoji:
+            if guildstats['lock'] is True:
+                return
             if channel.id == star_channel.id:
+                return
+            if channel.id in guildstats['ignoreChannel']:
                 return
             msg = await channel.fetch_message(payload.message_id)
             reacts = list(filter(lambda r: str(r.emoji) == emoji, msg.reactions))
@@ -58,11 +62,11 @@ class Star(commands.Cog):
                     msgstats = await msg_cursor.find_one({'message': payload.message_id})
 
                     if msgstats is None:
-                        starmsg = await star_channel.send(f"**{len(react)}** {emoji} **|** {channel.mention}", embed=self.embedGenerator(msg))
-                        await msg_cursor.insert_one({'message': payload.message_id, 'star_msg': starmsg.id, 'amount': len(react)})
+                        starmsg = await star_channel.send(f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
+                        await msg_cursor.insert_one({'message': payload.message_id, 'star_msg': starmsg.id, 'amount': len(react), 'guild': payload.guild_id})
                     else:
                         starbordMessage = await star_channel.fetch_message(msgstats['star_msg'])
-                        await starbordMessage.edit(f"**{len(react)}** {emoji} **|** {channel.mention}", embed=self.embedGenerator(msg))
+                        await starbordMessage.edit(f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
                         await msg_cursor.update_one({'message': payload.message_id}, {'$inc': {'amount': 1}})
 
     @commands.Cog.listener()
@@ -90,7 +94,7 @@ class Star(commands.Cog):
                 if msgstats is not None:
                     starmsg = await star_channel.fetch_message(msgstats['star_msg'])
                     if len(react) >= guildstats['threshold']:
-                        await starmsg.edit(f"{len(react)} {emoji} | {channel.mention}", embed=self.embedGenerator(msg))
+                        await starmsg.edit(f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
                         await msg_cursor.update_one({'message': payload.message_id}, {'$inc': {'amount': -1}})
                     else:
                         await msg_cursor.delete_one({"message": payload.message_id})
@@ -101,3 +105,9 @@ class Star(commands.Cog):
         check = await msg_cursor.find_one({"message": payload.message_id})
         if check is not None:
             await msg_cursor.delete_one(check)
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
+        if await cursor.find_one({"guild": guild.id}) and await msg_cursor.find_one({'guild': guild.id}) is not None:
+            await cursor.delete_one({"guild": guild.id})
+            await msg_cursor.delete_one({'guild': guild.id})
