@@ -81,7 +81,7 @@ class Giveaway(commands.Cog):
         give.add_field(name=f'{ctx.author.name} is giving away: {prize}!',
                        value=f'React with 🎁 to enter!\n Ends in {datetime.timedelta(seconds=converted_time)} minutes!',
                        inline=False)
-        end = datetime.datetime.utcnow() + datetime.timedelta(seconds=time)
+        end = datetime.datetime.utcnow() + datetime.timedelta(seconds=converted_time)
         give.set_footer(text=f'Giveaway ends at {end} UTC!')
         message = await channel.send(embed=give)
         await message.add_reaction("🎁")

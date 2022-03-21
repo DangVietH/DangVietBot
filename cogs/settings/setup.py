@@ -17,6 +17,23 @@ gcursor = cluster['bot']['gc']
 scursor = cluster['sb']['config']
 
 
+def convert(time):
+    pos = ['s', 'm', 'h', 'd']
+
+    time_dict = {"s": 1, "m": 60, "h": 3600, "d": 3600 * 24}
+
+    unit = time[-1]
+
+    if unit not in pos:
+        return -1
+    try:
+        val = int(time[:-1])
+    except:
+        return -2
+
+    return val * time_dict[unit]
+
+
 class Setup(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -245,10 +262,10 @@ class Setup(commands.Cog):
             return await ctx.send("You don't have a starboard system")
         if result['selfStar'] is True:
             await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"selfStar": False}})
-            await ctx.send("Selfstar is now On")
+            await ctx.send("Selfstar is now off")
         else:
             await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"selfStar": True}})
-            await ctx.send("Selfstar is now off")
+            await ctx.send("Selfstar is now on")
 
     @starboard.command(help="Ignore channels from starboard")
     @commands.has_permissions(manage_channels=True)
@@ -297,6 +314,14 @@ class Setup(commands.Cog):
             return await ctx.send("You don't have a starboard system")
         await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": False}})
         await ctx.send("Starboard unlocked")
+
+    @starboard.command(help="Set starboard age")
+    @commands.has_permissions(manage_guild=True)
+    async def age(self, ctx, *, time):
+        if await scursor.find_one({"guild": ctx.guild.id}) is None:
+            return await ctx.send("You don't have a starboard system")
+        await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"age": convert(time)}})
+        await ctx.send(f"Starboard age updated to {time}")
 
     @starboard.command(help="Disable starboard system")
     @commands.has_permissions(manage_channels=True)
