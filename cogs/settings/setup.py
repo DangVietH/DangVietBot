@@ -179,10 +179,12 @@ class Setup(commands.Cog):
     async def set(self, ctx, channel: discord.TextChannel):
         result = await gcursor.find_one({"guild": ctx.guild.id})
         if result is None:
-            await gcursor.insert_one({"guild": ctx.guild.id, "channel": channel.id})
+            webhook = await channel.create_webhook(name="DangVietBot Global Chat", avatar=self.bot.user.avatar.url)
+            await gcursor.insert_one({"guild": ctx.guild.id, "channel": channel.id, "webhook": webhook.url})
             await ctx.send(f"Global chat channel set to {channel.mention}")
         elif result is not None:
-            await gcursor.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
+            webhook = await channel.create_webhook(name="DangVietBot Global Chat", avatar=self.bot.user.avatar.url)
+            await gcursor.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id, "webhook": webhook.url}})
             await ctx.send(f"Global chat channel updated to {channel.mention}")
 
     @gc.command(help="Remove your server from global chat")
@@ -211,7 +213,7 @@ class Setup(commands.Cog):
             return await ctx.send("You don't have a starboard system")
         embed = discord.Embed(title="Starboard Stats", color=discord.Color.random())
         embed.add_field(name="Starboard Channel", value=f"{self.bot.get_channel(result['channel']).mention}")
-        embed.add_field(name="Starboard Emojis", value=f"{result['emojis']}")
+        embed.add_field(name="Starboard Emojis", value=f"{result['emoji']}")
         embed.add_field(name="Starboard Threshold", value=f"{result['threshold']}")
         embed.add_field(name="Starboard Message Expire", value=f"{result['age']} seconds")
         embed.add_field(name="Starboard Ignored Channels", value=f"{[self.bot.get_channel(channel).mention for channel in result['ignoreChannel']]}")
@@ -236,6 +238,19 @@ class Setup(commands.Cog):
             return
         await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
         await ctx.send(f"Starboard channel updated to {channel.mention}")
+
+    @starboard.command(help="Toggle self star")
+    @commands.has_permissions(manage_guild=True)
+    async def selfStar(self, ctx):
+        result = await scursor.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return await ctx.send("You don't have a starboard system")
+        if result['selfStar'] is True:
+            await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"selfStar": False}})
+            await ctx.send("Selfstar is now On")
+        else:
+            await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"selfStar": True}})
+            await ctx.send("Selfstar is now off")
 
     @starboard.command(help="Ignore channels from starboard")
     @commands.has_permissions(manage_channels=True)
@@ -262,7 +277,7 @@ class Setup(commands.Cog):
         await ctx.send(f"Unignored channels {[x.mention for x in channel]}")
 
     @starboard.command(help="Set starboard emoji amount", aliases=["amount"])
-    @commands.has_permissions(manage_messages=True)
+    @commands.has_permissions(manage_guild=True)
     async def threshold(self, ctx, threshold: int):
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
             return await ctx.send("You don't have a starboard system")

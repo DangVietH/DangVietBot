@@ -1,7 +1,8 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
+import datetime
 
 # some code base on https://github.com/MenuDocs/Pyro/blob/master/cogs/starboard.py
 
@@ -14,6 +15,9 @@ msg_cursor = cluster['sb']['msg']
 class Star(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    async def setup_hook(self) -> None:
+        self.time_checker.start()
 
     def embedGenerator(self, msg):
         embed = discord.Embed(color=discord.Color.yellow(), timestamp=msg.created_at)
@@ -56,14 +60,16 @@ class Star(commands.Cog):
             reacts = list(filter(lambda r: str(r.emoji) == emoji, msg.reactions))
             if reacts:
                 react = [user async for user in msg.reactions[0].users()]
-                if msg.author.id in react:
+                if msg.author.id in react and guildstats['selfStar'] is False:
                     react.pop(react.index(msg.author.id))
                 if len(react) >= guildstats['threshold']:
                     msgstats = await msg_cursor.find_one({'message': payload.message_id})
 
                     if msgstats is None:
+                        current_time = datetime.datetime.now()
+                        final_time = current_time + datetime.timedelta(seconds=guildstats['age'])
                         starmsg = await star_channel.send(f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
-                        await msg_cursor.insert_one({'message': payload.message_id, 'star_msg': starmsg.id, 'amount': len(react), 'guild': payload.guild_id})
+                        await msg_cursor.insert_one({'message': payload.message_id, 'star_msg': starmsg.id, 'amount': len(react), 'guild': payload.guild_id, 'end': final_time})
                     else:
                         starbordMessage = await star_channel.fetch_message(msgstats['star_msg'])
                         await starbordMessage.edit(f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
@@ -82,14 +88,16 @@ class Star(commands.Cog):
         channel = self.bot.get_channel(payload.channel_id)
         emoji = guildstats['emoji']
         if str(payload.emoji) == emoji:
+            if guildstats['lock'] is True:
+                return
             if channel.id == star_channel.id:
+                return
+            if channel.id in guildstats['ignoreChannel']:
                 return
             msg = await channel.fetch_message(payload.message_id)
             reacts = list(filter(lambda r: str(r.emoji) == emoji, msg.reactions))
             if reacts:
                 react = [user async for user in msg.reactions[0].users()]
-                if msg.author.id in react:
-                    react.pop(react.index(msg.author.id))
                 msgstats = await msg_cursor.find_one({'message': payload.message_id})
                 if msgstats is not None:
                     starmsg = await star_channel.fetch_message(msgstats['star_msg'])
@@ -99,6 +107,19 @@ class Star(commands.Cog):
                     else:
                         await msg_cursor.delete_one({"message": payload.message_id})
                         await starmsg.delete()
+
+    @tasks.loop(seconds=10)
+    async def time_checker(self):
+        try:
+            all_timer = msg_cursor.find({})
+            current_time = datetime.datetime.now()
+            async for x in all_timer:
+                if current_time >= x['end']:
+                    await msg_cursor.delete_one(x)
+                else:
+                    pass
+        except Exception as e:
+            print(e)
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):

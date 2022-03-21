@@ -1,10 +1,14 @@
 import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
-
+import os
 import datetime
 from utils.configs import config_var
 from core.help import CustomHelp
+
+os.environ["JISHAKU_HIDE"] = "True"
+os.environ["JISHAKU_NO_UNDERSCORE"] = "True"
+os.environ["JISHAKU_NO_DM_TRACEBACK"] = "True"
 
 coglist = [
             'cogs.audio',

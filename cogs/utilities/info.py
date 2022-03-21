@@ -66,7 +66,6 @@ class Info(commands.Cog):
         embed.add_field(name="ID", value=f"{ctx.guild.id}")
         embed.add_field(name="Owner", value=f"{ctx.guild.owner}")
         embed.add_field(name="Member count", value=f"{ctx.guild.member_count}")
-        embed.add_field(name="Region", value=f"{ctx.guild.region}")
         embed.add_field(name="Verification Level", value=f"{ctx.guild.verification_level}")
         embed.add_field(name="Highest role", value=f"{ctx.guild.roles[-1]}")
         embed.add_field(name="Number of roles", value=f"{role_count}")
