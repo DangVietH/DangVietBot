@@ -6,6 +6,7 @@ import asyncpraw
 import random
 import asyncio
 from utils.configs import config_var
+import urllib
 
 
 reddit = asyncpraw.Reddit(client_id="WS8DpWseFlxeec8_v2sjrw",
@@ -134,13 +135,13 @@ class Fun(commands.Cog):
         await ctx.send(f"https://some-random-api.ml/canvas/wasted?avatar={member.display_avatar.url}")
 
     @commands.command(help="Make a fake youtube comment")
-    async def ytcomment(self, ctx, name="No Name", *, comment="Nothing you idiot"):
-        await ctx.send(f"https://some-random-api.ml/canvas/youtube-comment?avatar={ctx.author.display_avatar.url}&username={name}&comment={comment}")
+    async def ytcomment(self, ctx, *, comment="Nothing you idiot"):
+        await ctx.send(f"https://some-random-api.ml/canvas/youtube-comment?avatar={ctx.author.display_avatar.url}&username={ctx.author.name}&comment={urllib.parse.quote(comment)}")
 
     @commands.command(help="Make a fake tweet")
     async def tweet(self, ctx, name="No Name", *, comment="Nothing you idiot"):
         await ctx.send(
-            f"https://some-random-api.ml/canvas/tweet?avatar={ctx.author.display_avatar.url}&displayname={name}&comment={comment}&username={ctx.author.name}")
+            f"https://some-random-api.ml/canvas/tweet?avatar={ctx.author.display_avatar.url}&displayname={name}&comment={urllib.parse.quote(comment)}&username={ctx.author.name}")
 
     @commands.command(name="8ball", help="ask anything")
     async def _8ball(self, ctx, *, question):

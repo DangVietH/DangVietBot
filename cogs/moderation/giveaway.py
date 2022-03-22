@@ -92,6 +92,20 @@ class Giveaway(commands.Cog):
 
     @commands.command(help="Reroll the giveaway")
     @commands.has_permissions(manage_messages=True)
+    async def gend(self, ctx, msg_id):
+        gmsg = await ctx.fetch_message(msg_id)
+        if gmsg.author.id != self.bot.user.id:
+            return await ctx.send("Invalid Message ID.")
+        users = [user async for user in gmsg.reactions[0].users()]
+        users.pop(users.index(self.bot.user))
+        winner = random.choice(users)
+        embed = discord.Embed(color=discord.Color.red(), title="🥳 THE GIVEAWAY HAS ENDED!",
+                              description=f'🥳 **Winner**: {winner.mention}\n 🎫 **Number of Entrants**: {len(users)}')
+        embed.set_footer(text='Thanks for entering the giveaway!')
+        await gmsg.edit(embed=embed)
+
+    @commands.command(help="Reroll the giveaway")
+    @commands.has_permissions(manage_messages=True)
     async def greroll(self, ctx, msg_id):
         reroll_msg = await ctx.fetch_message(msg_id)
         if reroll_msg.author.id != self.bot.user.id:
