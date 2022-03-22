@@ -58,7 +58,7 @@ class Misc(commands.Cog):
             embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
             await ctx.send(embed=embed)
 
-    @commands.command(help="Remind your task", aliases=["reminder"])
+    @commands.group(help="Remind your task", aliases=["reminder"], invoke_without_command=True, case_insensitive=True)
     async def remind(self, ctx, time, *, reason):
         converted_time = convert(time)
         if converted_time == -1:
@@ -71,6 +71,16 @@ class Misc(commands.Cog):
             final_time = current_time + datetime.timedelta(seconds=converted_time)
             await timer.insert_one({"user": ctx.author.id, "time": final_time, "reason": reason})
             await ctx.send("⏰ Reminder set")
+
+    @remind.command(help="See your remind list")
+    async def list(self, ctx):
+        all_timer = timer.find({'user': ctx.author.id})
+        if all_timer is None:
+            return await ctx.send("You don't have any reminders")
+        embed = discord.Embed(title="Your remind list", color=discord.Color.random())
+        async for x in all_timer:
+            embed.add_field(name=f"End at: {x['time']}", value=f"**Reason:** {x['reason']}")
+        await ctx.send(embed=embed)
 
     @tasks.loop(seconds=10)
     async def time_checker(self):

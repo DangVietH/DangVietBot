@@ -154,23 +154,30 @@ class Economy(commands.Cog):
         check = await cursor.find_one({"id": user.id})
 
         item_name = item_name.lower()
+        name = None
+        price = None
+        amounts = None
+
         for item in check['inventory']:
             if item['name'].lower() == item_name:
+                name = item['name']
                 amounts = item['amount']
                 price = item["price"]
-                if amounts < amount:
-                    return await ctx.send("Too much")
-                await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
-                                        {"$inc": {"inventory.$.amount": -amount}})
-
-                is_amount_zero = await cursor.find_one(
-                    {"id": user.id, "inventory.name": str(item_name), "inventory.amount": 0})
-                if is_amount_zero is not None:
-                    await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}})
-                await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
-                await ctx.send(f"Successfully sold {amount} {item_name} for 💵 {price}")
-
                 break
+
+        if name is None:
+            return await ctx.send("Item not in inventory")
+        if amounts < amount:
+            return await ctx.send(f"You do not have enough {item_name} in the inventory")
+        await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                                {"$inc": {"inventory.$.amount": -amount}})
+
+        is_amount_zero = await cursor.find_one(
+            {"id": user.id, "inventory.name": str(item_name), "inventory.amount": 0})
+        if is_amount_zero is not None:
+            await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}})
+        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
+        await ctx.send(f"Successfully sold {amount} {item_name} for 💵 {price}")
 
     @commands.command(help="See your items", aliases=["bag"])
     async def inventory(self, ctx):

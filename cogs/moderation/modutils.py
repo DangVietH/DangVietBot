@@ -50,13 +50,8 @@ class ModUtils(commands.Cog):
 
     @commands.group(invoke_without_command=True, help="Modlog and case")
     async def modlog(self, ctx):
-        await self.add_to_db(ctx.guild)
-        embed = discord.Embed(title="Modlog", color=discord.Color.random(), description="Set up modlog system")
-        command = self.bot.get_command("welcome")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"modlog {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
-        await ctx.send(embed=embed)
+        _cmd = self.bot.get_command("help")
+        await _cmd(ctx, command='modlog')
 
     @modlog.command(help="Set up channel")
     @commands.has_permissions(manage_channels=True)

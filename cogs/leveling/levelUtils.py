@@ -49,14 +49,8 @@ class LevelUtils(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Level rewarding role setup")
     async def role(self, ctx):
-        await self.add_to_db(ctx.guild)
-        embed = discord.Embed(title="Level rewarding role setup", color=discord.Color.random())
-        command = self.bot.get_command("role")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"role {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
-        embed.set_footer(text="Who needs MEE6 premium when we have this")
-        await ctx.send(embed=embed)
+        _cmd = self.bot.get_command("help")
+        await _cmd(ctx, command='role')
 
     @role.command(help="Set up the roles")
     @commands.has_permissions(manage_channels=True)
@@ -93,15 +87,10 @@ class LevelUtils(commands.Cog):
                              clear_reactions_after=True)
         await page.start(ctx)
 
-    @commands.group(invoke_without_command=True, case_insensitive=True, help="Level channel setup")
+    @commands.group(invoke_without_command=True, case_insensitive=True, help="Level utils")
     async def lvl(self, ctx):
-        await self.add_to_db(ctx.guild)
-        embed = discord.Embed(title="Level up utils", color=discord.Color.random())
-        command = self.bot.get_command("lvl")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"lvl {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
-        await ctx.send(embed=embed)
+        _cmd = self.bot.get_command("help")
+        await _cmd(ctx, command='lvl')
 
     @lvl.command(help="Setup level up channel if you like to")
     @commands.has_permissions(manage_channels=True)

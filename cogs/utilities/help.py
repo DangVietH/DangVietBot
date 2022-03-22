@@ -7,7 +7,7 @@ from discord.ext.menus.views import ViewMenuPages
 class CogPageSource(menus.ListPageSource):
     def __init__(self, title, data):
         self.title = title
-        super().__init__(data, per_page=10)
+        super().__init__(data, per_page=5)
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(color=discord.Color.green(), title=self.title, timestamp=datetime.datetime.utcnow())
@@ -40,7 +40,7 @@ class CustomHelp(commands.HelpCommand):
         data = []
         filtered = await self.filter_commands(cog_.get_commands(), sort=True)
         for command in filtered:
-            data.append((f"- {command.name}", f"    {self.get_command_signature(command)}\n`{command.short_doc}`"))
+            data.append((f"- {self.get_command_signature(command)}", f"    {self.get_command_signature(command)}\n`{command.short_doc}`"))
 
         page = ViewMenuPages(source=CogPageSource(f"{cog_.qualified_name} Commands", data),
                              clear_reactions_after=True)
