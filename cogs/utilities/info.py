@@ -91,9 +91,8 @@ class Info(commands.Cog):
 
     @commands.command(help="Invite the bot")
     async def invite(self, ctx):
-        embed = discord.Embed(title='List of invite', description="""
-[All permission](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=549755813887&scope=bot%20applications.commands)
-[Admin permission](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=8&scope=bot%20applications.commands)
+        embed = discord.Embed(title='Invite the bot', description="""
+[Admin permission](https://bit.ly/3daeOIe)
 [Minimal permission](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=274948541504&scope=bot%20applications.commands)
         """)
         await ctx.send(embed=embed)
