@@ -198,7 +198,6 @@ class Setup(commands.Cog):
                 "channel": channel.id,
                 "emoji": "⭐",
                 "threshold": 2,
-                "age": 3600 * 24,
                 "ignoreChannel": [],
                 "lock": False,
                 "selfStar": False
@@ -268,14 +267,6 @@ class Setup(commands.Cog):
             return await ctx.send("You don't have a starboard system")
         await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": False}})
         await ctx.send("Starboard unlocked")
-
-    @starboard.command(help="Set starboard age")
-    @commands.has_permissions(manage_guild=True)
-    async def age(self, ctx, *, time):
-        if await scursor.find_one({"guild": ctx.guild.id}) is None:
-            return await ctx.send("You don't have a starboard system")
-        await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"age": convert(time)}})
-        await ctx.send(f"Starboard age updated to {time}")
 
     @starboard.command(help="Disable starboard system")
     @commands.has_permissions(manage_channels=True)
