@@ -9,6 +9,8 @@ from utils.configs import config_var
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["bot"]["tag"]
 
+# beware! terrible code ahead
+
 
 class Tags(commands.Cog):
     def __init__(self, bot):
@@ -26,13 +28,18 @@ class Tags(commands.Cog):
         else:
             check = await cursor.find_one({"guild": ctx.guild.id})
             if check is None:
-                return None
-            else:
-                all_tag = check['tag']
-                for thing in all_tag:
-                    if thing['name'] == name:
-                        await ctx.send(thing['value'])
-                        break
+                return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
+
+            all_tag = check['tag']
+            value = None
+            for thing in all_tag:
+                if thing['name'] == name:
+                    value = thing['value']
+                    break
+            if value is None:
+                return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
+
+            await ctx.send(value)
 
     @tag.command(help="Create a tag")
     async def create(self, ctx):
@@ -73,8 +80,7 @@ class Tags(commands.Cog):
     @tag.command(help="Remove a tag", aliases=['remove'])
     @commands.has_permissions(manage_guild=True)
     async def delete(self, ctx, *, name):
-        is_exist = await cursor.find_one({"guild": ctx.guild.id, "tag.name": name})
-        if is_exist is None:
+        if await cursor.find_one({"guild": ctx.guild.id, "tag.name": name}) is None:
             await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
         else:
             await cursor.update_one({"guild": ctx.guild.id}, {"$pull": {"tag": {"name": name}}})
@@ -82,10 +88,22 @@ class Tags(commands.Cog):
 
     @tag.command(help="Edit a tag")
     async def edit(self, ctx, *, name):
-        is_exist = await cursor.find_one({"guild": ctx.guild.id, "tag.name": name})
-        if is_exist is None:
+        gcheck = await cursor.find_one({"guild": ctx.guild.id})
+        if gcheck is None:
             return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
-        if ctx.author is not self.bot.get_user(is_exist['owner']):
+
+        tnname = None
+        owner = None
+        for thing in gcheck['tag']:
+            if thing['name'] == name:
+                tnname = thing['name']
+                owner = thing['owner']
+                break
+
+        if tnname is None:
+            return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
+
+        if ctx.author is not self.bot.get_user(owner):
             return await ctx.send("You are not the owner of this tag")
         await ctx.send("What is the new tag value: `Type end to abort the process`")
 
@@ -93,7 +111,7 @@ class Tags(commands.Cog):
             return user.author == ctx.author and user.channel == ctx.channel
 
         user_choice = (await self.bot.wait_for('message', check=check)).content
-        if user_choice == "end":
+        if user_choice == "end".lower():
             return await ctx.send("Task abort successfully")
         await cursor.update_one({"guild": ctx.guild.id, "tag.name": name}, {"$set": {"tag.value": user_choice}})
         await ctx.send("Tag edited successfully")

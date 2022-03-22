@@ -4,7 +4,6 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import datetime
 from utils.configs import config_var
-from core.help import CustomHelp
 
 os.environ["JISHAKU_HIDE"] = "True"
 os.environ["JISHAKU_NO_UNDERSCORE"] = "True"
@@ -30,7 +29,6 @@ class DangVietBot(commands.Bot):
             intents=discord.Intents.all(),
             strip_after_prefix=True,
             case_insensitive=True,
-            help_command=CustomHelp(),
             description="One bot Many functionality",
             owner_id=860876181036335104,
             enable_debug_events=True,

@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands, menus
 from discord.ext.menus.views import ViewMenuPages
+from cogs.utilities.help import CustomHelp
 
 
 class ServerPageSource(menus.ListPageSource):
@@ -18,6 +19,8 @@ class ServerPageSource(menus.ListPageSource):
 class Info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        bot.help_command = CustomHelp()
+        bot.help_command.cog = self
 
     @commands.command(help="See bot latency")
     async def ping(self, ctx):

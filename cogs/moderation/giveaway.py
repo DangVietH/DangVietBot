@@ -93,12 +93,15 @@ class Giveaway(commands.Cog):
     @commands.command(help="Reroll the giveaway")
     @commands.has_permissions(manage_messages=True)
     async def gend(self, ctx, msg_id):
-        gmsg = await ctx.fetch_message(msg_id)
-        if gmsg.author.id != self.bot.user.id:
+        if await cursor.find_one({'message_id': msg_id}) is None:
             return await ctx.send("Invalid Message ID.")
+        await cursor.delete_one({'message_id': msg_id})
+        gmsg = await ctx.fetch_message(msg_id)
         users = [user async for user in gmsg.reactions[0].users()]
         users.pop(users.index(self.bot.user))
         winner = random.choice(users)
+        if len(users) < 1:
+            return await gmsg.edit(embed=discord.Embed(color=discord.Color.red(), title="Nobody has entered the giveaway."))
         embed = discord.Embed(color=discord.Color.red(), title="🥳 THE GIVEAWAY HAS ENDED!",
                               description=f'🥳 **Winner**: {winner.mention}\n 🎫 **Number of Entrants**: {len(users)}')
         embed.set_footer(text='Thanks for entering the giveaway!')
@@ -131,8 +134,10 @@ class Giveaway(commands.Cog):
                     users.pop(users.index(self.bot.user))
 
                     winner = random.choice(users)
-                    if winner is None:
-                        return await channel.send("No one has entered the giveaway. Maybe next time")
+                    if len(users) < 1:
+                        await channel.send("No one has entered the giveaway. Maybe next time")
+                        await cursor.delete_one({'message_id': msg_id})
+                        return
                     embed = discord.Embed(color=discord.Color.red(), title="🥳 THE GIVEAWAY HAS ENDED!")
                     embed.add_field(name=f"🎉 Prize: {x['prize']}",
                                     value=f'🥳 **Winner**: {winner.mention}\n 🎫 **Number of Entrants**: {len(users)}',

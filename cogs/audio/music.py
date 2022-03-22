@@ -5,6 +5,7 @@ import re
 from discord.ext.commands.errors import CheckFailure
 from discord.ext.menus.views import ViewMenuPages
 from utils.menuUtils import SecondPageSource
+import datetime
 
 
 class NotConnectedToVoice(CheckFailure):
@@ -183,7 +184,11 @@ class Music(commands.Cog):
     async def track_hook(self, event):
         if isinstance(event, lavalink.events.TrackStartEvent):
             schannel = self.bot.get_channel(event.player.fetch('channel'))
-            embed = discord.Embed(title="Now playing", description=event.track.title, color=discord.Color.random())
+            embed = discord.Embed(title="Now playing", description=f"[{event.track.title}]({event.track.uri})", color=discord.Color.random())
+            embed.add_field(name="Artist", value=event.track.author)
+            embed.add_field(name="Duration", value=str(datetime.datetime.fromtimestamp(event.track.duration/1000.0)), inline=False)
+
+            embed.set_thumbnail(url=f"https://img.youtube.com/vi/{event.track.identifier}/hqdefault.jpg")
             await schannel.send(embed=embed)
 
         elif isinstance(event, lavalink.events.QueueEndEvent):
@@ -295,9 +300,14 @@ class Music(commands.Cog):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         if not player.current:
             return await ctx.send("Nothing is playing.")
-        else:
-            embed = discord.Embed(title="Now Playing", description=f"{player.current.title}", color=discord.Color.random())
-            await ctx.send(embed=embed)
+        embed = discord.Embed(title="Now playing", description=f"[{player.current.title}]({player.current.uri})",
+                              color=discord.Color.random())
+        embed.add_field(name="Artist", value=player.current.author)
+        embed.add_field(name="Duration", value=str(datetime.datetime.fromtimestamp(player.current.duration / 1000.0)),
+                        inline=False)
+
+        embed.set_thumbnail(url=f"https://img.youtube.com/vi/{player.current.identifier}/hqdefault.jpg")
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=['vol'], help="Change bot volume")
     async def volume(self, ctx, volume: int = None):
