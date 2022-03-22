@@ -40,7 +40,7 @@ class CustomHelp(commands.HelpCommand):
         data = []
         filtered = await self.filter_commands(cog_.get_commands(), sort=True)
         for command in filtered:
-            data.append((f"- {self.get_command_signature(command)}", f"    {self.get_command_signature(command)}\n`{command.short_doc}`"))
+            data.append((f"- {command.name}", f"{self.get_command_signature(command)}\n`{command.short_doc}`"))
 
         page = ViewMenuPages(source=CogPageSource(f"{cog_.qualified_name} Commands", data),
                              clear_reactions_after=True)
@@ -51,9 +51,9 @@ class CustomHelp(commands.HelpCommand):
         if isinstance(group, commands.Group):
             filtered = await self.filter_commands(group.commands, sort=True)
             for command in filtered:
-                data.append((f"- {command.name}", f"    {self.get_command_signature(command)}\n`{command.short_doc}`"))
+                data.append((f"- {command.name}", f"{self.get_command_signature(command)}\n`{command.short_doc}`"))
 
-        page = ViewMenuPages(source=CogPageSource(f"{group.qualified_name}", data),
+        page = ViewMenuPages(source=CogPageSource(f"{group.qualified_name} Commands", data),
                              clear_reactions_after=True)
         await page.start(self.context)
 
