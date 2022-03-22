@@ -40,12 +40,8 @@ class Setup(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Welcome system setup")
     async def welcome(self, ctx):
-        embed = discord.Embed(title="Welcome", color=discord.Color.random(), description="Set up welcome system")
-        command = self.bot.get_command("welcome")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"welcome {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
-        await ctx.send(embed=embed)
+        _cmd = self.bot.get_command("help")
+        await _cmd(ctx, command='welcome')
 
     @welcome.command(help="Setup welcome channel")
     @commands.has_permissions(manage_channels=True)
@@ -110,12 +106,8 @@ class Setup(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Custom prefix setup")
     async def prefix(self, ctx):
-        embed = discord.Embed(title="Prefix", color=discord.Color.random(), description="Set up custom prefix")
-        command = self.bot.get_command("prefix")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"prefix {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
-        await ctx.send(embed=embed)
+        _cmd = self.bot.get_command("help")
+        await _cmd(ctx, command='prefix')
 
     @prefix.command(help="Set custom prefix")
     @commands.has_permissions(manage_guild=True)
@@ -141,12 +133,8 @@ class Setup(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Reaction role setup")
     async def reaction(self, ctx):
-        embed = discord.Embed(title="Reaction", color=discord.Color.random(), description="Create reaction roles")
-        command = self.bot.get_command("reaction")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"reaction {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
-        await ctx.send(embed=embed)
+        _cmd = self.bot.get_command("help")
+        await _cmd(ctx, command='reaction')
 
     @reaction.command(help="Set up reaction role")
     @commands.has_permissions(manage_messages=True)
@@ -184,12 +172,8 @@ class Setup(commands.Cog):
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Starboard stuff", aliases=['sb', 'star'])
     async def starboard(self, ctx):
-        embed = discord.Embed(title="Starboard", color=discord.Color.random(), description="Create reaction roles")
-        command = self.bot.get_command("starboard")
-        if isinstance(command, commands.Group):
-            for subcommand in command.commands:
-                embed.add_field(name=f"starboard|sb|star {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
-        await ctx.send(embed=embed)
+        _cmd = self.bot.get_command("help")
+        await _cmd(ctx, command='starboard')
 
     @starboard.command(help="Show starboard stats")
     async def stats(self, ctx):

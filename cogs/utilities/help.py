@@ -1,5 +1,20 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
+import datetime
+from discord.ext.menus.views import ViewMenuPages
+
+
+class CogPageSource(menus.ListPageSource):
+    def __init__(self, title, data):
+        self.title = title
+        super().__init__(data, per_page=10)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.green(), title=self.title, timestamp=datetime.datetime.utcnow())
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
 
 
 class CustomHelp(commands.HelpCommand):
@@ -22,25 +37,25 @@ class CustomHelp(commands.HelpCommand):
         await self.get_destination().send(embed=embed, view=view)
 
     async def send_cog_help(self, cog_):
-        embed = discord.Embed(title='{0.qualified_name} Commands'.format(cog_), color=discord.Color.from_rgb(225, 0, 92),
-                              description=f'Use {self.context.clean_prefix}help [something] for more info on a command or category. \nExample: {self.context.clean_prefix}help Economy')
-
+        data = []
         filtered = await self.filter_commands(cog_.get_commands(), sort=True)
         for command in filtered:
-            embed.add_field(name=f"- {command.name}",
-                            value=f"    {self.get_command_signature(command)}\n`{command.short_doc}`", inline=False)
-        await self.get_destination().send(embed=embed)
+            data.append((f"- {command.name}", f"    {self.get_command_signature(command)}\n`{command.short_doc}`"))
+
+        page = ViewMenuPages(source=CogPageSource(f"{cog_.qualified_name} Commands", data),
+                             clear_reactions_after=True)
+        await page.start(self.context)
 
     async def send_group_help(self, group):
-        embed = discord.Embed(title=group.qualified_name, color=discord.Color.from_rgb(225, 0, 92),
-                              description=f'Use {self.context.clean_prefix}help [something] for more info on a command or category. \nExample: {self.context.clean_prefix}help Economy')
-
+        data = []
         if isinstance(group, commands.Group):
             filtered = await self.filter_commands(group.commands, sort=True)
             for command in filtered:
-                embed.add_field(name=f"- {command.name}",
-                                value=f"    {self.get_command_signature(command)}\n`{command.short_doc}`", inline=False)
-        await self.get_destination().send(embed=embed)
+                data.append((f"- {command.name}", f"    {self.get_command_signature(command)}\n`{command.short_doc}`"))
+
+        page = ViewMenuPages(source=CogPageSource(f"{group.qualified_name}", data),
+                             clear_reactions_after=True)
+        await page.start(self.context)
 
     async def send_command_help(self, command):
         embed = discord.Embed(title=command.name, color=discord.Color.from_rgb(225, 0, 92),

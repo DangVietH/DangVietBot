@@ -19,12 +19,8 @@ class Tags(commands.Cog):
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Tag setup")
     async def tag(self, ctx, *, name=None):
         if name is None:
-            embed = discord.Embed(title="Tag command", color=discord.Color.random(), description="Set up custom prefix")
-            command = self.bot.get_command("tag")
-            if isinstance(command, commands.Group):
-                for subcommand in command.commands:
-                    embed.add_field(name=f"tag {subcommand.name}", value=f"```{subcommand.help}```", inline=False)
-            await ctx.send(embed=embed)
+            _cmd = self.bot.get_command("help")
+            await _cmd(ctx, command='tag')
         else:
             check = await cursor.find_one({"guild": ctx.guild.id})
             if check is None:
@@ -103,7 +99,7 @@ class Tags(commands.Cog):
         if tnname is None:
             return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
 
-        if ctx.author is not self.bot.get_user(owner):
+        if ctx.author.id != owner:
             return await ctx.send("You are not the owner of this tag")
         await ctx.send("What is the new tag value: `Type end to abort the process`")
 
