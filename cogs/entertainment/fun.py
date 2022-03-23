@@ -7,6 +7,7 @@ import random
 import asyncio
 from utils.configs import config_var
 import urllib
+import aiohttp
 
 
 reddit = asyncpraw.Reddit(client_id="WS8DpWseFlxeec8_v2sjrw",
@@ -72,13 +73,29 @@ class Fun(commands.Cog):
         if len(all_sub) <= 20:  # meme collection running out owo
             await gen_meme()
 
-    @commands.command(help="Slap someone")
+    @commands.command(help="Get dog facts")
     @commands.cooldown(1, 30, commands.BucketType.user)
-    async def slap(self, ctx, member: discord.Member = None):
-        if member is None:
-            await ctx.send("Please type the member name")
-        else:
-            await ctx.send(f"{ctx.author.mention} force DHB to slap {member.mention}")
+    async def dogfact(self, ctx):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://some-random-api.ml/facts/dog") as resp:
+                data = await resp.json()
+                await ctx.send(data['fact'])
+
+    @commands.command(help="Get cat facts")
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    async def catfact(self, ctx):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://some-random-api.ml/facts/cat") as resp:
+                data = await resp.json()
+                await ctx.send(data['fact'])
+
+    @commands.command(help="Get bird facts")
+    @commands.cooldown(1, 30, commands.BucketType.user)
+    async def birdfact(self, ctx):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://some-random-api.ml/facts/bird") as resp:
+                data = await resp.json()
+                await ctx.send(data['fact'])
 
     @commands.command(help="Measure your pp size", aliases=["cock", 'dong'])
     async def pp(self, ctx, *, member: discord.Member = None):
