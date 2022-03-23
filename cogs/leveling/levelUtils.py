@@ -53,7 +53,7 @@ class LevelUtils(commands.Cog):
         await _cmd(ctx, command='role')
 
     @role.command(help="Set up the roles")
-    @commands.has_permissions(manage_channels=True)
+    @commands.has_permissions(manage_roles=True)
     @commands.guild_only()
     async def add(self, ctx, level: int, roles: discord.Role):
         role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})
@@ -64,7 +64,7 @@ class LevelUtils(commands.Cog):
             await ctx.send(f"{roles.name} role added.")
 
     @role.command(help="Remove the role from level")
-    @commands.has_permissions(manage_channels=True)
+    @commands.has_permissions(manage_roles=True)
     @commands.guild_only()
     async def remove(self, ctx, level: int, roles: discord.Role):
         role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})

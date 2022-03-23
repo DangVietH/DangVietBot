@@ -35,6 +35,7 @@ class DangVietBot(commands.Bot):
             activity=discord.Game(name="d!help"),
             **kwargs
         )
+        self.mongo = AsyncIOMotorClient(config_var['mango_link'])
 
     def run(self):
         super().run(config_var['token'], reconnect=True)
@@ -86,8 +87,7 @@ class DangVietBot(commands.Bot):
         await guild.system_channel.send(embed=embed)
 
     async def get_prefix(self, message):
-        cluster = AsyncIOMotorClient(config_var['mango_link'])
-        cursor = cluster["custom_prefix"]["prefix"]
+        cursor = self.mongo["custom_prefix"]["prefix"]
         if not message.guild:
             return commands.when_mentioned_or("d!")(self, message)
         else:

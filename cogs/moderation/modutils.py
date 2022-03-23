@@ -6,9 +6,22 @@ from utils.configs import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 modb = cluster["moderation"]
-cursors = modb['modlog']
+cursors = modb['modconfig']
 cases = modb['cases']
 user_case = modb['user']
+
+
+def is_mod():
+    async def predicate(ctx):
+        result = await cursors.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return False
+        if result['role'] == 0:
+            return False
+        if ctx.guild.get_role(result['role']) in ctx.author.roles:
+            return True
+
+    return commands.check(predicate)
 
 
 class GuildCasePageSource(menus.ListPageSource):
@@ -42,6 +55,11 @@ class ModUtils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def add_to_config(self, guild):
+        results = await cursors.find_one({"guild": guild.id})
+        if results is None:
+            await cursors.insert_one({"guild": guild.id, "modlog": 0, "role": 0, "automod": {"spam": False, "invite": False, "links": False, "mass_mention": False, "raid": False, "caps": False}})
+
     async def add_to_db(self, guild):
         results = await cases.find_one({"guild": guild.id})
         if results is None:
@@ -49,30 +67,24 @@ class ModUtils(commands.Cog):
             await cases.insert_one(insert)
 
     @commands.group(invoke_without_command=True, help="Modlog and case")
-    async def modlog(self, ctx):
+    async def modConfig(self, ctx):
+        await self.add_to_config(ctx.guild)
         _cmd = self.bot.get_command("help")
-        await _cmd(ctx, command='modlog')
+        await _cmd(ctx, command='modConfig')
 
-    @modlog.command(help="Set up channel")
+    @modConfig.command(help="Set up modlog channel")
     @commands.has_permissions(manage_channels=True)
-    async def channel(self, ctx, channel: discord.TextChannel):
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is None:
-            insert = {"guild": ctx.guild.id, "channel": channel.id}
-            await cursors.insert_one(insert)
-            await ctx.send(f"Modlog channel set to {channel.mention}")
-            return
+    async def modlog(self, ctx, channel: discord.TextChannel):
+        await self.add_to_config(ctx.guild)
         await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
         await ctx.send(f"Modlog channel updated to {channel.mention}")
 
-    @modlog.command(help="Remove modlog system if you like to")
-    @commands.has_permissions(manage_channels=True)
-    async def remove(self, ctx):
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is None:
-            return await ctx.send("You don't have a Modlog channel")
-        await cursors.delete_one(result)
-        await ctx.send("Modlog system has been remove")
+    @modConfig.command(help="Set up mod role")
+    @commands.has_permissions(manage_role=True)
+    async def modrole(self, ctx, role: discord.Role):
+        await self.add_to_config(ctx.guild)
+        await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"role": role.id}})
+        await ctx.send(f"Mod role updated to {role.name}")
 
     @commands.command(help="Look at server cases", aliases=["case"])
     @commands.guild_only()
