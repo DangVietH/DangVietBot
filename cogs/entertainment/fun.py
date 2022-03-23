@@ -7,8 +7,8 @@ import random
 import asyncio
 from utils.configs import config_var
 import urllib
-import io
 import aiohttp
+import io
 
 
 reddit = asyncpraw.Reddit(client_id="WS8DpWseFlxeec8_v2sjrw",
@@ -126,19 +126,19 @@ class Fun(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def gay(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        await ctx.send(f'https://some-random-api.ml/canvas/gay?avatar={member.display_avatar.url}')
+        await ctx.send(f"https://some-random-api.ml/canvas/gay?avatar={member.display_avatar.url}")
 
     @commands.command(help="Get a horny permission's card")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def horny(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        await ctx.send(f'https://some-random-api.ml/canvas/horny?avatar={member.display_avatar.url}')
+        await ctx.send(f"https://some-random-api.ml/canvas/horny?avatar={member.display_avatar.url}")
 
     @commands.command(help="U R arrested")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def jail(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        await ctx.send(f'https://some-random-api.ml/canvas/jail?avatar={member.display_avatar.url}')
+        await ctx.send(f"https://some-random-api.ml/canvas/jail?avatar={member.display_avatar.url}")
 
     @commands.command(help="GET TRIGGERED")
     @commands.cooldown(1, 10, commands.BucketType.user)

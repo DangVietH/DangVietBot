@@ -43,7 +43,7 @@ class Welcome(commands.Cog):
             draw.text((512, 390), f"Member {member.guild.member_count}", fill=(255, 255, 255), font=small_font, anchor="ms")
 
             AVATAR_SIZE = 200
-            avatar_asset = member.display_avatar.replace(format='jpg', size=128)
+            avatar_asset = member.avatar.replace(format='jpg', size=128)
             buffer_avatar = io.BytesIO(await avatar_asset.read())
 
             buffer_avatar = io.BytesIO()

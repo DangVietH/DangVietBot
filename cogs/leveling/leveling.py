@@ -130,7 +130,7 @@ class Leveling(commands.Cog):
         draw.rounded_rectangle((245, 185, bar_length, 205), fill=(225, 0, 92), radius=10)
 
         AVATAR_SIZE = 200
-        avatar_asset = user.display_avatar.replace(format='jpg', size=128)
+        avatar_asset = user.avatar.replace(format='jpg', size=128)
         buffer_avatar = io.BytesIO(await avatar_asset.read())
 
         buffer_avatar = io.BytesIO()
