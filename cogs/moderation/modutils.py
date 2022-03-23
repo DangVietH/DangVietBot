@@ -82,7 +82,7 @@ class ModUtils(commands.Cog):
         await ctx.send(f"Modlog channel updated to {channel.mention}")
 
     @modConfig.command(help="Set up mod role")
-    @commands.has_permissions(manage_role=True)
+    @commands.has_permissions(manage_roles=True)
     async def modrole(self, ctx, role: discord.Role):
         await self.add_to_config(ctx.guild)
         await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"role": role.id}})
