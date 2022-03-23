@@ -7,6 +7,7 @@ import random
 import asyncio
 from utils.configs import config_var
 import urllib
+import io
 import aiohttp
 
 
@@ -125,25 +126,41 @@ class Fun(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def gay(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        await ctx.send(f"https://some-random-api.ml/canvas/gay?avatar={member.display_avatar.url}")
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'https://some-random-api.ml/canvas/gay?avatar={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.reply(file=discord.File(imageData, 'triggered.gif'))
 
     @commands.command(help="Get a horny permission's card")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def horny(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        await ctx.send(f"https://some-random-api.ml/canvas/horny?avatar={member.display_avatar.url}")
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'https://some-random-api.ml/canvas/horny?avatar={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.reply(file=discord.File(imageData, 'triggered.gif'))
 
     @commands.command(help="U R arrested")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def jail(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        await ctx.send(f"https://some-random-api.ml/canvas/jail?avatar={member.display_avatar.url}")
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'https://some-random-api.ml/canvas/jail?avatar={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.reply(file=discord.File(imageData, 'triggered.gif'))
 
     @commands.command(help="GET TRIGGERED")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def triggered(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        await ctx.send(f"https://some-random-api.ml/canvas/triggered?avatar={member.display_avatar.url}")
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'https://some-random-api.ml/canvas/triggered?avatar={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.reply(file=discord.File(imageData, 'triggered.gif'))
 
     @commands.command(help="Oh no")
     @commands.cooldown(1, 10, commands.BucketType.user)

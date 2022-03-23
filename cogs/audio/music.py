@@ -293,24 +293,27 @@ class Music(commands.Cog):
         await player.stop()
         # Disconnect from the voice channel.
         await ctx.voice_client.disconnect(force=True)
+        await ctx.message.add_reaction("✅")
 
     @commands.command(help="Pause player")
     async def pause(self, ctx):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         if not player.is_playing:
-            await ctx.send("I'm not playing anything")
-        else:
-            await player.set_pause(True)
+            return await ctx.send("I'm not playing anything")
+        await player.set_pause(True)
+        await ctx.message.add_reaction("✅")
 
     @commands.command(help="Resume player")
     async def resume(self, ctx):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         await player.set_pause(False)
+        await ctx.message.add_reaction("✅")
 
     @commands.command(help="Skip the current track")
     async def skip(self, ctx):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         await player.skip()
+        await ctx.message.add_reaction("✅")
 
     @commands.command(help="Shows the currently playing track.")
     async def np(self, ctx):
@@ -327,9 +330,10 @@ class Music(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['lyrc', 'lyric'], help="Shows the lyrics of a song")
-    async def lyrics(self, ctx, *, song):
+    async def lyrics(self, ctx):
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://some-random-api.ml/lyrics?title={urllib.parse.quote(song)}") as resp:
+            async with session.get(f"https://some-random-api.ml/lyrics?title={urllib.parse.quote(player.current.title)}") as resp:
                 data = await resp.json()
 
         if data.get('error'):
@@ -344,11 +348,11 @@ class Music(commands.Cog):
     async def volume(self, ctx, volume: int = None):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         if volume is None:
-            await ctx.send(f'Volume: {player.volume * 2}%')
-        else:
-            volume = max(1, min(volume, 100))
+            return await ctx.send(f'Volume: {player.volume * 2}%')
+        volume = max(1, min(volume, 100))
 
-            await player.set_volume(volume / 2)
+        await player.set_volume(volume / 2)
+        await ctx.message.add_reaction("✅")
 
     @commands.command(help="Loop the current song until the command is invoked again. ")
     async def loop(self, ctx):

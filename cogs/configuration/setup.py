@@ -34,7 +34,7 @@ def convert(time):
     return val * time_dict[unit]
 
 
-class Setup(commands.Cog):
+class Configuration(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -258,7 +258,7 @@ class Setup(commands.Cog):
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
             return await ctx.send("You don't have a starboard system")
         await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": True}})
-        await ctx.send("Starboard locked")
+        await ctx.message.add_reaction("✅")
 
     @starboard.command(help="Lock starboard")
     @commands.has_permissions(manage_guild=True)
@@ -266,7 +266,7 @@ class Setup(commands.Cog):
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
             return await ctx.send("You don't have a starboard system")
         await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": False}})
-        await ctx.send("Starboard unlocked")
+        await ctx.message.add_reaction("✅")
 
     @starboard.command(help="Disable starboard system")
     @commands.has_permissions(manage_channels=True)
@@ -274,4 +274,4 @@ class Setup(commands.Cog):
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
             return await ctx.send("You don't have a starboard system")
         await scursor.delete_one({"guild": ctx.guild.id})
-        await ctx.send("Starboard system disabled")
+        await ctx.message.add_reaction("✅")
