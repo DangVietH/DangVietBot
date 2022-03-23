@@ -16,7 +16,7 @@ class LyricPageSource(menus.ListPageSource):
         self.title = title
         self.url = url
         self.thumbnail = thumbnail
-        super().__init__(data, per_page=1)
+        super().__init__(data, per_page=20)
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(title=self.title, color=discord.Color.green(), url=self.url)
@@ -205,7 +205,6 @@ class Music(commands.Cog):
             embed = discord.Embed(title="Now playing", description=f"[{event.track.title}]({event.track.uri})", color=discord.Color.random())
             embed.add_field(name="Artist", value=event.track.author)
             embed.add_field(name="Duration", value=str(datetime.datetime.fromtimestamp(event.track.duration/1000.0)))
-            embed.add_field(name="Volume", value=f'{event.volume * 2}%')
             embed.set_thumbnail(url=f"https://img.youtube.com/vi/{event.track.identifier}/hqdefault.jpg")
             await schannel.send(embed=embed)
 
@@ -337,7 +336,7 @@ class Music(commands.Cog):
         if data.get('error'):
             return await ctx.send(f"Received unexpected error: {data['error']}")
         pagData = []
-        for chunk in textwrap.wrap(data['lyrics'], 2000, replace_whitespace=False):
+        for chunk in data['lyrics'].split('\n'):
             pagData.append(chunk)
         page = ViewMenuPages(source=LyricPageSource(data['title'], data['links']['genius'], data['thumbnail']['genius'], pagData), clear_reactions_after=True)
         await page.start(ctx)
