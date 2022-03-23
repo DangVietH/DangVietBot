@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
+from cogs.config.configuration import ConfigurationBase
 
 # some code base on https://github.com/MenuDocs/Pyro/blob/master/cogs/starboard.py
 
@@ -11,10 +12,7 @@ cursor = cluster['sb']['config']
 msg_cursor = cluster['sb']['msg']
 
 
-class Star(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
+class Star(ConfigurationBase):
     def embedGenerator(self, msg):
         embed = discord.Embed(color=discord.Color.yellow(), timestamp=msg.created_at)
         embed.set_author(name=f"{msg.author}", icon_url=msg.author.display_avatar.url)
@@ -32,6 +30,113 @@ class Star(commands.Cog):
             if image:
                 embed.set_image(url=image)
         return embed
+
+    @commands.group(invoke_without_command=True, case_insensitive=True, help="Starboard stuff", aliases=['sb', 'star'])
+    async def starboard(self, ctx):
+        _cmd = self.bot.get_command("help")
+        await _cmd(ctx, command='starboard')
+
+    @starboard.command(help="Show starboard stats")
+    async def stats(self, ctx):
+        result = await cursor.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return await ctx.send("You don't have a starboard system")
+        embed = discord.Embed(title="Starboard Stats", color=discord.Color.random())
+        embed.add_field(name="Starboard Channel", value=f"{self.bot.get_channel(result['channel']).mention}")
+        embed.add_field(name="Starboard Emojis", value=f"{result['emoji']}")
+        embed.add_field(name="Starboard Threshold", value=f"{result['threshold']}")
+        embed.add_field(name="Starboard Message Expire", value=f"{result['age']} seconds")
+        embed.add_field(name="Starboard Ignored Channels",
+                        value=f"{[self.bot.get_channel(channel).mention for channel in result['ignoreChannel']]}")
+        await ctx.send(embed=embed)
+
+    @starboard.command(help="Setup starboard channel")
+    @commands.has_permissions(manage_channels=True)
+    async def channel(self, ctx, channel: discord.TextChannel):
+        result = await cursor.find_one({"guild": ctx.guild.id})
+        if result is None:
+            await cursor.insert_one({
+                "guild": ctx.guild.id,
+                "channel": channel.id,
+                "emoji": "⭐",
+                "threshold": 2,
+                "ignoreChannel": [],
+                "lock": False,
+                "selfStar": False
+            })
+            await ctx.send(f"Starboard channel set to {channel.mention}")
+            return
+        await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
+        await ctx.send(f"Starboard channel updated to {channel.mention}")
+
+    @starboard.command(help="Toggle self star")
+    @commands.has_permissions(manage_guild=True)
+    async def selfStar(self, ctx):
+        result = await cursor.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return await ctx.send("You don't have a starboard system")
+        if result['selfStar'] is True:
+            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"selfStar": False}})
+            await ctx.send("Selfstar is now off")
+        else:
+            await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"selfStar": True}})
+            await ctx.send("Selfstar is now on")
+
+    @starboard.command(help="Ignore channels from starboard")
+    @commands.has_permissions(manage_channels=True)
+    async def ignoreChannel(self, ctx, channel: commands.Greedy[discord.TextChannel]):
+        result = await cursor.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return await ctx.send("You don't have a starboard system")
+        for c in channel:
+            if c in result['ignoreChannel']:
+                continue
+            await cursor.update_one({"guild": ctx.guild.id}, {"$push": {"ignoreChannel": c.id}})
+        await ctx.send(f"Ignored channels {[x.mention for x in channel]}")
+
+    @starboard.command(help="Un ignore channels from starboard")
+    @commands.has_permissions(manage_channels=True)
+    async def unignoreChannel(self, ctx, channel: commands.Greedy[discord.TextChannel]):
+        result = await cursor.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return await ctx.send("You don't have a starboard system")
+        for c in channel:
+            if c in result['ignoreChannel']:
+                continue
+            await cursor.update_one({"guild": ctx.guild.id}, {"$pull": {"ignoreChannel": c.id}})
+        await ctx.send(f"Unignored channels {[x.mention for x in channel]}")
+
+    @starboard.command(help="Set starboard emoji amount", aliases=["amount"])
+    @commands.has_permissions(manage_guild=True)
+    async def threshold(self, ctx, threshold: int):
+        if await cursor.find_one({"guild": ctx.guild.id}) is None:
+            return await ctx.send("You don't have a starboard system")
+        await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"threshold": threshold}})
+        await ctx.send(f"Starboard threshold updated to {threshold}")
+
+    @starboard.command(help="Lock starboard")
+    @commands.has_permissions(manage_guild=True)
+    async def lock(self, ctx):
+        if await cursor.find_one({"guild": ctx.guild.id}) is None:
+            return await ctx.send("You don't have a starboard system")
+        await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": True}})
+        await ctx.send("Starboard locked")
+
+    @starboard.command(help="Lock starboard")
+    @commands.has_permissions(manage_guild=True)
+    async def unlock(self, ctx):
+        if await cursor.find_one({"guild": ctx.guild.id}) is None:
+            return await ctx.send("You don't have a starboard system")
+        await cursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": False}})
+        await ctx.send("Starboard unlocked")
+
+    @starboard.command(help="Disable starboard system")
+    @commands.has_permissions(manage_channels=True)
+    async def disable(self, ctx):
+        if await cursor.find_one({"guild": ctx.guild.id}) is None:
+            return await ctx.send("You don't have a starboard system")
+        await cursor.delete_one({"guild": ctx.guild.id})
+        await ctx.send("Starboard system disabled")
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):

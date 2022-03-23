@@ -17,7 +17,7 @@ coglist = [
             'cogs.moderation',
             'cogs.owner',
             'cogs.rtfm',
-            'cogs.settings',
+            'cogs.config',
             'cogs.utilities',
             'jishaku']
 
