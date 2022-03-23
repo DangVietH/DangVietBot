@@ -329,8 +329,8 @@ class Music(commands.Cog):
 
     @commands.command(aliases=['lyrc', 'lyric'], help="Shows the lyrics of a song")
     async def lyrics(self, ctx, *, search=None):
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         if search is None:
+            player = self.bot.lavalink.player_manager.get(ctx.guild.id)
             search = player.current.title
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://some-random-api.ml/lyrics?title={urllib.parse.quote(search)}") as resp:
