@@ -1,8 +1,6 @@
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
-from cogs.config.configuration import ConfigurationBase
-import asyncio
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["react_role"]['reaction_roles']
@@ -11,45 +9,9 @@ cursor = cluster["react_role"]['reaction_roles']
 # code base on https://github.com/AdvicSaha443/Discord.py-Self-Role-Bot/blob/main/main.py
 
 
-class Reaction(ConfigurationBase):
-    @commands.group(invoke_without_command=True, case_insensitive=True, help="Reaction role setup")
-    async def reaction(self, ctx):
-        _cmd = self.bot.get_command("help")
-        await _cmd(ctx, command='reaction')
-
-    @reaction.command(help="Set up reaction role")
-    @commands.has_permissions(manage_messages=True)
-    async def create(self, ctx):
-        await ctx.send("Answer These Question In Next 10Min!")
-
-        questions = ["Enter Message: ", "Enter Emojis: ", "Enter Roles (only type role id): ", "Enter Channel: "]
-        answers = []
-
-        def check(user):
-            return user.author == ctx.author and user.channel == ctx.channel
-
-        for question in questions:
-            await ctx.send(question)
-
-            try:
-                msg = await self.bot.wait_for('message', timeout=600.0, check=check)
-            except asyncio.TimeoutError:
-                await ctx.send("Type Faster Next Time!")
-                return
-            else:
-                answers.append(msg.content)
-
-        emojis = answers[1].split(" ")
-        roles = answers[2].split(" ")
-        c_id = int(answers[3][2:-1])
-        channel = self.bot.get_channel(c_id)
-
-        bot_msg = await channel.send(answers[0])
-
-        insert = {"id": bot_msg.id, "emojis": emojis, "roles": roles, "guild": ctx.guild.id}
-        await cursor.insert_one(insert)
-        for emoji in emojis:
-            await bot_msg.add_reaction(emoji)
+class Reaction(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
