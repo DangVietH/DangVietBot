@@ -1,11 +1,29 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
 import lavalink
 import re
 from discord.ext.commands.errors import CheckFailure
 from discord.ext.menus.views import ViewMenuPages
 from utils.menuUtils import SecondPageSource
 import datetime
+import urllib
+import aiohttp
+import textwrap
+
+
+class LyricPageSource(menus.ListPageSource):
+    def __init__(self, title, url, thumbnail, data):
+        self.title = title
+        self.url = url
+        self.thumbnail = thumbnail
+        super().__init__(data, per_page=1)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(title=self.title, color=discord.Color.green(), url=self.url)
+        embed.description = "\n".join([part for part in entries])
+        embed.set_thumbnail(url=self.thumbnail)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
 
 
 class NotConnectedToVoice(CheckFailure):
@@ -186,8 +204,8 @@ class Music(commands.Cog):
             schannel = self.bot.get_channel(event.player.fetch('channel'))
             embed = discord.Embed(title="Now playing", description=f"[{event.track.title}]({event.track.uri})", color=discord.Color.random())
             embed.add_field(name="Artist", value=event.track.author)
-            embed.add_field(name="Duration", value=str(datetime.datetime.fromtimestamp(event.track.duration/1000.0)), inline=False)
-
+            embed.add_field(name="Duration", value=str(datetime.datetime.fromtimestamp(event.track.duration/1000.0)))
+            embed.add_field(name="Volume", value=f'{event.volume * 2}%')
             embed.set_thumbnail(url=f"https://img.youtube.com/vi/{event.track.identifier}/hqdefault.jpg")
             await schannel.send(embed=embed)
 
@@ -303,11 +321,28 @@ class Music(commands.Cog):
         embed = discord.Embed(title="Now playing", description=f"[{player.current.title}]({player.current.uri})",
                               color=discord.Color.random())
         embed.add_field(name="Artist", value=player.current.author)
-        embed.add_field(name="Duration", value=str(datetime.datetime.fromtimestamp(player.current.duration / 1000.0)),
-                        inline=False)
+        embed.add_field(name="Duration", value=str(datetime.datetime.fromtimestamp(player.current.duration / 1000.0)))
+        embed.add_field(name="Volume", value=f'{player.volume * 2}%')
 
         embed.set_thumbnail(url=f"https://img.youtube.com/vi/{player.current.identifier}/hqdefault.jpg")
         await ctx.send(embed=embed)
+
+    @commands.command(aliases=['lyrc', 'lyric'], help="Shows the lyrics of a song")
+    async def lyrics(self, ctx, *, search=None):
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+        if search is None:
+            search = player.current.title
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"https://some-random-api.ml/lyrics?title={urllib.parse.quote(search)}") as resp:
+                data = await resp.json()
+
+        if data.get('error'):
+            return await ctx.send(f"Received unexpected error: {data['error']}")
+        pagData = []
+        for chunk in textwrap.wrap(data['lyrics'], 2000, replace_whitespace=False):
+            pagData.append(chunk)
+        page = ViewMenuPages(source=LyricPageSource(data['title'], data['links']['genius'], data['thumbnail']['genius'], pagData), clear_reactions_after=True)
+        await page.start(ctx)
 
     @commands.command(aliases=['vol'], help="Change bot volume")
     async def volume(self, ctx, volume: int = None):
