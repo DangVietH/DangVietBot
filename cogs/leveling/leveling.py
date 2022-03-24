@@ -3,7 +3,7 @@ from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from PIL import Image, ImageDraw, ImageFont
 import io
-from utils.imageUtils import get_image_from_url
+from utils.randomutils import get_image_from_url
 from utils.menuUtils import DefaultPageSource
 from discord.ext.menus.views import ViewMenuPages
 from utils.configs import config_var

@@ -3,6 +3,7 @@ from discord.ext import commands, menus
 from discord.ext.menus.views import ViewMenuPages
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
+from utils.randomutils import has_mod_role
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 modb = cluster["moderation"]
@@ -50,7 +51,7 @@ class ModUtils(commands.Cog):
             await cases.insert_one(insert)
 
     @commands.command(help="Set up modlog channel")
-    @commands.has_permissions(manage_channels=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
     async def modlog(self, ctx, channel: discord.TextChannel):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -62,7 +63,7 @@ class ModUtils(commands.Cog):
         await ctx.send(f"Modlog channel updated to {channel.mention}")
 
     @commands.command(help="Set up custom mod role")
-    @commands.has_permissions(manage_roles=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
     async def modrole(self, ctx, role: discord.Role):
         result = await modrole.find_one({"guild": ctx.guild.id})
         if result is None:

@@ -3,26 +3,15 @@ from discord.ext import commands, tasks
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
 import datetime
+from utils.randomutils import has_mod_role
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 modb = cluster["moderation"]
 cursors = modb['modlog']
 cases = modb['cases']
 user_case = modb['user']
-modrole = modb['modrole']
 timer = cluster["timer"]['mod']
 cursor = cluster["moderation"]['automod']
-
-
-def has_mod_role():
-    async def predicate(ctx):
-        result = await modrole.find_one({"guild": ctx.guild.id})
-        if result is None:
-            return False
-        if ctx.guild.get_role(result['role']) in ctx.author.roles:
-            return True
-
-    return commands.check(predicate)
 
 
 def convert(time):

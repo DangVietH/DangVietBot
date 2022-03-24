@@ -79,9 +79,9 @@ class DangVietBot(commands.Bot):
                               color=discord.Color.from_rgb(225, 0, 92))
         embed.add_field(name="Note", value="I'm still WIP, so some features may be bugged or ugly.", inline=False)
         embed.add_field(name="Links",
-                        value="[invite](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=549755813887&scope=bot%20applications.commands) \n[Support Server](https://discord.gg/cnydBRnHU9)",
+                        value="[invite](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=1237420731614&scope=bot%20applications.commands) \n[Support Server](https://discord.gg/cnydBRnHU9)",
                         inline=False)
-        embed.add_field(name="Some tips", value="You could add a mod role to the bot by using `d!modrole <role>`")
+        embed.add_field(name="Some tips", value="Set up a mod role by using `d!modrole <role>`")
         embed.set_thumbnail(
             url="https://cdn.discordapp.com/avatars/875589545532485682/a5123a4fa15dad3beca44144d6749189.png?size=1024")
         await guild.system_channel.send(embed=embed)

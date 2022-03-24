@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
-from utils.imageUtils import get_image_from_url
+from utils.randomutils import get_image_from_url
 from PIL import Image, ImageDraw, ImageFont
 import io
 
