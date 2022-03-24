@@ -115,7 +115,11 @@ class Star(commands.Cog):
     async def on_raw_message_delete(self, payload):
         check = await msg_cursor.find_one({"message": payload.message_id})
         if check is not None:
+            guildData = await cursor.find_one({"guild": payload.guild_id})
+            starChannel = self.bot.get_channel(guildData['channel'])
+            starMsg = await starChannel.fetch_message(check['star_msg'])
             await msg_cursor.delete_one(check)
+            await starMsg.delete()
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):

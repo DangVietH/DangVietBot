@@ -42,7 +42,7 @@ def convert(time):
     return val * time_dict[unit]
 
 
-class Admin(commands.Cog):
+class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 

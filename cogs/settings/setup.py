@@ -184,7 +184,6 @@ class Setup(commands.Cog):
         embed.add_field(name="Starboard Channel", value=f"{self.bot.get_channel(result['channel']).mention}")
         embed.add_field(name="Starboard Emojis", value=f"{result['emoji']}")
         embed.add_field(name="Starboard Threshold", value=f"{result['threshold']}")
-        embed.add_field(name="Starboard Message Expire", value=f"{result['age']} seconds")
         embed.add_field(name="Starboard Ignored Channels", value=f"{[self.bot.get_channel(channel).mention for channel in result['ignoreChannel']]}")
         await ctx.send(embed=embed)
 

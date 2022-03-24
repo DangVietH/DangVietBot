@@ -22,7 +22,7 @@ class CustomHelp(commands.HelpCommand):
         return f'{self.context.clean_prefix}{command.qualified_name} {command.signature}'
 
     async def send_bot_help(self, mapping):
-        embed = discord.Embed(title='DangVietBot Commands',
+        embed = discord.Embed(title='DangVietBot Categories',
                               description=f"{self.context.bot.description}",
                               color=discord.Color.from_rgb(225, 0, 92))
         for cog, command in mapping.items():

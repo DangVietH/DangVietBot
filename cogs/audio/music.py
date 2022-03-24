@@ -8,7 +8,6 @@ from utils.menuUtils import SecondPageSource
 import datetime
 import urllib
 import aiohttp
-import textwrap
 
 
 class LyricPageSource(menus.ListPageSource):
@@ -327,10 +326,9 @@ class Music(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['lyrc', 'lyric'], help="Shows the lyrics of a song")
-    async def lyrics(self, ctx):
-        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+    async def lyrics(self, ctx, *, song):
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://some-random-api.ml/lyrics?title={urllib.parse.quote(player.current.title)}") as resp:
+            async with session.get(f"https://some-random-api.ml/lyrics?title={urllib.parse.quote(song)}") as resp:
                 data = await resp.json()
 
         if data.get('error'):

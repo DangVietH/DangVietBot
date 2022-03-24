@@ -73,10 +73,10 @@ class ModUtils(commands.Cog):
         if result is None:
             insert = {"guild": ctx.guild.id, "role": role.id}
             await modrole.insert_one(insert)
-            await ctx.send(f"Modlog channel set to {role.mention}")
+            await ctx.send(f"Mod role set to {role.mention}")
             return
         await modrole.update_one({"guild": ctx.guild.id}, {"$set": {"role": role.id}})
-        await ctx.send(f"Modlog channel updated to {role.mention}")
+        await ctx.send(f"Mod role updated to {role.mention}")
 
     @commands.command(help="Look at server cases", aliases=["case"])
     @commands.guild_only()

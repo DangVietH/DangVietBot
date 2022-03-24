@@ -14,7 +14,7 @@ coglist = [
             'cogs.economy',
             'cogs.entertainment',
             'cogs.leveling',
-            'cogs.moderation',
+            'cogs.mod',
             'cogs.owner',
             'cogs.rtfm',
             'cogs.settings',
