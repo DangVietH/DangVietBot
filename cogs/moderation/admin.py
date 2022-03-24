@@ -41,7 +41,6 @@ class Admin(commands.Cog):
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
 
         embed = discord.Embed(title=f"Case {num_of_case}",
-                              cursor=cluster["moderation"]['automod'],
                               description=f"{criminal.mention} has been {type_off.title()}ed for: {reason}",
                               color=discord.Color.red(),
                               timestamp=ctx.message.created_at)
