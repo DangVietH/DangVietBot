@@ -9,8 +9,20 @@ modb = cluster["moderation"]
 cursors = modb['modlog']
 cases = modb['cases']
 user_case = modb['user']
+modrole = modb['modrole']
 timer = cluster["timer"]['mod']
 cursor = cluster["moderation"]['automod']
+
+
+def has_mod_role():
+    async def predicate(ctx):
+        result = await modrole.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return False
+        if ctx.guild.get_role(result['role']) in ctx.author.roles:
+            return True
+
+    return commands.check(predicate)
 
 
 def convert(time):
@@ -70,7 +82,7 @@ class Admin(commands.Cog):
                 await user_case.update_one({"guild": ctx.guild.id, "user": criminal.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Warn member")
-    @commands.has_permissions(administrator=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(moderate_members=True))
     async def warn(self, ctx, member: discord.Member, *, reason=None):
         guild = ctx.guild
         if reason is None:
@@ -81,7 +93,7 @@ class Admin(commands.Cog):
         await self.modlogUtils(ctx, member, "warn", reason)
 
     @commands.command(help="Timeout a member")
-    @commands.has_permissions(moderate_members=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(moderate_members=True))
     async def timeout(self, ctx, member: discord.Member, time, *, reason=None):
         converted_time = convert(time)
         if converted_time == -1:
@@ -95,7 +107,7 @@ class Admin(commands.Cog):
         await self.modlogUtils(ctx, member, "timeout", reason)
 
     @commands.command(help="Untimeout a member")
-    @commands.has_permissions(moderate_members=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(moderate_members=True))
     async def untimeout(self, ctx, member: discord.Member, *, reason=None):
         await member.edit(timeout=None)
         await member.send(f"You were timeout in **{ctx.guild.name}** for {reason}")
@@ -103,7 +115,7 @@ class Admin(commands.Cog):
         await self.modlogUtils(ctx, member, "untimeout", reason)
 
     @commands.command(help="Mute member")
-    @commands.has_permissions(manage_messages=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
     async def mute(self, ctx, member: discord.Member, *, reason=None):
         guild = ctx.guild
         mutedRole = discord.utils.get(guild.roles, name="muted")
@@ -120,7 +132,7 @@ class Admin(commands.Cog):
         await self.modlogUtils(ctx, member, "mute", reason)
 
     @commands.command(help="Mute member but with a timer", aliases=['softmute'])
-    @commands.has_permissions(manage_messages=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
     async def tempmute(self, ctx, member: discord.Member, time, *, reason=None):
         converted_time = convert(time)
         if converted_time == -1:
@@ -148,7 +160,7 @@ class Admin(commands.Cog):
         await self.modlogUtils(ctx, member, "tempmute", reason)
 
     @commands.command(help="Unmute member")
-    @commands.has_permissions(manage_messages=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
     async def unmute(self, ctx, member: discord.Member, *, reason=None):
         mutedRole = discord.utils.get(ctx.guild.roles,
                                       name="muted")
@@ -159,7 +171,7 @@ class Admin(commands.Cog):
         await self.modlogUtils(ctx, member, "unmute", reason)
 
     @commands.command(help="Kick member")
-    @commands.has_permissions(kick_members=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(kick_members=True))
     async def kick(self, ctx, member: discord.Member, *, reason=None):
         if not member.bot:
             await member.send(f"You've been kick from **{ctx.guild.name}** for {reason}")
@@ -168,7 +180,7 @@ class Admin(commands.Cog):
         await self.modlogUtils(ctx, member, "kick", reason)
 
     @commands.command(help="Ban member")
-    @commands.has_permissions(ban_members=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
     async def ban(self, ctx, member: discord.Member, *, reason=None):
         if not member.bot:
             await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for {reason}. What a shame 👎")
@@ -177,7 +189,7 @@ class Admin(commands.Cog):
         await self.modlogUtils(ctx, member, "ban", reason)
 
     @commands.command(help="Ban member but temporarily", aliases=['softban'])
-    @commands.has_permissions(ban_members=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
     async def tempban(self, ctx, member: discord.User, time, *, reason=None):
         converted_time = convert(time)
         if converted_time == -1:
@@ -221,7 +233,7 @@ class Admin(commands.Cog):
             print(e)
 
     @commands.command(help="Unban member")
-    @commands.has_permissions(ban_members=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
     async def unban(self, ctx, member_id: int, *, reason=None):
         user = self.bot.get_user(int(member_id))
         await ctx.guild.unban(user)
@@ -248,38 +260,38 @@ class Admin(commands.Cog):
             await channel.send(embed=embed)
 
     @commands.command(help="Clear messages in a certain amount", aliases=['purge'])
-    @commands.has_permissions(manage_messages=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
     async def clear(self, ctx, amount: int):
         await ctx.channel.purge(limit=amount + 1)
 
     @commands.command(help="Clear all messages in that channel")
-    @commands.has_permissions(manage_messages=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
     async def clear_all(self, ctx):
         await ctx.channel.purge(limit=None)
 
     @commands.command(help="Lock channel")
-    @commands.has_permissions(manage_channels=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
     async def lock(self, ctx, channel: discord.TextChannel = None):
         channel = channel or ctx.channel
         await channel.set_permissions(ctx.guild.default_role, send_messages=False)
         await ctx.send('Channel locked.')
 
     @commands.command(help="Unlock channel")
-    @commands.has_permissions(manage_channels=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
     async def unlock(self, ctx, channel: discord.TextChannel = None):
         channel = channel or ctx.channel
         await channel.set_permissions(ctx.guild.default_role, send_messages=True)
         await ctx.send('Channel unlocked.')
 
     @commands.command(help="Lock all channel")
-    @commands.has_permissions(manage_channels=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
     async def lock_all(self, ctx):
         for channel in ctx.guild.channels:
             if isinstance(channel, discord.TextChannel):
                 await channel.set_permissions(ctx.guild.default_role, send_messages=False)
 
     @commands.command(help="Unlock all channel")
-    @commands.has_permissions(manage_channels=True)
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
     async def unlock_all(self, ctx):
         for channel in ctx.guild.channels:
             if isinstance(channel, discord.TextChannel):

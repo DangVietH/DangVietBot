@@ -7,6 +7,7 @@ from utils.configs import config_var
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 modb = cluster["moderation"]
 cursors = modb['modlog']
+modrole = modb['modrole']
 cases = modb['cases']
 user_case = modb['user']
 
@@ -48,14 +49,14 @@ class ModUtils(commands.Cog):
             insert = {"guild": guild.id, "num": 0, "cases": []}
             await cases.insert_one(insert)
 
-    @commands.group(invoke_without_command=True, help="Modlog and case")
-    async def modlog(self, ctx):
+    @commands.group(invoke_without_command=True, help="Moderation config")
+    async def modConfig(self, ctx):
         _cmd = self.bot.get_command("help")
         await _cmd(ctx, command='modlog')
 
-    @modlog.command(help="Set up channel")
+    @modConfig.command(help="Set up modlog channel")
     @commands.has_permissions(manage_channels=True)
-    async def channel(self, ctx, channel: discord.TextChannel):
+    async def modlog(self, ctx, channel: discord.TextChannel):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             insert = {"guild": ctx.guild.id, "channel": channel.id}
@@ -65,14 +66,17 @@ class ModUtils(commands.Cog):
         await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
         await ctx.send(f"Modlog channel updated to {channel.mention}")
 
-    @modlog.command(help="Remove modlog system if you like to")
-    @commands.has_permissions(manage_channels=True)
-    async def remove(self, ctx):
-        result = await cursors.find_one({"guild": ctx.guild.id})
+    @modConfig.command(help="Set up custom mod role")
+    @commands.has_permissions(manage_roles=True)
+    async def modrole(self, ctx, role: discord.Role):
+        result = await modrole.find_one({"guild": ctx.guild.id})
         if result is None:
-            return await ctx.send("You don't have a Modlog channel")
-        await cursors.delete_one(result)
-        await ctx.send("Modlog system has been remove")
+            insert = {"guild": ctx.guild.id, "role": role.id}
+            await modrole.insert_one(insert)
+            await ctx.send(f"Modlog channel set to {role.mention}")
+            return
+        await modrole.update_one({"guild": ctx.guild.id}, {"$set": {"role": role.id}})
+        await ctx.send(f"Modlog channel updated to {role.mention}")
 
     @commands.command(help="Look at server cases", aliases=["case"])
     @commands.guild_only()
