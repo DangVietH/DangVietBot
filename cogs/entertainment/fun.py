@@ -176,6 +176,28 @@ class Fun(commands.Cog):
                 await session.close()
                 await ctx.send(file=discord.File(imageData, 'wasted.png'))
 
+    @commands.command(help="Not fun fact: my owner lives in a communist country")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def comrade(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://some-random-api.ml/canvas/comrade?avatar={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'comrade.png'))
+
+    @commands.command(help="Respect")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def passed(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://some-random-api.ml/canvas/wasted?avatar={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'wasted.png'))
+
     @commands.command(help="Make a fake youtube comment")
     async def ytcomment(self, ctx, *, comment="Nothing you idiot"):
         async with aiohttp.ClientSession() as session:
