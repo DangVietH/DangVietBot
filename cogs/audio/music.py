@@ -220,6 +220,7 @@ class Music(commands.Cog):
 
     @commands.command(help="Searches and plays a song from a given query.")
     async def play(self, ctx, *, query: str):
+        await ctx.trigger_typing()
         # Get the player for this guild from cache.
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
         # Remove leading and trailing <>. <> may be used to suppress embedding links in Discord.
@@ -327,6 +328,7 @@ class Music(commands.Cog):
 
     @commands.command(aliases=['lyrc', 'lyric'], help="Shows the lyrics of a song")
     async def lyrics(self, ctx, *, song):
+        await ctx.trigger_typing()
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://some-random-api.ml/lyrics?title={urllib.parse.quote(song)}") as resp:
                 data = await resp.json()

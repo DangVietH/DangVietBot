@@ -193,7 +193,7 @@ class Fun(commands.Cog):
         member = member or ctx.author
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                    f'https://some-random-api.ml/canvas/wasted?avatar={member.display_avatar.url}') as rsp:
+                    f'https://some-random-api.ml/canvas/passed?avatar={member.display_avatar.url}') as rsp:
                 imageData = io.BytesIO(await rsp.read())
                 await session.close()
                 await ctx.send(file=discord.File(imageData, 'wasted.png'))
