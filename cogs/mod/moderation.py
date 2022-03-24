@@ -95,6 +95,8 @@ class Moderation(commands.Cog):
     @commands.command(help="Timeout a member")
     @commands.check_any(has_mod_role(), commands.has_permissions(moderate_members=True))
     async def timeout(self, ctx, member: discord.Member, time, *, reason=None):
+        if ctx.author.top_role.position < member.top_role.position:
+            return await ctx.send("You can't timeout someone with a higher role than you")
         converted_time = convert(time)
         if converted_time == -1:
             return await ctx.send("You didn't answer the time correctly")
@@ -117,6 +119,8 @@ class Moderation(commands.Cog):
     @commands.command(help="Mute member")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
     async def mute(self, ctx, member: discord.Member, *, reason=None):
+        if ctx.author.top_role.position < member.top_role.position:
+            return await ctx.send("You can't mute someone with a higher role than you")
         guild = ctx.guild
         mutedRole = discord.utils.get(guild.roles, name="muted")
         if not mutedRole:
@@ -131,9 +135,11 @@ class Moderation(commands.Cog):
         await member.add_roles(mutedRole, reason=reason)
         await self.modlogUtils(ctx, member, "mute", reason)
 
-    @commands.command(help="Mute member but with a timer", aliases=['softmute'])
+    @commands.command(help="Mute member but with a timer")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
     async def tempmute(self, ctx, member: discord.Member, time, *, reason=None):
+        if ctx.author.top_role.position < member.top_role.position:
+            return await ctx.send("You can't mute someone with a higher role than you")
         converted_time = convert(time)
         if converted_time == -1:
             return await ctx.send("You didn't answer the time correctly")
@@ -173,6 +179,8 @@ class Moderation(commands.Cog):
     @commands.command(help="Kick member")
     @commands.check_any(has_mod_role(), commands.has_permissions(kick_members=True))
     async def kick(self, ctx, member: discord.Member, *, reason=None):
+        if ctx.author.top_role.position < member.top_role.position:
+            return await ctx.send("You can't kick someone with a higher role than you")
         if not member.bot:
             await member.send(f"You've been kick from **{ctx.guild.name}** for {reason}")
         await member.kick(reason=reason)
@@ -182,15 +190,48 @@ class Moderation(commands.Cog):
     @commands.command(help="Ban member")
     @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
     async def ban(self, ctx, member: discord.Member, *, reason=None):
+        if ctx.author.top_role.position < member.top_role.position:
+            return await ctx.send("You can't ban someone with a higher role than you")
         if not member.bot:
             await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for {reason}. What a shame 👎")
         await member.ban(reason=reason)
 
         await self.modlogUtils(ctx, member, "ban", reason)
 
-    @commands.command(help="Ban member but temporarily", aliases=['softban'])
+    @commands.command(help="Ban loads of people")
+    @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
+    async def massban(self, members: commands.Greedy[discord.Member], ctx, *, reason=None):
+        for member in members:
+            if ctx.author.top_role.position < member.top_role.position:
+                return await ctx.send("You can't ban someone with a higher role than you")
+            if not member.bot:
+                await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for {reason}. What a shame 👎")
+            await member.ban(reason=reason)
+        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+
+        embed = discord.Embed(title=f"Case {num_of_case}",
+                              description=f"{', '.join([str(member) for member in members])} has been banned for: {reason}",
+                              color=discord.Color.red(),
+                              timestamp=ctx.message.created_at)
+        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
+        await ctx.send(embed=embed)
+        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
+
+        result = await cursors.find_one({"guild": ctx.guild.id})
+        if result is not None:
+            channel = self.bot.get_channel(result["channel"])
+            embed = discord.Embed(title=f"Case #{num_of_case}: MassBan!",
+                                  description=f"**Users:** {', '.join([str(member) for member in members])} ({', '.join([str(member.id) for member in members])}) \n**Mod:** {ctx.author} ({ctx.author.id})\n**Reason:** {reason}",
+                                  color=discord.Color.red(),
+                                  timestamp=ctx.message.created_at)
+            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
+            await channel.send(embed=embed)
+
+    @commands.command(help="Ban member but temporarily")
     @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
     async def tempban(self, ctx, member: discord.User, time, *, reason=None):
+        if ctx.author.top_role.position < member.top_role.position:
+            return await ctx.send("You can't ban someone with a higher role than you")
         converted_time = convert(time)
         if converted_time == -1:
             return await ctx.send("You didn't answer the time correctly")

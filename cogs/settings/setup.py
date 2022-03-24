@@ -49,10 +49,11 @@ class Setup(commands.Cog):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             insert = {"guild": ctx.guild.id, "channel": channel.id, "message": "Welcome {mention}",
-                      "dm": f"Have fun at **{ctx.guild.name}**", "img": "https://cdn.discordapp.com/attachments/875886792035946496/936446668293935204/bridge.png"}
+                      "dm": f"Have fun at **{ctx.guild.name}**", "img": "https://cdn.discordapp.com/attachments/875886792035946496/936446668293935204/bridge.png",
+                      "role": 0}
             await welcome_cursors.insert_one(insert)
             await ctx.send(f"Welcome channel set to {channel.mention}")
-        elif result is not None:
+        else:
             await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
             await ctx.send(f"Welcome channel updated to {channel.mention}")
 
@@ -66,7 +67,7 @@ class Setup(commands.Cog):
         else:
             await ctx.send("You don't have a welcome system")
 
-    @welcome.command(help="Create your welcome message. Use var to see the list of variables")
+    @welcome.command(help="Create your welcome message. Use welcome text var to see the list of variables")
     @commands.has_permissions(manage_channels=True)
     async def text(self, ctx, *, text):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
@@ -84,25 +85,52 @@ class Setup(commands.Cog):
             await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"message": text}})
             await ctx.send(f"Welcome message updated to ```{text}```")
 
-    @welcome.command(help="Setup welcome dm")
+    @welcome.command(help="Setup welcome dm. Use welcome dm var to see the list of variables")
     @commands.has_permissions(manage_messages=True)
     async def dm(self, ctx, *, text):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             await ctx.send("You haven't configure a welcome channel yet")
         else:
+            if text.lower() == "var":
+                return await ctx.send("""
+{mention}: Mention the joined user
+{username}: user name and discriminator
+{count}: Display the member count
+{name}: The user's name
+{server}: The server's name
+                            """)
             await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"dm": text}})
             await ctx.send(f"Welcome dm updated to ```{text}```")
+
+    @welcome.command(help="Add role when member join")
+    @commands.has_permissions(manage_channels=True)
+    @commands.guild_only()
+    async def role(self, ctx, role: discord.Role):
+        result = await welcome_cursors.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return await ctx.send("You haven't configure a welcome channel yet")
+        await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"role": role.id}})
+        await ctx.send(f"Successfully updated welcome role")
+
+    @welcome.command(help="remove role when member join")
+    @commands.has_permissions(manage_channels=True)
+    @commands.guild_only()
+    async def roleremove(self, ctx):
+        result = await welcome_cursors.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return await ctx.send("You haven't configure a welcome channel yet")
+        await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"role": 0}})
+        await ctx.send(f"Successfully remove welcome role")
 
     @welcome.command(help="Custom image. Make sure it's a link", aliases=["img"])
     @commands.has_permissions(manage_messages=True)
     async def image(self, ctx, *, link: str):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
-            await ctx.send("You haven't configure a welcome channel yet")
-        else:
-            await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"img": link}})
-            await ctx.send(f"Successfully updated welcome image")
+            return await ctx.send("You haven't configure a welcome channel yet")
+        await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"img": link}})
+        await ctx.send(f"Successfully updated welcome image")
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Custom prefix setup")
     async def prefix(self, ctx):
@@ -117,7 +145,7 @@ class Setup(commands.Cog):
             insert = {"guild": ctx.guild.id, "prefix": f"{prefixes}"}
             await pcursor.insert_one(insert)
             await ctx.send(f"Server prefix set to `{prefixes}`")
-        elif result is not None:
+        else:
             await pcursor.update_one({"guild": ctx.guild.id}, {"$set": {"prefix": f"{prefixes}"}})
             await ctx.send(f"Server prefix update to `{prefixes}`")
 

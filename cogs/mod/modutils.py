@@ -49,12 +49,7 @@ class ModUtils(commands.Cog):
             insert = {"guild": guild.id, "num": 0, "cases": []}
             await cases.insert_one(insert)
 
-    @commands.group(invoke_without_command=True, help="Moderation config")
-    async def modConfig(self, ctx):
-        _cmd = self.bot.get_command("help")
-        await _cmd(ctx, command='modlog')
-
-    @modConfig.command(help="Set up modlog channel")
+    @commands.command(help="Set up modlog channel")
     @commands.has_permissions(manage_channels=True)
     async def modlog(self, ctx, channel: discord.TextChannel):
         result = await cursors.find_one({"guild": ctx.guild.id})
@@ -66,17 +61,17 @@ class ModUtils(commands.Cog):
         await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
         await ctx.send(f"Modlog channel updated to {channel.mention}")
 
-    @modConfig.command(help="Set up custom mod role")
+    @commands.command(help="Set up custom mod role")
     @commands.has_permissions(manage_roles=True)
     async def modrole(self, ctx, role: discord.Role):
         result = await modrole.find_one({"guild": ctx.guild.id})
         if result is None:
             insert = {"guild": ctx.guild.id, "role": role.id}
             await modrole.insert_one(insert)
-            await ctx.send(f"Mod role set to {role.mention}")
+            await ctx.send(f"Mod role set to {role.name}")
             return
         await modrole.update_one({"guild": ctx.guild.id}, {"$set": {"role": role.id}})
-        await ctx.send(f"Mod role updated to {role.mention}")
+        await ctx.send(f"Mod role updated to {role.name}")
 
     @commands.command(help="Look at server cases", aliases=["case"])
     @commands.guild_only()
@@ -88,7 +83,7 @@ class ModUtils(commands.Cog):
             return await ctx.send("Looks like all your server members are good people! Good job!")
         for case in results['cases']:
             gdata.append((f"Case {case['Number']}",
-                          f"**Type:** {case['type']}\n **User:** {self.bot.get_user(int(case['user']))}\n**Mod:**{self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
+                          f"**Type:** {case['type']}\n **User:** {self.bot.get_user(int(case['user']))}\n**Mod:** {self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
         page = ViewMenuPages(source=GuildCasePageSource(results['num'], gdata), clear_reactions_after=True)
         await page.start(ctx)
 

@@ -85,6 +85,8 @@ class Welcome(commands.Cog):
                         username=member
                     )
                 )
+            if result['role'] != 0:
+                await member.add_roles(member.guild.get_role(result['role']))
 
     # remove data to save storage
     @commands.Cog.listener()

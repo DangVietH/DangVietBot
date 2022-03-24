@@ -31,11 +31,11 @@ redit_pass=
 token=
 ```
 
-4. **Remove ay reference to DangVietBot in the code**
+4. **Remove any reference to DangVietBot in the code**
 5. **Enjoy running the bot**
 
 **Note that I'll not help you on selfhosting**
 ## Links
-[invite](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=549755813887&scope=bot%20applications.commands)
+[**invite**](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=549755813887&scope=bot%20applications.commands)
 
-[support server](https://discord.gg/cnydBRnHU9)
+[**support server**](https://discord.gg/cnydBRnHU9)
