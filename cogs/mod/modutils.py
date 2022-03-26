@@ -75,7 +75,6 @@ class ModUtils(commands.Cog):
         await ctx.send(f"Mod role updated to {role.name}")
 
     @commands.command(help="Look at server cases", aliases=["case"])
-    @commands.guild_only()
     async def caselist(self, ctx):
         await self.add_to_db(ctx.guild)
         results = await cases.find_one({"guild": ctx.guild.id})
@@ -89,7 +88,6 @@ class ModUtils(commands.Cog):
         await page.start(ctx)
 
     @commands.command(help="Look at user cases", aliases=["ucase"])
-    @commands.guild_only()
     async def usercase(self, ctx, member: discord.Member = None):
         member = member or ctx.author
         udata = []

@@ -169,6 +169,7 @@ class Music(commands.Cog):
         player = self.bot.lavalink.player_manager.create(ctx.guild.id, endpoint=str(ctx.author.voice.channel.rtc_region))
         # Create returns a player if one exists, otherwise creates.
         # This line is important because it ensures that a player always exists for a guild.
+        # Since Guild.region is deprecated in dpy v2, we need to use the VoiceChannel.rtc_region instead.
 
         # Most people might consider this a waste of resources for guilds that aren't playing, but this is
         # the easiest and simplest way of ensuring players are created.

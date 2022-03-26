@@ -106,7 +106,6 @@ class Setup(commands.Cog):
 
     @welcome.command(help="Add role when member join")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
-    @commands.guild_only()
     async def role(self, ctx, role: discord.Role):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -116,7 +115,6 @@ class Setup(commands.Cog):
 
     @welcome.command(help="remove role when member join")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
-    @commands.guild_only()
     async def roleremove(self, ctx):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:

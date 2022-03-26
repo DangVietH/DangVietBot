@@ -80,7 +80,7 @@ class Fun(commands.Cog):
         async with aiohttp.ClientSession() as session:
             async with session.get("https://some-random-api.ml/facts/dog") as resp:
                 data = await resp.json()
-                await ctx.send(data['fact'])
+                await ctx.send(f"**Dog Fact:** {data['fact']}")
 
     @commands.command(help="Get cat facts")
     @commands.cooldown(1, 30, commands.BucketType.user)
@@ -88,7 +88,7 @@ class Fun(commands.Cog):
         async with aiohttp.ClientSession() as session:
             async with session.get("https://some-random-api.ml/facts/cat") as resp:
                 data = await resp.json()
-                await ctx.send(data['fact'])
+                await ctx.send(f"**Cat Fact:** {data['fact']}")
 
     @commands.command(help="Get bird facts")
     @commands.cooldown(1, 30, commands.BucketType.user)
@@ -96,7 +96,7 @@ class Fun(commands.Cog):
         async with aiohttp.ClientSession() as session:
             async with session.get("https://some-random-api.ml/facts/bird") as resp:
                 data = await resp.json()
-                await ctx.send(data['fact'])
+                await ctx.send(f"**Bird Fact:** {data['fact']}")
 
     @commands.command(help="Measure your pp size", aliases=["cock", 'dong'])
     async def pp(self, ctx, *, member: discord.Member = None):

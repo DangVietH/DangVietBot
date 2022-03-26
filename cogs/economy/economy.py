@@ -50,7 +50,6 @@ class Economy(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(help="Who is the richest one in your server")
-    @commands.guild_only()
     async def rich(self, ctx):
         stats = cursor.find().sort("wallet", -1)
         data = []
@@ -80,7 +79,6 @@ class Economy(commands.Cog):
 
     @commands.command(help="Beg some money")
     @commands.cooldown(1, 7200, commands.BucketType.user)
-    @commands.guild_only()
     async def beg(self, ctx):
         user = ctx.author
 
@@ -92,12 +90,10 @@ class Economy(commands.Cog):
 
     @commands.command(help="we work for the right to work")
     @commands.cooldown(1, 3600, commands.BucketType.user)
-    @commands.guild_only()
     async def work(self, ctx):
         user = ctx.author
         await self.open_account(user)
 
-        check = await cursor.find_one({"id": user.id})
         random_money = random.randint(100, 10000)
         await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
         jl = ['police', 'programmer', 'bus driver', 'street preformer', 'taxi driver', 'farmer', 'teacher', 'doctor']
@@ -105,7 +101,6 @@ class Economy(commands.Cog):
         await ctx.send(f"You got 💵 {random_money} for working as a {career}")
 
     @commands.command(help="View the store", aliases=['store'])
-    @commands.guild_only()
     async def shop(self, ctx):
         data = []
         for i in range(len(items_name)):
@@ -115,7 +110,6 @@ class Economy(commands.Cog):
         await page.start(ctx)
 
     @commands.command(help="Buy some items")
-    @commands.guild_only()
     async def buy(self, ctx, item_name: str, amount=1):
         user = ctx.author
 
@@ -146,7 +140,6 @@ class Economy(commands.Cog):
                     break
 
     @commands.command(help="Sell your items")
-    @commands.guild_only()
     async def sell(self, ctx, item_name: str, amount=1):
         user = ctx.author
 
@@ -208,7 +201,6 @@ class Economy(commands.Cog):
 
     @commands.command(help="we work for the right to work")
     @commands.cooldown(1, 60, commands.BucketType.user)
-    @commands.guild_only()
     async def gamble(self, ctx, amount: int):
         await self.open_account(ctx.author)
         check = await cursor.find_one({"id": ctx.author.id})
@@ -225,7 +217,6 @@ class Economy(commands.Cog):
             await ctx.send(f"You have lost 💵 {amount}")
 
     @commands.command(help="Deposit your money into the bank", aliases=['dep'])
-    @commands.guild_only()
     async def deposit(self, ctx, amount=None):
         user = ctx.author
         await self.open_account(user)
@@ -244,7 +235,6 @@ class Economy(commands.Cog):
         await ctx.message.add_reaction("✅")
 
     @commands.command(help="Withdraw your money from the bank")
-    @commands.guild_only()
     async def withdraw(self, ctx, amount=None):
         user = ctx.author
         await self.open_account(user)
@@ -263,7 +253,6 @@ class Economy(commands.Cog):
         await ctx.message.add_reaction("✅")
 
     @commands.command(help="Transfer money to someone", aliases=['send'])
-    @commands.guild_only()
     async def transfer(self, ctx, user: discord.Member = None, amount=1):
         await self.open_account(ctx.author)
         check = await cursor.find_one({"id": ctx.author.id})
@@ -279,7 +268,6 @@ class Economy(commands.Cog):
 
     @commands.command(help="It's a crime to steal someone", aliases=['steal'])
     @commands.cooldown(1, 86400, commands.BucketType.user)
-    @commands.guild_only()
     async def rob(self, ctx, user: discord.Member = None, amount=1):
         await self.open_account(ctx.author)
 
