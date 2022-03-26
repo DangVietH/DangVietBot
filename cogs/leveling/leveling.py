@@ -87,6 +87,8 @@ class Leveling(commands.Cog):
 
     @commands.command(help="See your exp")
     async def rank(self, ctx, user: discord.Member = None):
+        if await disable.find_one({"guild": ctx.guild.id}):
+            return await ctx.send("Level system is disabled in this server")
         user = user or ctx.author
         stats = await levelling.find_one({'guild': ctx.guild.id, "user": user.id})
         if stats is None:
@@ -170,6 +172,8 @@ class Leveling(commands.Cog):
 
     @commands.command(help="See server ranks")
     async def top(self, ctx):
+        if await disable.find_one({"guild": ctx.guild.id}):
+            return await ctx.send("Level system is disabled in this server")
         stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
         data = []
         num = 0

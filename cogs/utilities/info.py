@@ -47,6 +47,7 @@ class Info(commands.Cog):
         embed.add_field(name="Status", value=user.status, inline=True)
         embed.add_field(name="In voice", value=voice_state, inline=True)
         embed.add_field(name="Activity", value=activity, inline=True)
+        embed.add_field(name="Roles", value=",".join([role.mention for role in ctx.author.roles]), inline=True)
         embed.add_field(name="Top role", value=user.top_role.mention, inline=True)
         embed.add_field(name="Bot", value=user.bot, inline=True)
         embed.add_field(name="Badges", value=hypesquad_class, inline=False)
