@@ -8,7 +8,6 @@ from utils.menuUtils import DefaultPageSource
 from discord.ext.menus.views import ViewMenuPages
 from utils.configs import config_var
 
-
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 db = cluster["levelling"]
 levelling = db['member']
@@ -54,11 +53,15 @@ class Leveling(commands.Cog):
 
                             lvl_channel = await upchannel.find_one({"guild": message.guild.id})
                             if lvl_channel is None:
-                                await message.channel.send(
-                                    f"🎉 {message.author.mention} has reached level **{lvl}**!!🎉")
-                            else:
-                                channel = self.bot.get_channel(lvl_channel["channel"])
-                                await channel.send(f"🎉 {message.author.mention} has reach level **{lvl}**!!🎉")
+                                return await message.channel.send(lconf['msg'].format(
+                                    mention=message.author.mention,
+                                    name=message.author.name,
+                                    server=message.guild.name,
+                                    username=message.author
+                                ))
+
+                            channel = self.bot.get_channel(lvl_channel["channel"])
+                            await channel.send(f"🎉 {message.author.mention} has reach level **{lvl}**!!🎉")
 
                             levelrole = lconf['role']
                             levelnum = lconf['level']
@@ -68,15 +71,14 @@ class Leveling(commands.Cog):
                                     await message.author.add_roles(role)
                                     lvl_channel = await upchannel.find_one({"guild": message.guild.id})
                                     if lvl_channel is None:
-                                        await message.channel.send(f"{message.author}also receive {role.name} role")
-                                    else:
-                                        channel = self.bot.get_channel(lvl_channel["channel"])
-                                        await channel.send(f"🎉 {message.author} also receive {role.name} role")
+                                        return await message.channel.send(
+                                            f"{message.author}also receive {role.name} role")
+                                    channel = self.bot.get_channel(lvl_channel["channel"])
+                                    await channel.send(f"🎉 {message.author} also receive {role.name} role")
                 else:
                     return None
 
     @commands.command(help="See your exp")
-    @commands.guild_only()
     async def rank(self, ctx, user: discord.Member = None):
         user = user or ctx.author
         stats = await levelling.find_one({'guild': ctx.guild.id, "user": user.id})
@@ -110,7 +112,7 @@ class Leveling(commands.Cog):
 
         rectangle_image = Image.new('RGBA', (IMAGE_WIDTH, IMAGE_HEIGHT))
         rectangle_draw = ImageDraw.Draw(rectangle_image)
-        rectangle_draw.rectangle((20, 20, IMAGE_WIDTH-20, IMAGE_HEIGHT-20), fill=(0, 0, 0, 127))
+        rectangle_draw.rectangle((20, 20, IMAGE_WIDTH - 20, IMAGE_HEIGHT - 20), fill=(0, 0, 0, 127))
         image = Image.alpha_composite(image, rectangle_image)
 
         draw = ImageDraw.Draw(image)
@@ -160,7 +162,6 @@ class Leveling(commands.Cog):
         await ctx.send(file=discord.File(buffer, 'rank.png'))
 
     @commands.command(help="See server ranks")
-    @commands.guild_only()
     async def top(self, ctx):
         stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
         data = []
@@ -170,11 +171,11 @@ class Leveling(commands.Cog):
             to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        page = ViewMenuPages(source=DefaultPageSource(f"Leaderboard of {ctx.guild.name}", data), clear_reactions_after=True)
+        page = ViewMenuPages(source=DefaultPageSource(f"Leaderboard of {ctx.guild.name}", data),
+                             clear_reactions_after=True)
         await page.start(ctx)
 
     @commands.command(help="See global rank")
-    @commands.guild_only()
     @commands.is_owner()
     async def gtop(self, ctx):
         stats = levelling.find().sort("xp", -1)

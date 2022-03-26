@@ -22,10 +22,9 @@ class LevelUtils(commands.Cog):
     async def add_to_db(self, guild):
         results = await levelConfig.find_one({"guild": guild.id})
         if results is None:
-            await levelConfig.insert_one({"guild": guild.id, "role": [], "level": [], "xp": 10})
+            await levelConfig.insert_one({"guild": guild.id, "role": [], "level": [], "xp": 10, "msg": "🎉 {mention} has reached level **{level}**!!🎉"})
 
     @commands.command(help="Set background for your server rank")
-    @commands.guild_only()
     async def setbackground(self, ctx, link):
         if await image_cursor.find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is not None:
             await image_cursor.update_one({"guild": ctx.guild.id, "member": ctx.author.id}, {"$set": {"image": link}})
@@ -34,14 +33,12 @@ class LevelUtils(commands.Cog):
         await ctx.send("New Background set")
 
     @commands.command(help="Set background back to default")
-    @commands.guild_only()
     async def resetbackground(self, ctx):
         if await image_cursor.find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is None:
             await ctx.send("You don't have a custom background")
         await image_cursor.delete_one({"guild": ctx.guild.id, "member": ctx.author.id})
         await ctx.send("👍")
 
-    @commands.guild_only()
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
     @commands.command(help="Set xp for each msg")
     async def setXpPermessage(self, ctx, level: int):
@@ -56,7 +53,6 @@ class LevelUtils(commands.Cog):
 
     @role.command(help="Set up the roles")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
-    @commands.guild_only()
     async def add(self, ctx, level: int, roles: discord.Role):
         role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})
         if roles.id in role_cursor['role']:
@@ -67,7 +63,6 @@ class LevelUtils(commands.Cog):
 
     @role.command(help="Remove the role from level")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
-    @commands.guild_only()
     async def remove(self, ctx, level: int, roles: discord.Role):
         role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})
         if roles.id in role_cursor['role']:
@@ -77,7 +72,6 @@ class LevelUtils(commands.Cog):
             await ctx.send("I don't remember I put that role in. do role list to see")
 
     @role.command(help="See list of rewarding roles")
-    @commands.guild_only()
     async def list(self, ctx):
         role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})
         levelrole = role_cursor['role']
@@ -94,9 +88,21 @@ class LevelUtils(commands.Cog):
         _cmd = self.bot.get_command("help")
         await _cmd(ctx, command='lvl')
 
+    @lvl.command(help="Custom level up message. Use welcome text var to see the list of variables")
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
+    async def text(self, ctx, *, text):
+        if text.lower() == "var":
+            return await ctx.send("""
+{mention}: Mention the joined user
+{username}: user name and discriminator
+{name}: The user's name
+{server}: The server's name
+                        """)
+        await levelConfig.update_one({"guild": ctx.guild.id}, {"$set": {"msg": text}})
+        await ctx.send(f"Welcome message updated to ```{text}```")
+
     @lvl.command(help="Setup level up channel if you like to")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
-    @commands.guild_only()
     async def setchannel(self, ctx, channel: discord.TextChannel):
         result = await upchannel.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -109,7 +115,6 @@ class LevelUtils(commands.Cog):
 
     @lvl.command(help="Remove level up channel")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
-    @commands.guild_only()
     async def removechannel(self, ctx):
         result = await upchannel.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -119,7 +124,6 @@ class LevelUtils(commands.Cog):
 
     @lvl.command(help="Disable levelling")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_guild=True))
-    @commands.guild_only()
     async def disable(self, ctx):
         check = await disable.find_one({"guild": ctx.guild.id})
         if check is not None:
@@ -136,7 +140,6 @@ class LevelUtils(commands.Cog):
 
     @lvl.command(help="Re-enable levelling")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_guild=True))
-    @commands.guild_only()
     async def renable(self, ctx):
         check = await disable.find_one({"guild": ctx.guild.id})
         if check is not None:
@@ -147,7 +150,6 @@ class LevelUtils(commands.Cog):
 
     @commands.command(help="Add xp to member")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
-    @commands.guild_only()
     async def add_xp(self, ctx, member: discord.Member, amount: int):
         if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
             return await ctx.send("User has no account")
@@ -156,7 +158,6 @@ class LevelUtils(commands.Cog):
 
     @commands.command(help="Remove xp from member")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
-    @commands.guild_only()
     async def remove_xp(self, ctx, member: discord.Member, amount: int):
         if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
             return await ctx.send("User has no account")

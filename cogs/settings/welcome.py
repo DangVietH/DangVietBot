@@ -71,7 +71,7 @@ class Welcome(commands.Cog):
                     mention=member.mention,
                     count=member.guild.member_count,
                     name=member.name,
-                    guild=member.guild.name,
+                    server=member.guild.name,
                     username=member
                 ),
                 file=discord.File(buffer_output, 'welcome.png')
@@ -81,7 +81,7 @@ class Welcome(commands.Cog):
                     str(result["dm"]).format(
                         count=member.guild.member_count,
                         name=member.name,
-                        guild=member.guild.name,
+                        server=member.guild.name,
                         username=member
                     )
                 )
