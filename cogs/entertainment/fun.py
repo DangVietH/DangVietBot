@@ -164,7 +164,7 @@ class Fun(commands.Cog):
     @commands.command(aliases=['pokeidex'], help="Show pokemon info")
     async def pokedex(self, ctx, *, pokemon):
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://some-random-api.ml/lyrics?title={urllib.parse.quote(pokemon)}") as resp:
+            async with session.get(f"https://some-random-api.ml/pokedex?pokemon={urllib.parse.quote(pokemon)}") as resp:
                 data = await resp.json()
         if data.get('error'):
             return await ctx.send(f"Received unexpected error: {data['error']}")
