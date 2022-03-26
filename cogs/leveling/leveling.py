@@ -61,7 +61,12 @@ class Leveling(commands.Cog):
                                 ))
 
                             channel = self.bot.get_channel(lvl_channel["channel"])
-                            await channel.send(f"🎉 {message.author.mention} has reach level **{lvl}**!!🎉")
+                            await channel.send(lconf['msg'].format(
+                                    mention=message.author.mention,
+                                    name=message.author.name,
+                                    server=message.guild.name,
+                                    username=message.author
+                                ))
 
                             levelrole = lconf['role']
                             levelnum = lconf['level']
