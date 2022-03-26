@@ -75,7 +75,7 @@ class Fun(commands.Cog):
             await gen_meme()
 
     @commands.command(help="Get dog facts")
-    @commands.cooldown(1, 30, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def dogfact(self, ctx):
         async with aiohttp.ClientSession() as session:
             async with session.get("https://some-random-api.ml/facts/dog") as resp:
@@ -83,7 +83,7 @@ class Fun(commands.Cog):
                 await ctx.send(f"**Dog Fact:** {data['fact']}")
 
     @commands.command(help="Get cat facts")
-    @commands.cooldown(1, 30, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def catfact(self, ctx):
         async with aiohttp.ClientSession() as session:
             async with session.get("https://some-random-api.ml/facts/cat") as resp:
@@ -91,7 +91,7 @@ class Fun(commands.Cog):
                 await ctx.send(f"**Cat Fact:** {data['fact']}")
 
     @commands.command(help="Get bird facts")
-    @commands.cooldown(1, 30, commands.BucketType.user)
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def birdfact(self, ctx):
         async with aiohttp.ClientSession() as session:
             async with session.get("https://some-random-api.ml/facts/bird") as resp:
@@ -152,6 +152,41 @@ class Fun(commands.Cog):
                 imageData = io.BytesIO(await rsp.read())
                 await session.close()
                 await ctx.send(file=discord.File(imageData, 'jail.png'))
+
+    @commands.command(help="Funny shit")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def joke(self, ctx):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://some-random-api.ml/joke") as resp:
+                data = await resp.json()
+                await ctx.send(data['joke'])
+
+    @commands.command(aliases=['pokeidex'], help="Show pokemon info")
+    async def pokedex(self, ctx, *, pokemon):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"https://some-random-api.ml/lyrics?title={urllib.parse.quote(pokemon)}") as resp:
+                data = await resp.json()
+        if data.get('error'):
+            return await ctx.send(f"Received unexpected error: {data['error']}")
+        embed = discord.Embed(title=data['name'], description=data['description'])
+        embed.add_field(name="Generation", value=data['generation'])
+        embed.add_field(name="Type", value=", ".join(poketype for poketype in data['type']))
+        embed.add_field(name="Species", value=", ".join(species for species in data['species']))
+        embed.add_field(name="Abilities", value=", ".join(abilities for abilities in data['abilities']))
+        embed.add_field(name="Id", value=data['id'])
+        embed.add_field(name="Height", value=data['height'])
+        embed.add_field(name="Weight", value=data['weight'])
+        embed.add_field(name="Gender", value=", ".join(gender for gender in data['gender']))
+        embed.add_field(name="Base Experience", value=data['base_experience'])
+        embed.add_field(name="Egg group", value=", ".join(egg_groups for egg_groups in data['egg_groups']))
+        embed.add_field(name="HP", value=data['stats']['hp'])
+        embed.add_field(name="Attack", value=data['stats']['attack'])
+        embed.add_field(name="Defense", value=data['stats']['defense'])
+        embed.add_field(name="Speed Attack", value=data['stats']['sp_def'])
+        embed.add_field(name="Speed Defense", value=data['stats']['sp_def'])
+        embed.add_field(name="Speed", value=data['stats']['speed'])
+        embed.add_field(name="Total", value=data['stats']['total'])
+        embed.set_thumbnail(url=data['sprites']['animated'])
 
     @commands.command(help="GET TRIGGERED")
     @commands.cooldown(1, 10, commands.BucketType.user)
