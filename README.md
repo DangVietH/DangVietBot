@@ -36,6 +36,6 @@ token=
 
 **Note that I'll not help you on selfhosting**
 ## Links
-[**invite**](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=549755813887&scope=bot%20applications.commands)
+[**invite**](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=1237420731614&scope=bot%20applications.commands)
 
 [**support server**](https://discord.gg/cnydBRnHU9)

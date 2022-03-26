@@ -66,9 +66,9 @@ class Fun(commands.Cog):
         comment = random_sub.num_comments
         link = random_sub.permalink
 
-        embed = discord.Embed(title=f'{name}', color=discord.Color.purple(), url=f"https://reddit.com{link}")
+        embed = discord.Embed(title=f'{name}', color=discord.Color.orange(), url=f"https://reddit.com{link}")
         embed.set_image(url=url)
-        embed.set_footer(text=f"⬆️ {upvote} | 💬 {comment}", icon_url='https://www.vectorico.com/download/social_media/Reddit-Icon.png')
+        embed.set_footer(text=f"👍 {upvote} | 💬 {comment}", icon_url='https://www.vectorico.com/download/social_media/Reddit-Icon.png')
         await ctx.send(embed=embed)
 
         if len(all_sub) <= 20:  # meme collection running out owo
@@ -101,9 +101,7 @@ class Fun(commands.Cog):
     @commands.command(help="Measure your pp size", aliases=["cock", 'dong'])
     async def pp(self, ctx, *, member: discord.Member = None):
         member = member or ctx.author
-        pp = random.randint(0, 50)
-        the_thing = "="
-        await ctx.send(embed=discord.Embed(title=f"{member} pp size", description=f"8{the_thing*pp}D", color=discord.Color.purple()))
+        await ctx.send(embed=discord.Embed(title=f"{member} pp size", description=f"8{'='*random.randint(0, 50)}D", color=discord.Color.purple()))
 
     @commands.command(help="Emojify your text")
     @commands.cooldown(1, 10, commands.BucketType.user)

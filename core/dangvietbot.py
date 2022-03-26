@@ -37,6 +37,8 @@ class DangVietBot(commands.Bot):
             activity=discord.Game(name="d!help"),
             **kwargs
         )
+        self.invite = "https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=1237420731614&scope=bot%20applications.commands"
+        self.github = "https://github.com/DangVietH/DangVietBot"
 
     def run(self):
         super().run(config_var['token'], reconnect=True)
@@ -81,7 +83,7 @@ class DangVietBot(commands.Bot):
                               color=discord.Color.from_rgb(225, 0, 92))
         embed.add_field(name="Note", value="I'm still WIP, so some features may be bugged or ugly.", inline=False)
         embed.add_field(name="Links",
-                        value="[invite](https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=1237420731614&scope=bot%20applications.commands) \n[Support Server](https://discord.gg/cnydBRnHU9)",
+                        value=f"[invite]({self.invite}) \n[Support Server](https://discord.gg/cnydBRnHU9)",
                         inline=False)
         embed.add_field(name="Some tips", value="Set up a mod role by using `d!modrole <role>`")
         embed.set_thumbnail(

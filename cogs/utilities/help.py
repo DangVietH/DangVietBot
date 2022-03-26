@@ -21,6 +21,10 @@ class CustomHelp(commands.HelpCommand):
     def get_command_signature(self, command):
         return f'{self.context.clean_prefix}{command.qualified_name} {command.signature}'
 
+    async def on_help_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandNotFound):
+            await ctx.send("Sorry but that command does not exist.")
+
     async def send_bot_help(self, mapping):
         embed = discord.Embed(title='DangVietBot Categories',
                               description=f"{self.context.bot.description}",
@@ -32,7 +36,7 @@ class CustomHelp(commands.HelpCommand):
                 embed.add_field(name=cog_name, value=f"Commands: {len(command)}")
         embed.set_footer(text=f'Use {self.context.clean_prefix}help [something] for more info on a command or category. \nExample: {self.context.clean_prefix}help Economy')
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(label='Invite', url='https://bit.ly/3BJa6Nj'))
+        view.add_item(discord.ui.Button(label='Invite', url='https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=1237420731614&scope=bot%20applications.commands'))
         view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9'))
         await self.get_destination().send(embed=embed, view=view)
 
