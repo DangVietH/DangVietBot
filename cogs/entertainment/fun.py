@@ -186,7 +186,8 @@ class Fun(commands.Cog):
         embed.add_field(name="Speed", value=data['stats']['speed'])
         embed.add_field(name="Total", value=data['stats']['total'])
         embed.add_field(name="Evolution Stage", value=data['family']['evolutionStage'])
-        embed.add_field(name="Evolution Line", value=", ".join(eline for eline in data['family']['evolutionLine']))
+        if data['family']['evolutionLine']:
+            embed.add_field(name="Evolution Line", value=", ".join(eline for eline in data['family']['evolutionLine']))
         embed.set_thumbnail(url=data['sprites']['animated'])
         await ctx.send(embed=embed)
 
