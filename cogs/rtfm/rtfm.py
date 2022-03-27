@@ -31,7 +31,7 @@ class RtfmListPageSource(menus.ListPageSource):
         return embed
 
 
-class Dev(commands.Cog):
+class RTFM(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.targets = {

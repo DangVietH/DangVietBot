@@ -1,5 +1,5 @@
-from .dev import Dev
+from .rtfm import RTFM
 
 
 async def setup(bot):
-    await bot.add_cog(Dev(bot))
+    await bot.add_cog(RTFM(bot))

@@ -161,7 +161,7 @@ class Fun(commands.Cog):
                 data = await resp.json()
                 await ctx.send(data['joke'])
 
-    @commands.command(aliases=['pokeidex'], help="Show pokemon info")
+    @commands.command(help="Show pokemon info")
     async def pokedex(self, ctx, *, pokemon):
         async with aiohttp.ClientSession() as session:
             async with session.get(f"https://some-random-api.ml/pokedex?pokemon={urllib.parse.quote(pokemon)}") as resp:
@@ -171,6 +171,7 @@ class Fun(commands.Cog):
         embed = discord.Embed(title=f"{data['name']} - {data['id']}", description=data['description'])
         embed.add_field(name="Type", value=", ".join(poketype for poketype in data['type']))
         embed.add_field(name="Species", value=", ".join(species for species in data['species']))
+        embed.add_field(name="Generation", value=data['generation'])
         embed.add_field(name="Abilities", value=", ".join(abilities for abilities in data['abilities']))
         embed.add_field(name="Height", value=data['height'])
         embed.add_field(name="Weight", value=data['weight'])
@@ -184,6 +185,8 @@ class Fun(commands.Cog):
         embed.add_field(name="Speed Defense", value=data['stats']['sp_def'])
         embed.add_field(name="Speed", value=data['stats']['speed'])
         embed.add_field(name="Total", value=data['stats']['total'])
+        embed.add_field(name="Evolution Stage", value=data['family']['evolutionStage'])
+        embed.add_field(name="Evolution Line", value=", ".join(eline for eline in data['family']['evolutionLine']))
         embed.set_thumbnail(url=data['sprites']['animated'])
         await ctx.send(embed=embed)
 
@@ -196,6 +199,39 @@ class Fun(commands.Cog):
                 imageData = io.BytesIO(await rsp.read())
                 await session.close()
                 await ctx.send(file=discord.File(imageData, 'triggered.gif'))
+
+    @commands.command(help="ur very cute", aliases=['patpat'])
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def petpet(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/patpat?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'patpat.gif'))
+
+    @commands.command(help="Steamy stuff")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def boil(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/boil?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'boil.gif'))
+
+    @commands.command(help="Umm we have a tech problem")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def glitch(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/glitch?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'glitch.gif'))
 
     @commands.command(help="Oh no")
     @commands.cooldown(1, 10, commands.BucketType.user)

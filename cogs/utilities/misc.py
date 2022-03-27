@@ -1,15 +1,11 @@
 import discord
 from discord.ext import commands, tasks
-import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
 import datetime
 
 cluster = AsyncIOMotorClient(config_var["mango_link"])
 timer = cluster["timer"]['remind']
-
-snipe_message_content = None
-snipe_message_author = None
 
 
 def convert(time):
@@ -36,27 +32,6 @@ class Misc(commands.Cog):
 
     async def setup_hook(self) -> None:
         self.time_checker.start()
-
-    @commands.Cog.listener()
-    async def on_message_delete(self, message):
-        global snipe_message_content
-        global snipe_message_author
-
-        snipe_message_content = message.content
-        snipe_message_author = message.author
-        await asyncio.sleep(60)
-        snipe_message_author = None
-        snipe_message_content = None
-
-    @commands.command(help='See the last deleted message')
-    async def snipe(self, ctx):
-        if snipe_message_content is None:
-            await ctx.send("Nothing to snipe for now")
-        else:
-            embed = discord.Embed(description=f"{snipe_message_content}", color=discord.Color.random())
-            embed.set_author(name=f"{snipe_message_author}", icon_url=f"{snipe_message_author.avatar.url}")
-            embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar.url)
-            await ctx.send(embed=embed)
 
     @commands.group(help="Remind your task", aliases=["reminder"], invoke_without_command=True, case_insensitive=True)
     async def remind(self, ctx, time, *, reason):
