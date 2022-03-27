@@ -168,12 +168,10 @@ class Fun(commands.Cog):
                 data = await resp.json()
         if data.get('error'):
             return await ctx.send(f"Received unexpected error: {data['error']}")
-        embed = discord.Embed(title=data['name'], description=data['description'])
-        embed.add_field(name="Generation", value=data['generation'])
+        embed = discord.Embed(title=f"{data['name']} - {data['id']}", description=data['description'])
         embed.add_field(name="Type", value=", ".join(poketype for poketype in data['type']))
         embed.add_field(name="Species", value=", ".join(species for species in data['species']))
         embed.add_field(name="Abilities", value=", ".join(abilities for abilities in data['abilities']))
-        embed.add_field(name="Id", value=data['id'])
         embed.add_field(name="Height", value=data['height'])
         embed.add_field(name="Weight", value=data['weight'])
         embed.add_field(name="Gender", value=", ".join(gender for gender in data['gender']))
@@ -187,6 +185,7 @@ class Fun(commands.Cog):
         embed.add_field(name="Speed", value=data['stats']['speed'])
         embed.add_field(name="Total", value=data['stats']['total'])
         embed.set_thumbnail(url=data['sprites']['animated'])
+        await ctx.send(embed=embed)
 
     @commands.command(help="GET TRIGGERED")
     @commands.cooldown(1, 10, commands.BucketType.user)
