@@ -25,10 +25,10 @@ pip install -r requirements.txt
 
 3. **Create an .env file and add these code into it:**
 ```env
-mango_link=
-reddit_secret=
-redit_pass=
-token=
+mango_link=MONGODB_CONNECTION_STRING 
+reddit_secret=create a srcipt app at https://ssl.reddit.com/prefs/apps/
+redit_pass=your reddit account password
+token=BOT_TOKEN
 ```
 
 4. **Remove any reference to DangVietBot in the code**

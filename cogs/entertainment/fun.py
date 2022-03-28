@@ -11,7 +11,7 @@ import aiohttp
 import io
 
 
-reddit = asyncpraw.Reddit(client_id="WS8DpWseFlxeec8_v2sjrw",
+reddit = asyncpraw.Reddit(client_id="WS8DpWseFlxeec8_v2sjrw",  # if you're Selfhosting, you'll need to change this
                           client_secret=config_var['reddit_secret'],
                           username='DangVietHoang',
                           password=config_var['reddit_pass'],
