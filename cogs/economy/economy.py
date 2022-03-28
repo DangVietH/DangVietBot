@@ -5,6 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from utils.menuUtils import DefaultPageSource
 from discord.ext.menus.views import ViewMenuPages
 from utils.configs import config_var
+import asyncio
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 db = cluster["economy"]
@@ -91,14 +92,55 @@ class Economy(commands.Cog):
     @commands.command(help="we work for the right to work")
     @commands.cooldown(1, 3600, commands.BucketType.user)
     async def work(self, ctx):
-        user = ctx.author
-        await self.open_account(user)
+        await self.open_account(ctx.author)
 
-        random_money = random.randint(100, 10000)
-        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
-        jl = ['police', 'programmer', 'bus driver', 'street preformer', 'taxi driver', 'farmer', 'teacher', 'doctor']
-        career = random.choice(jl)
-        await ctx.send(f"You got 💵 {random_money} for working as a {career}")
+        name = ['tim', 'bill', 'jack', 'jim']
+        verb = ['ate', 'kicked', 'drank', 'paid']
+        noun = ['a cat', 'a shopkeeper', 'a ball', 'a horse']
+
+        sentences = f"{name[random.randint(0, 3)]} {verb[random.randint(0, 3)]} {noun[random.randint(0, 3)]}"
+        emojis = []
+        for s in sentences:
+            if s.isdecimal():
+                num2emo = {'0': 'zero', '1': 'one', '2': 'two',
+                           '3': 'three', '4': 'four', '5': 'five',
+                           '6': 'six', '7': 'seven', '8': 'eight', '9': 'nine'}
+                emojis.append(f":{num2emo.get(s)}:")
+            elif s.isalpha():
+                emojis.append(f":regional_indicator_{s.lower()}:")
+            else:
+                emojis.append(s)
+        await ctx.send('Convert these emojis to text')
+        await ctx.send(''.join(emojis))
+
+        def check(user):
+            return user.author == ctx.author and user.channel == ctx.channel
+
+        embed = discord.Embed()
+        try:
+            msg = await self.bot.wait_for('message', timeout=30.0, check=check)
+        except asyncio.TimeoutError:
+            lowMone = random.randint(1, 100)
+            embed.title = "FAIL"
+            embed.description = f"You took too long to respond. You're paid {lowMone}"
+            embed.color = discord.Color.red()
+            await ctx.send(embed=embed)
+            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": lowMone}})
+        else:
+            if msg.content.lower() == sentences.lower():
+                ymone = random.randint(1000, 100000)
+                embed.title = "Congratulations"
+                embed.description = f"You got paid {ymone} for successfully converting the emojis to text"
+                embed.color = discord.Color.green()
+                await ctx.send(embed=embed)
+                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": ymone}})
+            else:
+                lowMone = random.randint(1, 100)
+                embed.title = "FAIL"
+                embed.description = f"You're paid {lowMone} for unsuccessfully converting the emojis to text"
+                embed.color = discord.Color.red()
+                await ctx.send(embed=embed)
+                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": lowMone}})
 
     @commands.command(help="View the store", aliases=['store'])
     async def shop(self, ctx):

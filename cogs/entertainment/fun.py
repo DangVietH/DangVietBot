@@ -45,7 +45,7 @@ class Fun(commands.Cog):
     async def quote(self, ctx):
         async with aiohttp.ClientSession() as session:
             async with session.get("https://zenquotes.io/api/random") as resp:
-                data = await resp.text()
+                data = await resp.json()
                 await ctx.send(f"**{data[0]['q']}**\n          -{data[0]['a']}")
 
     @commands.command(help="Fresh reddit memes")
