@@ -17,14 +17,6 @@ reddit = asyncpraw.Reddit(client_id="WS8DpWseFlxeec8_v2sjrw",  # if you're Selfh
                           password=config_var['reddit_pass'],
                           user_agent='')
 
-
-def get_quote():
-    response = requests.get("https://zenquotes.io/api/random")
-    json_data = json.loads(response.text)
-    quote = f"**{json_data[0]['q']}**\n          -{json_data[0]['a']}"
-    return quote
-
-
 all_sub = []
 
 
@@ -51,8 +43,10 @@ class Fun(commands.Cog):
     @commands.command(help="Returns a quote")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def quote(self, ctx):
-        quotes = get_quote()
-        await ctx.send(quotes)
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://zenquotes.io/api/random") as resp:
+                data = await resp.text()
+                await ctx.send(f"**{data[0]['q']}**\n          -{data[0]['a']}")
 
     @commands.command(help="Fresh reddit memes")
     async def meme(self, ctx):

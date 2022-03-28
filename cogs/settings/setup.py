@@ -226,7 +226,8 @@ class Setup(commands.Cog):
                 "threshold": 2,
                 "ignoreChannel": [],
                 "lock": False,
-                "selfStar": False
+                "selfStar": False,
+                "nsfw": False
             })
             await ctx.send(f"Starboard channel set to {channel.mention}")
             return
@@ -293,6 +294,25 @@ class Setup(commands.Cog):
             return await ctx.send("You don't have a starboard system")
         await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": False}})
         await ctx.send("Starboard unlocked")
+
+    @starboard.command(help="Allow to star in nsfw channels. value should be yes or no")
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_guild=True))
+    async def nsfw(self, ctx, value="yes"):
+        if value.lower() not in ['yes', 'no']:
+            return await ctx.send("Value should be `yes` or `no`")
+        result = await scursor.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return await ctx.send("You don't have a starboard system")
+        if value.lower() == "yes":
+            if result['nsfw'] is True:
+                return await ctx.send("NSFW is already allowed")
+            await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"nsfw": True}})
+            await ctx.send("NSFW is now allowed")
+        elif value.lower() == "no":
+            if result['nsfw'] is False:
+                return await ctx.send("NSFW is already not allowed")
+            await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"nsfw": False}})
+            await ctx.send("NSFW is now not allowed")
 
     @starboard.command(help="Disable starboard system")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))

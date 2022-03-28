@@ -52,6 +52,8 @@ class Star(commands.Cog):
                 return
             if channel.id in guildstats['ignoreChannel']:
                 return
+            if channel.is_nsfw() and guildstats['nsfw'] is False:
+                return
             msg = await channel.fetch_message(payload.message_id)
             reacts = list(filter(lambda r: str(r.emoji) == emoji, msg.reactions))
             if reacts:
@@ -87,6 +89,8 @@ class Star(commands.Cog):
             if channel.id == star_channel.id:
                 return
             if channel.id in guildstats['ignoreChannel']:
+                return
+            if channel.is_nsfw() and guildstats['nsfw'] is False:
                 return
             msg = await channel.fetch_message(payload.message_id)
             reacts = list(filter(lambda r: str(r.emoji) == emoji, msg.reactions))

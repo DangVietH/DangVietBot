@@ -39,7 +39,6 @@ class Tags(commands.Cog):
 
     @tag.command(help="Create a tag")
     async def create(self, ctx):
-        await ctx.send("Answer These Question In 10 minute!")
         questions = ["What is the tag name: ",
                      "What is the tag value: "]
         answers = []
@@ -49,15 +48,8 @@ class Tags(commands.Cog):
 
         for question in questions:
             await ctx.send(question)
-
-            try:
-                msg = await self.bot.wait_for('message', timeout=600.0, check=check)
-            except asyncio.TimeoutError:
-                await ctx.send("Type Faster Next Time!")
-                return
-            else:
-                answers.append(msg.content)
-
+            msg = await self.bot.wait_for('message', timeout=600.0, check=check)
+            answers.append(msg.content)
         check = await cursor.find_one({"guild": ctx.guild.id})
         if check is None:
             await cursor.insert_one({"guild": ctx.guild.id, "tag": [
