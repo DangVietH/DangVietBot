@@ -59,28 +59,29 @@ class Games(commands.Cog):
                 embed.description = f"I choose **{rchoices}**\nYou choose **{choice}**\n**It's a tie!**"
                 await ctx.send(embed=embed)
             elif rchoices == 'paper':
-                embed.description = f"I choose **{rchoices}**\nYou choose **{choice}**\n**You won!**"
-                await ctx.send(embed=embed)
-            elif rchoices == 'scissors':
                 embed.description = f"I choose **{rchoices}**\nYou choose **{choice}**\n**I won!**"
-                await ctx.send(embed=embed)
-        elif choice == 'paper':
-            if rchoices == 'rock':
-                embed.description = f"I choose **{rchoices}**\nYou choose **{choice}**\n**I won!**"
-                await ctx.send(embed=embed)
-            elif rchoices == 'paper':
-                embed.description = f"I choose **{rchoices}**\nYou choose **{choice}**\n**It's a tie!**"
                 await ctx.send(embed=embed)
             elif rchoices == 'scissors':
                 embed.description = f"I choose **{rchoices}**\nYou choose **{choice}**\n**You won!**"
                 await ctx.send(embed=embed)
 
-        elif choice == 'scissors':
+        elif choice == 'paper':
             if rchoices == 'rock':
                 embed.description = f"I choose **{rchoices}**\nYou choose **{choice}**\n**You won!**"
                 await ctx.send(embed=embed)
             elif rchoices == 'paper':
+                embed.description = f"I choose **{rchoices}**\nYou choose **{choice}**\n**It's a tie!**"
+                await ctx.send(embed=embed)
+            elif rchoices == 'scissors':
                 embed.description = f"I choose **{rchoices}**\nYou choose **{choice}**\n**I won!**"
+                await ctx.send(embed=embed)
+
+        elif choice == 'scissors':
+            if rchoices == 'rock':
+                embed.description = f"I choose **{rchoices}**\nYou choose **{choice}**\n**I won!**"
+                await ctx.send(embed=embed)
+            elif rchoices == 'paper':
+                embed.description = f"I choose **{rchoices}**\nYou choose **{choice}**\n**You won!**"
                 await ctx.send(embed=embed)
             elif rchoices == 'scissors':
                 embed.description = f"I choose **{rchoices}**\nYou choose **{choice}**\n**It's a tie!**"
