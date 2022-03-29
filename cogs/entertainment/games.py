@@ -41,9 +41,10 @@ class Games(commands.Cog):
                 emb2.color = discord.Color.red()
                 await ctx.send(embed=emb2)
                 return
-            embed.title = "Correct"
-            embed.color = discord.Color.green()
-            await ctx.send(embed=embed)
+            emb2.title = "Correct"
+            emb2.description = f"The correct answer indeed was {corret_ans}"
+            emb2.color = self.bot.embed_color
+            await ctx.send(embed=emb2)
 
     @commands.command()
     async def rps(self, ctx, choice):
