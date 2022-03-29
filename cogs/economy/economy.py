@@ -116,7 +116,7 @@ class Economy(commands.Cog):
         def check(user):
             return user.author == ctx.author and user.channel == ctx.channel
 
-        embed = discord.Embed()
+        embed = discord.Embed(timestamp=ctx.message.created_at)
         try:
             msg = await self.bot.wait_for('message', timeout=30.0, check=check)
         except asyncio.TimeoutError:
@@ -342,3 +342,9 @@ class Economy(commands.Cog):
             await cursor.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
             await cursor.update_one({"id": user.id}, {"$set": {"wallet": user_update}})
             await ctx.send(f"Successfully rob 💵 {amount} from {user.mention}")
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        if self.bot.get_user(member.id) is None:
+            if await cursor.find_one({"id": member.id}):
+                await cursor.delete_one({"id": member.id})

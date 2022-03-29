@@ -9,6 +9,8 @@ class Games(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    """
+
     @commands.command(help="Play some quizs", aliases=["quiz"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def trivia(self, ctx):
@@ -45,6 +47,7 @@ class Games(commands.Cog):
             embed.title = "Correct"
             embed.color = discord.Color.green()
             await ctx.send(embed=embed)
+    """
 
     @commands.command()
     async def rps(self, ctx, choice):
