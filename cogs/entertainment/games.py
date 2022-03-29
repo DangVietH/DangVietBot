@@ -16,6 +16,9 @@ class Games(commands.Cog):
             async with session.get("https://opentdb.com/api.php?amount=1") as resp:
                 data = await resp.json()
 
+        if data['response_code'] != 0:
+            return await ctx.send("There was an error fetching the question! Just rerun the command")
+
         embed = discord.Embed(color=self.bot.embed_color)
         ldt = data['results'][0]
         ques = ldt["incorrect_answers"]
@@ -37,16 +40,16 @@ class Games(commands.Cog):
             emb2 = discord.Embed()
             if msg.content != corret_ans:
                 emb2.title = "Incorrect"
-                emb2.description = f"The correct answer was {corret_ans}"
+                emb2.description = f"The correct answer was **{corret_ans}**"
                 emb2.color = discord.Color.red()
                 await ctx.send(embed=emb2)
                 return
             emb2.title = "Correct"
-            emb2.description = f"The correct answer indeed was {corret_ans}"
+            emb2.description = f"The correct answer indeed was **{corret_ans}**"
             emb2.color = self.bot.embed_color
             await ctx.send(embed=emb2)
 
-    @commands.command()
+    @commands.command(help="Play rock paper scissors with me")
     async def rps(self, ctx, choice):
         choice = choice.lower()
         choices = ["rock", "paper", "scissors"]

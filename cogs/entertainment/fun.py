@@ -162,7 +162,7 @@ class Fun(commands.Cog):
                 data = await resp.json()
         if data.get('error'):
             return await ctx.send(f"Received unexpected error: {data['error']}")
-        embed = discord.Embed(title=f"{data['name']} - {data['id']}", description=data['description'])
+        embed = discord.Embed(title=f"{data['name']} - {data['id']}", description=data['description'], color=self.bot.embed_color)
         embed.add_field(name="Type", value=", ".join(poketype for poketype in data['type']))
         embed.add_field(name="Species", value=", ".join(species for species in data['species']))
         embed.add_field(name="Generation", value=data['generation'])

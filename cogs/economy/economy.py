@@ -272,6 +272,8 @@ class Economy(commands.Cog):
         amount = int(amount)
         if amount > check['wallet']:
             return await ctx.send("You can't deposit more money than your wallet")
+        elif amount <= 0:
+            return await ctx.send("You can't send negative")
         await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -amount}})
         await cursor.update_one({"id": user.id}, {"$inc": {"bank": amount}})
         await ctx.message.add_reaction("✅")
@@ -290,6 +292,8 @@ class Economy(commands.Cog):
         amount = int(amount)
         if amount > check['bank']:
             return await ctx.send("You can't deposit more money than your bank")
+        elif amount <= 0:
+            return await ctx.send("You can't send negative")
         await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amount}})
         await cursor.update_one({"id": user.id}, {"$inc": {"bank": -amount}})
         await ctx.message.add_reaction("✅")
@@ -303,6 +307,8 @@ class Economy(commands.Cog):
             return await ctx.send("They don't have an economy account")
         if amount > check['wallet']:
             return await ctx.send("You didn't have enough money in your bank to give someone")
+        elif amount <= 0:
+            return await ctx.send("You can't send negative")
         await cursor.update_one({"id": ctx.author.id}, {"$inc": {"bank": -amount}})
         await cursor.update_one({"id": user.id}, {"$inc": {"bank": amount}})
         await ctx.message.add_reaction("✅")
@@ -312,6 +318,8 @@ class Economy(commands.Cog):
     @commands.cooldown(1, 86400, commands.BucketType.user)
     async def rob(self, ctx, user: discord.Member = None, amount=1):
         await self.open_account(ctx.author)
+        if amount <= 0:
+            return await ctx.send("You can't send negative")
 
         check1 = await cursor.find_one({"id": ctx.author.id})
         check2 = await cursor.find_one({"id": user.id})
