@@ -94,14 +94,14 @@ class Moderation(commands.Cog):
         duration = datetime.timedelta(minutes=converted_time)
         await member.edit(timeout=duration)
 
-        await member.send(f"You were timeout in **{ctx.guild.name}** for {reason}")
+        await member.send(f"You were timeout in **{ctx.guild.name}** for **{reason}**")
         await self.modlogUtils(ctx, member, "timeout", reason)
 
     @commands.command(help="Untimeout a member")
     @commands.check_any(has_mod_role(), commands.has_permissions(moderate_members=True))
     async def untimeout(self, ctx, member: discord.Member, *, reason=None):
         await member.edit(timeout=None)
-        await member.send(f"You were timeout in **{ctx.guild.name}** for {reason}")
+        await member.send(f"You were timeout in **{ctx.guild.name}** for **{reason}**")
 
         await self.modlogUtils(ctx, member, "untimeout", reason)
 
@@ -148,7 +148,7 @@ class Moderation(commands.Cog):
                                               read_messages=False)
         await member.add_roles(mutedRole, reason=reason)
         await member.send(
-            f"You were temporarily muted for {str(datetime.timedelta(seconds=converted_time))} in **{guild.name}** for {reason}")
+            f"You were temporarily muted for {str(datetime.timedelta(seconds=converted_time))} in **{guild.name}** for **{reason}**")
         current_time = datetime.datetime.now()
         final_time = current_time + datetime.timedelta(seconds=converted_time)
         await timer.insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id})
@@ -171,7 +171,7 @@ class Moderation(commands.Cog):
         if ctx.author.top_role.position < member.top_role.position:
             return await ctx.send("You can't kick someone with a higher role than you")
         if not member.bot:
-            await member.send(f"You've been kick from **{ctx.guild.name}** for {reason}")
+            await member.send(f"You've been kick from **{ctx.guild.name}** for **{reason}**")
         await member.kick(reason=reason)
 
         await self.modlogUtils(ctx, member, "kick", reason)
@@ -182,7 +182,7 @@ class Moderation(commands.Cog):
         if ctx.author.top_role.position < member.top_role.position:
             return await ctx.send("You can't ban someone with a higher role than you")
         if not member.bot:
-            await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for {reason}. What a shame 👎")
+            await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for **{reason}**. What a shame 👎")
         await member.ban(reason=reason)
 
         await self.modlogUtils(ctx, member, "ban", reason)
@@ -194,7 +194,7 @@ class Moderation(commands.Cog):
             if ctx.author.top_role.position < member.top_role.position:
                 return await ctx.send("You can't ban someone with a higher role than you")
             if not member.bot:
-                await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for {reason}. What a shame 👎")
+                await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for **{reason}**. What a shame 👎")
             await member.ban(reason=reason)
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
 
@@ -229,7 +229,7 @@ class Moderation(commands.Cog):
             return await ctx.send("Time must be an integer")
         if not member.bot:
             await member.send(
-                f"You've been banned for {str(datetime.timedelta(seconds=converted_time))} from **{ctx.guild.name}** for {reason}. Don't worry, it will be a short time!!")
+                f"You've been banned for {str(datetime.timedelta(seconds=converted_time))} from **{ctx.guild.name}** for **{reason}**. Don't worry, it will be a short time!!")
         await ctx.guild.ban(member)
         await self.modlogUtils(ctx, member, "tempban", reason)
 
