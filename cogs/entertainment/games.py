@@ -9,24 +9,21 @@ class Games(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    """
-
     @commands.command(help="Play some quizs", aliases=["quiz"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def trivia(self, ctx):
         async with aiohttp.ClientSession() as session:
             async with session.get("https://opentdb.com/api.php?amount=1") as resp:
                 data = await resp.json()
-        embed = discord.Embed(color=discord.Color.blue())
-        ques = []
-        corret_ans = None
-        for result in data["results"]:
-            embed.title = result["question"]
-            ques.append(x for x in result["incorrect_answers"])
-            ques.append(result["correct_answer"])
-            corret_ans = result["correct_answer"]
+
+        embed = discord.Embed(color=self.bot.embed_color)
+        ldt = data['results'][0]
+        ques = ldt["incorrect_answers"]
+        corret_ans = ldt["correct_answer"]
+        ques.append(corret_ans)
         random.shuffle(ques)
-        embed.description = f"Answer this in 30 seconds\n**1.** {ques[0]}\n**2.** {ques[1]}\n**3.** {ques[2]}\n**4.** {ques[3]}"
+        embed.title = ldt["question"].replace("&quot;", "'").replace("&#039;", "'")
+        embed.description = f"Answer this in 30 seconds:\n**1.** {ques[0]}\n**2.** {ques[1]}\n**3.** {ques[2]}\n**4.** {ques[3]}"
         await ctx.send(embed=embed)
 
         def check(user):
@@ -45,9 +42,8 @@ class Games(commands.Cog):
                 await ctx.send(embed=emb2)
                 return
             embed.title = "Correct"
-            embed.color = discord.Color.green()
+            embed.color = 0x2F3136
             await ctx.send(embed=embed)
-    """
 
     @commands.command()
     async def rps(self, ctx, choice):
@@ -56,7 +52,7 @@ class Games(commands.Cog):
         if choice not in choices:
             return await ctx.send("Please only put rock, paper or scissors")
         rchoices = random.choice(choices)
-        embed = discord.Embed(title="Rock Paper Scissors", color=discord.Color.blue())
+        embed = discord.Embed(title="Rock Paper Scissors", color=self.bot.embed_color)
         if choice == 'rock':
             if rchoices == 'rock':
                 embed.description = f"I choose **{rchoices}**\nYou choose **{choice}**\n**It's a tie!**"

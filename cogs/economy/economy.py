@@ -14,7 +14,7 @@ nfts = db["nft"]
 
 items_name = ["chicken", "parrot", "watch", "horse", "sword", "rifle", "laptop", "platinum", "silver", "gold",
               "diamonds",
-              "robber_shield"]
+              "robber-shield"]
 items_price = [10, 20, 42, 70, 102, 499, 1000, 20000, 50000, 200000, 599999, 1542649]
 items_description = ["KFC GO BRRR", "talking birb machine", "moniter ye time", "Juan",
                      "fight others", "hunt animals", "work on it", "Show of your status", "cool kid",
@@ -121,23 +121,23 @@ class Economy(commands.Cog):
             msg = await self.bot.wait_for('message', timeout=30.0, check=check)
         except asyncio.TimeoutError:
             lowMone = random.randint(1, 100)
-            embed.title = "FAIL"
-            embed.description = f"You took too long to respond. You're paid {lowMone}"
+            embed.title = "BAD WORK"
+            embed.description = f"You took too long to respond. You're paid 💵 {lowMone}"
             embed.color = discord.Color.red()
             await ctx.send(embed=embed)
             await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": lowMone}})
         else:
             if msg.content.lower() == sentences.lower():
                 ymone = random.randint(1000, 100000)
-                embed.title = "Congratulations"
-                embed.description = f"You got paid {ymone} for successfully converting the emojis to text"
+                embed.title = "GOOD WORK"
+                embed.description = f"You got paid 💵 {ymone} for successfully converting the emojis to text"
                 embed.color = discord.Color.green()
                 await ctx.send(embed=embed)
                 await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": ymone}})
             else:
                 lowMone = random.randint(1, 100)
                 embed.title = "FAIL"
-                embed.description = f"You're paid {lowMone} for unsuccessfully converting the emojis to text"
+                embed.description = f"You're paid 💵 {lowMone} for unsuccessfully converting the emojis to text"
                 embed.color = discord.Color.red()
                 await ctx.send(embed=embed)
                 await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": lowMone}})
@@ -320,7 +320,7 @@ class Economy(commands.Cog):
         total_check = check1['wallet'] + check1['bank']
         if total_check < 10000:
             return await ctx.send("You need 💵 10000 to rob someone")
-        anti_rob_1 = await cursor.find_one({"id": user.id, "inventory.name": "robber_shield"})
+        anti_rob_1 = await cursor.find_one({"id": user.id, "inventory.name": "robber-shield"})
         if anti_rob_1 is not None:
             author_update = check1['wallet'] + 10
             user_update = check2['wallet'] - 10

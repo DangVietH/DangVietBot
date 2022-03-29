@@ -52,7 +52,7 @@ class Misc(commands.Cog):
         all_timer = timer.find({'user': ctx.author.id})
         if all_timer is None:
             return await ctx.send("You don't have any reminders")
-        embed = discord.Embed(title="Your remind list", color=discord.Color.random())
+        embed = discord.Embed(title="Your remind list", color=self.bot.embed_color)
         async for x in all_timer:
             embed.add_field(name=f"End at: {x['time']}", value=f"**Reason:** {x['reason']}")
         await ctx.send(embed=embed)
