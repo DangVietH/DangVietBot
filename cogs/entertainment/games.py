@@ -42,7 +42,7 @@ class Games(commands.Cog):
                 await ctx.send(embed=emb2)
                 return
             embed.title = "Correct"
-            embed.color = 0x2F3136
+            embed.color = discord.Color.green()
             await ctx.send(embed=embed)
 
     @commands.command()
