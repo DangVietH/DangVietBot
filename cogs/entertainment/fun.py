@@ -271,7 +271,7 @@ class Fun(commands.Cog):
                 await ctx.send(file=discord.File(imageData, 'yt.png'))
 
     @commands.command(help="Make a fake tweet")
-    async def tweet(self, ctx, name="No Name", *, comment="Nothing you idiot"):
+    async def tweet(self, ctx, name, *, comment="Nothing you idiot"):
         async with aiohttp.ClientSession() as session:
             async with session.get(
                     f"https://some-random-api.ml/canvas/tweet?avatar={ctx.author.display_avatar.url}&displayname={name}&comment={urllib.parse.quote(comment)}&username={ctx.author.name}") as rsp:

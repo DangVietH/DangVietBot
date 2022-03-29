@@ -26,8 +26,9 @@ class Games(commands.Cog):
         ques.append(corret_ans)
         random.shuffle(ques)
         embed.title = ldt["question"].replace("&quot;", "'").replace("&#039;", "'")
-        embed.description = f"Answer this in 30 seconds:\n**1.** {ques[0]}\n**2.** {ques[1]}\n**3.** {ques[2]}\n**4.** {ques[3]}"
+        embed.description = f"Answer this in 30 seconds:\n**1.** {ques[0]}\n**2.** {ques[1]}\n**3.** {ques[2]}\n**4.** {ques[3]}\nType the correct options (example:`1`)"
         await ctx.send(embed=embed)
+        opList = ['1', '2', '3', '4']
 
         def check(user):
             return user.author == ctx.author and user.channel == ctx.channel
@@ -37,17 +38,22 @@ class Games(commands.Cog):
         except asyncio.TimeoutError:
             await ctx.send(f"Time's out! The correct answer was {corret_ans}")
         else:
+            if msg.content.lower() not in opList:
+                return await ctx.send("Invalid option! It's needs to be like `1`, `2`, `3` or `4`")
             emb2 = discord.Embed()
-            if msg.content != corret_ans:
-                emb2.title = "Incorrect"
-                emb2.description = f"The correct answer was **{corret_ans}**"
-                emb2.color = discord.Color.red()
-                await ctx.send(embed=emb2)
-                return
-            emb2.title = "Correct"
-            emb2.description = f"The correct answer indeed was **{corret_ans}**"
-            emb2.color = self.bot.embed_color
-            await ctx.send(embed=emb2)
+            for i in range(len(opList)):
+                if msg.content.lower() == opList[i]:
+                    choice = ques[i]
+                    if choice != corret_ans:
+                        emb2.title = "Incorrect"
+                        emb2.description = f"The correct answer was **{corret_ans}**"
+                        emb2.color = discord.Color.red()
+                        await ctx.send(embed=emb2)
+                        return
+                    emb2.title = "Correct"
+                    emb2.description = f"The correct answer indeed was **{corret_ans}**"
+                    emb2.color = self.bot.embed_color
+                    await ctx.send(embed=emb2)
 
     @commands.command(help="Play rock paper scissors with me")
     async def rps(self, ctx, choice):

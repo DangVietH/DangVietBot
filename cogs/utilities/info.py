@@ -80,7 +80,8 @@ class Info(commands.Cog):
 
     @commands.command(help="Bot information")
     async def about(self, ctx):
-        embed = discord.Embed(title="Bot information", color=discord.Color.random())
+        embed = discord.Embed(title="Bot Information", color=discord.Color.random())
+        embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar.url)
         embed.add_field(name="Developer", value=f"DvH#9980")
         embed.add_field(name="Written in", value="Python 3.10.1")
         embed.add_field(name="Library", value="[discord.py 2.0](https://github.com/Rapptz/discord.py)")
@@ -88,7 +89,11 @@ class Info(commands.Cog):
         embed.add_field(name="Command's", value=f"{len(self.bot.commands)}")
         embed.add_field(name="Server's", value=f"{len(self.bot.guilds)}")
         embed.add_field(name="User's", value=f"{len(self.bot.users)}")
-        await ctx.send(embed=embed)
+        view = discord.ui.View()
+        view.add_item(discord.ui.Button(label='Invite', url=self.bot.invite))
+        view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9'))
+        view.add_item(discord.ui.Button(label='Github', url='https://github.com/DangVietH/DangVietBot'))
+        await ctx.send(embed=embed, view=view)
 
     @commands.command(help="Invite the bot")
     async def invite(self, ctx):

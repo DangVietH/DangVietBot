@@ -189,7 +189,7 @@ class Moderation(commands.Cog):
 
     @commands.command(help="Ban loads of people")
     @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
-    async def massban(self, members: commands.Greedy[discord.Member], ctx, *, reason=None):
+    async def massban(self, ctx, members: commands.Greedy[discord.Member], *, reason=None):
         for member in members:
             if ctx.author.top_role.position < member.top_role.position:
                 return await ctx.send("You can't ban someone with a higher role than you")
