@@ -2,8 +2,7 @@ import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
-from discord.ext.menus.views import ViewMenuPages
-from utils.menuUtils import SecondPageSource
+from utils.menuUtils import SecondPageSource, MenuPages
 from utils.randomutils import has_mod_role
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
@@ -22,7 +21,8 @@ class LevelUtils(commands.Cog):
     async def add_to_db(self, guild):
         results = await levelConfig.find_one({"guild": guild.id})
         if results is None:
-            await levelConfig.insert_one({"guild": guild.id, "role": [], "level": [], "xp": 10, "msg": "🎉 {mention} has reached level **{level}**!!🎉"})
+            await levelConfig.insert_one({"guild": guild.id, "role": [], "level": [], "xp": 10,
+                                          "msg": "🎉 {mention} has reached level **{level}**!!🎉"})
 
     @commands.command(help="Set background for your server rank")
     async def setbackground(self, ctx, link):
@@ -79,8 +79,8 @@ class LevelUtils(commands.Cog):
         data = []
         for i in range(len(levelrole)):
             data.append((f"Level **{levelnum[i]}** role reward", ctx.guild.get_role(levelrole[i]).mention))
-        page = ViewMenuPages(source=SecondPageSource(f"{ctx.author.guild.name} role rewards", data),
-                             clear_reactions_after=True)
+        page = MenuPages(source=SecondPageSource(f"{ctx.author.guild.name} role rewards", data),
+                         clear_reactions_after=True)
         await page.start(ctx)
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Level utils")

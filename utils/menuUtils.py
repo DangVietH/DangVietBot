@@ -33,7 +33,6 @@ class MenuPages(ViewMenuPages):
     """Subclass ViewMenuPages to add interaction_check"""
     async def interaction_check(self, interaction) -> bool:
         if interaction.user != self.ctx.author:
-            await interaction.response.send_message("You can't use these buttons!", ephemeral=True)
             return False
         else:
             return True

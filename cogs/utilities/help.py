@@ -10,7 +10,12 @@ class CogPageSource(menus.ListPageSource):
         super().__init__(data, per_page=5)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(color=0x2F3136, title=self.title, timestamp=datetime.datetime.utcnow())
+        embed = discord.Embed(
+            color=0x2F3136,
+            title=self.title,
+            timestamp=datetime.datetime.utcnow(),
+            description="<> = required argument | [] = optional argument"
+        )
         for entry in entries:
             embed.add_field(name=entry[0], value=entry[1], inline=False)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')

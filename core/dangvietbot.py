@@ -100,6 +100,6 @@ class DangVietBot(commands.Bot):
         else:
             result = await cursor.find_one({"guild": message.guild.id})
             if result is not None:
-                return commands.when_mentioned_or(str(result["prefix"]))(self, message)
+                return commands.when_mentioned_or(str(result["prefix"]).lower())(self, message)
             else:
-                return commands.when_mentioned_or("d!")(self, message)
+                return commands.when_mentioned_or("d!".lower())(self, message)

@@ -9,7 +9,7 @@ import aiohttp
 import io
 
 
-reddit = asyncpraw.Reddit(client_id="WS8DpWseFlxeec8_v2sjrw",  # if you're Selfhosting, you'll need to change this
+reddit = asyncpraw.Reddit(client_id=config_var['reddit_id'],
                           client_secret=config_var['reddit_secret'],
                           username='DangVietHoang',
                           password=config_var['reddit_pass'],
@@ -214,6 +214,72 @@ class Fun(commands.Cog):
                 imageData = io.BytesIO(await rsp.read())
                 await session.close()
                 await ctx.send(file=discord.File(imageData, 'boil.gif'))
+
+    @commands.command(help="You just see the worst shit ever")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def canny(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/canny?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'canny.png'))
+
+    @commands.command(help="UR terrible")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def cartoon(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/cartoon?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'cartoon.png'))
+
+    @commands.command(help="The best album ever")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def explicit(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/explicit?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'explicit.png'))
+
+    @commands.command(help="Say sumthing")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def tv(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/explicit?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'tv.gif'))
+
+    @commands.command(help="Depressing")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def rain(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/rain?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'rain.gif'))
+
+    @commands.command(help="tic tic tic")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def clock(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/clock?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'clock.gif'))
 
     @commands.command(help="Umm we have a tech problem")
     @commands.cooldown(1, 10, commands.BucketType.user)

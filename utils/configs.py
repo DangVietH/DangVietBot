@@ -5,4 +5,5 @@ config_var = {
     "mango_link": os.environ.get("mango_link"),
     "reddit_pass": os.environ.get("reddit_pass"),
     "reddit_secret": os.environ.get("reddit_secret"),
+    "reddit_id": os.environ.get("reddit_id")
 }
