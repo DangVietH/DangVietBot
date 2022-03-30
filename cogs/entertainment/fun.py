@@ -226,6 +226,17 @@ class Fun(commands.Cog):
                 await session.close()
                 await ctx.send(file=discord.File(imageData, 'canny.png'))
 
+    @commands.command(help="Waving in the rain")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def cloth(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/cloth?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'boil.gif'))
+
     @commands.command(help="UR terrible")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def cartoon(self, ctx, member: discord.Member = None):
