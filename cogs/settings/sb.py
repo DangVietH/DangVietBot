@@ -26,7 +26,10 @@ class Star(commands.Cog):
 
         attach = msg.attachments[0] if msg.attachments else None
         if attach:
-            embed.set_image(url=attach.url)
+            if attach.url.lower().endswith(('png', 'jpeg', 'jpg', 'gif', 'webp')):
+                embed.set_image(url=attach.url)
+            else:
+                embed.add_field(name='Attachment', value=f'[{attach.filename}]({attach.url})', inline=False)
         if msg.embeds:
             image = msg.embeds[0].image.url
             if image:
