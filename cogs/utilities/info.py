@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, menus
-from discord.ext.menus.views import ViewMenuPages
+from utils.menuUtils import MenuPages
 from cogs.utilities.help import CustomHelp
 
 
@@ -111,5 +111,5 @@ class Info(commands.Cog):
         for guild in self.bot.guilds:
             to_append = (f"{guild.name}", f"**Owner** {guild.owner} **Member** {guild.member_count} **ID** {guild.id}")
             data.append(to_append)
-        menu = ViewMenuPages(source=ServerPageSource(data), clear_reactions_after=True)
+        menu = MenuPages(source=ServerPageSource(data), clear_reactions_after=True)
         await menu.start(ctx)

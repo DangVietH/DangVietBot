@@ -2,8 +2,7 @@ import discord
 from discord.ext import commands
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils.menuUtils import DefaultPageSource
-from discord.ext.menus.views import ViewMenuPages
+from utils.menuUtils import DefaultPageSource, MenuPages
 from utils.configs import config_var
 import asyncio
 
@@ -62,7 +61,7 @@ class Economy(commands.Cog):
                 to_append = (f"{num}: {is_user_in_guild}", f"**Wallet:** {x['wallet']}")
                 data.append(to_append)
 
-        pages = ViewMenuPages(source=DefaultPageSource(f"Richest user in {ctx.guild.name}", data), clear_reactions_after=True)
+        pages = MenuPages(source=DefaultPageSource(f"Richest user in {ctx.guild.name}", data), clear_reactions_after=True)
         await pages.start(ctx)
 
     @commands.command(help="Who is the richest one around the world")
@@ -75,7 +74,7 @@ class Economy(commands.Cog):
             to_append = (f"{num}: {self.bot.get_user(x['id'])}", f"**Wallet:** {x['wallet']}")
             data.append(to_append)
 
-        pages = ViewMenuPages(source=DefaultPageSource(f"Richest user in the world", data), clear_reactions_after=True)
+        pages = MenuPages(source=DefaultPageSource(f"Richest user in the world", data), clear_reactions_after=True)
         await pages.start(ctx)
 
     @commands.command(help="Beg some money")
@@ -148,7 +147,7 @@ class Economy(commands.Cog):
         for i in range(len(items_name)):
             data.append((f"{items_name[i]} | 💵 {items_price[i]}",
                          items_description[i]))
-        page = ViewMenuPages(source=DefaultPageSource(f"Shop", data), clear_reactions_after=True)
+        page = MenuPages(source=DefaultPageSource(f"Shop", data), clear_reactions_after=True)
         await page.start(ctx)
 
     @commands.command(help="Buy some items")
@@ -229,7 +228,7 @@ class Economy(commands.Cog):
                 amount = item['amount']
                 to_append = (f"{name}", f"**Amount** {amount}")
                 data.append(to_append)
-            pages = ViewMenuPages(source=DefaultPageSource(f"{ctx.author} Inventory", data), clear_reactions_after=True)
+            pages = MenuPages(source=DefaultPageSource(f"{ctx.author} Inventory", data), clear_reactions_after=True)
             await pages.start(ctx)
 
     @commands.command(help="Claim your daily money")

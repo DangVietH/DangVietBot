@@ -1,6 +1,7 @@
 import discord
 from discord.ext import menus
 import datetime
+from discord.ext.menus.views import ViewMenuPages
 
 
 class DefaultPageSource(menus.ListPageSource):
@@ -26,3 +27,13 @@ class SecondPageSource(menus.ListPageSource):
         embed.description = "\n".join([f"{name}: {value}" for name, value in entries])
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
         return embed
+
+
+class MenuPages(ViewMenuPages):
+    """Subclass ViewMenuPages to add interaction_check"""
+    async def interaction_check(self, interaction) -> bool:
+        if interaction.user != self.ctx.author:
+            await interaction.response.send_message("You can't use these buttons!", ephemeral=True)
+            return False
+        else:
+            return True

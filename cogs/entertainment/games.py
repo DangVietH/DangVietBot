@@ -9,6 +9,13 @@ class Games(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command(help="Play some test quizs")
+    @commands.is_owner()
+    async def testtrivia(self, ctx):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://opentdb.com/api.php?amount=1") as resp:
+                data = await resp.json()
+
     @commands.command(help="Play some quizs", aliases=["quiz"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def trivia(self, ctx):
@@ -22,11 +29,12 @@ class Games(commands.Cog):
         embed = discord.Embed(color=self.bot.embed_color)
         ldt = data['results'][0]
         ques = ldt["incorrect_answers"]
-        corret_ans = ldt["correct_answer"]
+        corret_ans = ldt["correct_answer"].replace("&quot;", "'").replace("&#039;", "'")
         ques.append(corret_ans)
         random.shuffle(ques)
         embed.title = ldt["question"].replace("&quot;", "'").replace("&#039;", "'")
-        embed.description = f"Answer this in 30 seconds:\n**1.** {ques[0]}\n**2.** {ques[1]}\n**3.** {ques[2]}\n**4.** {ques[3]}\nType the correct options (example:`1`)"
+        embed.description = f"Answer this in 30 seconds:\n**1:** {ques[0]}\n**2:** {ques[1]}\n**3:** {ques[2]}\n**4:** {ques[3]}\nType the correct options (example:`1`)"
+        embed.set_footer(text=f"Category: {ldt['category']} | Difficulty: {ldt['difficulty']}")
         await ctx.send(embed=embed)
         opList = ['1', '2', '3', '4']
 
@@ -40,18 +48,18 @@ class Games(commands.Cog):
         else:
             if msg.content.lower() not in opList:
                 return await ctx.send("Invalid option! It's needs to be like `1`, `2`, `3` or `4`")
-            emb2 = discord.Embed()
+            emb2 = discord.Embed(timestamp=ctx.message.created_at)
             for i in range(len(opList)):
                 if msg.content.lower() == opList[i]:
                     choice = ques[i]
                     if choice != corret_ans:
                         emb2.title = "Incorrect"
-                        emb2.description = f"The correct answer was **{corret_ans}**"
+                        emb2.description = f"The correct answer is **{corret_ans}**"
                         emb2.color = discord.Color.red()
                         await ctx.send(embed=emb2)
                         return
                     emb2.title = "Correct"
-                    emb2.description = f"The correct answer indeed was **{corret_ans}**"
+                    emb2.description = f"The correct answer indeed is **{corret_ans}**"
                     emb2.color = self.bot.embed_color
                     await ctx.send(embed=emb2)
 

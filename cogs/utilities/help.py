@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, menus
 import datetime
-from discord.ext.menus.views import ViewMenuPages
+from utils.menuUtils import MenuPages
 
 
 class CogPageSource(menus.ListPageSource):
@@ -34,9 +34,11 @@ class CustomHelp(commands.HelpCommand):
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "No Category")
                 embed.add_field(name=cog_name, value=f"Commands: {len(command)}")
-        embed.set_footer(text=f'Use {self.context.clean_prefix}help [something] for more info on a command or category. \nExample: {self.context.clean_prefix}help Economy')
+        embed.set_footer(
+            text=f'Use {self.context.clean_prefix}help [something] for more info on a command or category. \nExample: {self.context.clean_prefix}help Economy')
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(label='Invite', url='https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=1237420731614&scope=bot%20applications.commands'))
+        view.add_item(discord.ui.Button(label='Invite',
+                                        url='https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=1237420731614&scope=bot%20applications.commands'))
         view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9'))
         await self.get_destination().send(embed=embed, view=view)
 
@@ -46,8 +48,8 @@ class CustomHelp(commands.HelpCommand):
         for command in filtered:
             data.append((f"- {command.name}", f"{self.get_command_signature(command)}\n`{command.short_doc}`"))
 
-        page = ViewMenuPages(source=CogPageSource(f"{cog_.qualified_name} Commands", data),
-                             clear_reactions_after=True)
+        page = MenuPages(source=CogPageSource(f"{cog_.qualified_name} Commands", data),
+                         clear_reactions_after=True)
         await page.start(self.context)
 
     async def send_group_help(self, group):
@@ -57,8 +59,8 @@ class CustomHelp(commands.HelpCommand):
             for command in filtered:
                 data.append((f"- {command.name}", f"{self.get_command_signature(command)}\n`{command.short_doc}`"))
 
-        page = ViewMenuPages(source=CogPageSource(f"{group.qualified_name} Commands", data),
-                             clear_reactions_after=True)
+        page = MenuPages(source=CogPageSource(f"{group.qualified_name} Commands", data),
+                         clear_reactions_after=True)
         await page.start(self.context)
 
     async def send_command_help(self, command):

@@ -4,8 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from PIL import Image, ImageDraw, ImageFont
 import io
 from utils.randomutils import get_image_from_url
-from utils.menuUtils import DefaultPageSource
-from discord.ext.menus.views import ViewMenuPages
+from utils.menuUtils import DefaultPageSource, MenuPages
 from utils.configs import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
@@ -63,12 +62,12 @@ class Leveling(commands.Cog):
 
                             channel = self.bot.get_channel(lvl_channel["channel"])
                             await channel.send(lconf['msg'].format(
-                                    mention=message.author.mention,
-                                    name=message.author.name,
-                                    server=message.guild.name,
-                                    username=message.author,
-                                    level=stats['level']
-                                ))
+                                mention=message.author.mention,
+                                name=message.author.name,
+                                server=message.guild.name,
+                                username=message.author,
+                                level=stats['level']
+                            ))
 
                             levelrole = lconf['role']
                             levelnum = lconf['level']
@@ -182,8 +181,8 @@ class Leveling(commands.Cog):
             to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        page = ViewMenuPages(source=DefaultPageSource(f"Leaderboard of {ctx.guild.name}", data),
-                             clear_reactions_after=True)
+        page = MenuPages(source=DefaultPageSource(f"Leaderboard of {ctx.guild.name}", data),
+                         clear_reactions_after=True)
         await page.start(ctx)
 
     @commands.command(help="See global rank")
@@ -198,7 +197,7 @@ class Leveling(commands.Cog):
                          f"**Server:** {self.bot.get_guild(x['guild'])} **Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = ViewMenuPages(source=DefaultPageSource(f"Global Leaderboard", data), clear_reactions_after=True)
+        pages = MenuPages(source=DefaultPageSource(f"Global Leaderboard", data), clear_reactions_after=True)
         await pages.start(ctx)
 
     @commands.Cog.listener()

@@ -3,8 +3,7 @@ from discord.ext import commands, menus
 import lavalink
 import re
 from discord.ext.commands.errors import CheckFailure
-from discord.ext.menus.views import ViewMenuPages
-from utils.menuUtils import SecondPageSource
+from utils.menuUtils import SecondPageSource, MenuPages
 import datetime
 import urllib
 import aiohttp
@@ -339,7 +338,7 @@ class Music(commands.Cog):
         pagData = []
         for chunk in data['lyrics'].split('\n'):
             pagData.append(chunk)
-        page = ViewMenuPages(source=LyricPageSource(data['title'], data['links']['genius'], data['thumbnail']['genius'], pagData), clear_reactions_after=True)
+        page = MenuPages(source=LyricPageSource(data['title'], data['links']['genius'], data['thumbnail']['genius'], pagData), clear_reactions_after=True)
         await page.start(ctx)
 
     @commands.command(aliases=['vol'], help="Change bot volume")
@@ -374,5 +373,5 @@ class Music(commands.Cog):
                 to_append = (f"**{num}**", f"[**{track.title}**]({track.uri})")
                 data.append(to_append)
 
-            page = ViewMenuPages(source=SecondPageSource(f"📀 Queue of {ctx.author.guild.name} 📀", data), clear_reactions_after=True)
+            page = MenuPages(source=SecondPageSource(f"📀 Queue of {ctx.author.guild.name} 📀", data), clear_reactions_after=True)
             await page.start(ctx)

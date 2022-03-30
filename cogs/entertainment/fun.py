@@ -1,7 +1,5 @@
 import discord
 from discord.ext import commands
-import json
-import requests
 import asyncpraw
 import random
 import asyncio
