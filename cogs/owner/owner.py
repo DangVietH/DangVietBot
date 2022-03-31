@@ -6,6 +6,7 @@ from utils.configs import config_var
 import contextlib
 import io
 import textwrap
+from traceback import format_exception
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 
@@ -21,7 +22,7 @@ class EvalPageSource(menus.ListPageSource):
         super().__init__(data, per_page=1)
 
     async def format_page(self, menu, entries):
-        return f"```py\n{entries}\n```\n\nPage {menu.current_page + 1}/{self.get_max_pages()}"
+        return f"```py\n{entries}\n```\nPage {menu.current_page + 1}/{self.get_max_pages()}"
 
 
 class Owner(commands.Cog):
@@ -32,7 +33,8 @@ class Owner(commands.Cog):
     def clean_code(self, code):
         if code.startswith('```') and code.endswith('```'):
             return '\n'.join(code.split('\n')[1:-3])
-        return code.strip('` \n')
+        else:
+            return code
 
     @commands.command(help="Load a cog")
     @commands.is_owner()
@@ -110,10 +112,9 @@ class Owner(commands.Cog):
         try:
             with contextlib.redirect_stdout(stdout):
                 exec(f"async def func():\n{textwrap.indent(code, '    ')}", variables)
-                obj = await variables['func']()
-                result = f"{stdout.getvalue()}\n-- {obj}"
+                result = f"{stdout.getvalue()}"
         except Exception as e:
-            result = f"\n{e.__class__.__name__}: {e}\n"
+            result = "".join(format_exception(type(e), e, e.__traceback__))
 
         page = MenuPages(source=EvalPageSource([result[i: i + 2000] for i in range(0, len(result), 2000)]), clear_reactions_after=True)
         await page.start(ctx)
