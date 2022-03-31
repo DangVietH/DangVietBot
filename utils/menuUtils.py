@@ -32,7 +32,4 @@ class SecondPageSource(menus.ListPageSource):
 class MenuPages(ViewMenuPages):
     """Subclass ViewMenuPages to add interaction_check"""
     async def interaction_check(self, interaction) -> bool:
-        if interaction.user != self.ctx.author:
-            return False
-        else:
-            return True
+        return interaction.user == self.ctx.author

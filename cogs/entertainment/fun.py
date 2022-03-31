@@ -226,7 +226,7 @@ class Fun(commands.Cog):
                 await session.close()
                 await ctx.send(file=discord.File(imageData, 'canny.png'))
 
-    @commands.command(help="Waving in the rain")
+    @commands.command(help="Waving in the wind")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def cloth(self, ctx, member: discord.Member = None):
         member = member or ctx.author

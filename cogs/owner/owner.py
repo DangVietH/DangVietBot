@@ -25,7 +25,7 @@ class Owner(commands.Cog):
         except Exception as e:
             await ctx.send(f'**ERROR:** {type(e).__name__} - {e}')
         else:
-            await ctx.send('👌')
+            await ctx.send(f'⬆️`{cog}`')
 
     @commands.command(help="Unload a cog")
     @commands.is_owner()
@@ -35,7 +35,7 @@ class Owner(commands.Cog):
         except Exception as e:
             await ctx.send(f'**ERROR:** {type(e).__name__} - {e}')
         else:
-            await ctx.send('👌')
+            await ctx.send(f'⬇️`{cog}`')
 
     @commands.command(help="Reload a cog")
     @commands.is_owner()
@@ -45,7 +45,7 @@ class Owner(commands.Cog):
         except Exception as e:
             await ctx.send(f'**ERROR:** {type(e).__name__} - {e}')
         else:
-            await ctx.send('👌')
+            await ctx.send(f'🔁`{cog}`')
 
     @commands.is_owner()
     @commands.command(help="Change the bot status")
