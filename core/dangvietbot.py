@@ -21,7 +21,8 @@ coglist = [
             'cogs.rtfm',
             'cogs.settings',
             'cogs.utilities',
-            'jishaku']
+            'jishaku'
+]
 
 
 class DangVietBot(commands.Bot):
@@ -40,6 +41,7 @@ class DangVietBot(commands.Bot):
         self.invite = "https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=1237420731614&scope=bot%20applications.commands"
         self.github = "https://github.com/DangVietH/DangVietBot"
         self.embed_color = 0x2F3136
+        self.mongo = AsyncIOMotorClient(config_var['mango_link'])
 
     def run(self):
         super().run(config_var['token'], reconnect=True)
@@ -93,8 +95,7 @@ class DangVietBot(commands.Bot):
             await guild.system_channel.send(embed=embed)
 
     async def get_prefix(self, message):
-        cluster = AsyncIOMotorClient(config_var['mango_link'])
-        cursor = cluster["custom_prefix"]["prefix"]
+        cursor = self.mongo["custom_prefix"]["prefix"]
         if not message.guild:
             return commands.when_mentioned_or("d!")(self, message)
         else:

@@ -17,7 +17,7 @@ class LyricPageSource(menus.ListPageSource):
         super().__init__(data, per_page=20)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(title=self.title, color=0x2F3136, url=self.url)
+        embed = discord.Embed(title=self.title, color=menu.ctx.bot.embed_color, url=self.url)
         embed.description = "\n".join([part for part in entries])
         embed.set_thumbnail(url=self.thumbnail)
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')

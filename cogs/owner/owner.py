@@ -1,7 +1,11 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, menus
+from utils.menuUtils import MenuPages
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils.configs import config_var
+import contextlib
+import io
+import textwrap
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 
@@ -12,10 +16,27 @@ ecursor = cluster["economy"]["users"]
 levelling = cluster["levelling"]['member']
 
 
+class EvalPageSource(menus.ListPageSource):
+    def __init__(self, title, data):
+        super().__init__(data, per_page=1)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(title="Evaluation results", color=menu.ctx.bot.embed_color)
+        embed.description = f"```py\n{entries}\n```"
+        embed.set_thumbnail(url=self.thumbnail)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
 class Owner(commands.Cog):
     """Only DvH can use it"""
     def __init__(self, bot):
         self.bot = bot
+
+    def clean_code(self, code):
+        if code.startswith('```') and code.endswith('```'):
+            return '\n'.join(code.split('\n')[1:-3])
+        return code.strip('` \n')
 
     @commands.command(help="Load a cog")
     @commands.is_owner()
@@ -72,6 +93,36 @@ class Owner(commands.Cog):
         else:
             command.enabled = False
             await ctx.reply(F"Disabled {command.name} command.")
+
+    @commands.command(help="Run code")
+    @commands.is_owner()
+    async def eval(self, ctx, *, code):
+        code = self.clean_code(code)
+        variables = {
+            'discord': discord,
+            'bot': self.bot,
+            'commands': commands,
+            'ctx': ctx,
+            'channel': ctx.channel,
+            'author': ctx.author,
+            'guild': ctx.guild,
+            'message': ctx.message
+        }
+
+        stdout = io.StringIO()
+        title = f"Evaluation results"
+
+        try:
+            with contextlib.redirect_stdout(stdout):
+                exec(f"async def func():\n{textwrap.indent(code, '    ')}", variables)
+                obj = await variables['func']()
+                result = f"{stdout.getvalue()}\n-- {obj}"
+        except Exception as e:
+            title = "Error!"
+            result = f"\n{e.__class__.__name__}: {e}\n"
+
+        page = MenuPages(source=EvalPageSource(title, [result[i: i + 2000] for i in range(0, len(result), 2000)]), clear_reactions_after=True)
+        await page.start(ctx)
 
     @commands.group(help="Blacklist ppls")
     @commands.is_owner()
