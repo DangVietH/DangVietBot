@@ -17,15 +17,11 @@ levelling = cluster["levelling"]['member']
 
 
 class EvalPageSource(menus.ListPageSource):
-    def __init__(self, title, data):
+    def __init__(self, data):
         super().__init__(data, per_page=1)
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(title="Evaluation results", color=menu.ctx.bot.embed_color)
-        embed.description = f"```py\n{entries}\n```"
-        embed.set_thumbnail(url=self.thumbnail)
-        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
-        return embed
+        return f"```py\n{entries}\n```\n\nPage {menu.current_page + 1}/{self.get_max_pages()}"
 
 
 class Owner(commands.Cog):
@@ -110,7 +106,6 @@ class Owner(commands.Cog):
         }
 
         stdout = io.StringIO()
-        title = f"Evaluation results"
 
         try:
             with contextlib.redirect_stdout(stdout):
@@ -118,10 +113,9 @@ class Owner(commands.Cog):
                 obj = await variables['func']()
                 result = f"{stdout.getvalue()}\n-- {obj}"
         except Exception as e:
-            title = "Error!"
             result = f"\n{e.__class__.__name__}: {e}\n"
 
-        page = MenuPages(source=EvalPageSource(title, [result[i: i + 2000] for i in range(0, len(result), 2000)]), clear_reactions_after=True)
+        page = MenuPages(source=EvalPageSource([result[i: i + 2000] for i in range(0, len(result), 2000)]), clear_reactions_after=True)
         await page.start(ctx)
 
     @commands.group(help="Blacklist ppls")
