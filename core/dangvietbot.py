@@ -24,6 +24,8 @@ coglist = [
             'jishaku'
 ]
 
+cluster = AsyncIOMotorClient(config_var['mango_link'])
+
 
 class DangVietBot(commands.Bot):
     def __init__(self, *args, **kwargs):
@@ -58,7 +60,10 @@ class DangVietBot(commands.Bot):
         print(f"{self.user} is online! \nUsing discord.py {discord.__version__} \nDevelop by DvH#9980")
 
     async def on_message(self, message):
+        blacklist = cluster['bot']['blacklist']
         if message.guild is None or message.author.bot:
+            return
+        if await blacklist.find_one({"id": message.author.id}):
             return
         await self.process_commands(message)
 
@@ -94,7 +99,6 @@ class DangVietBot(commands.Bot):
             await guild.system_channel.send(embed=embed)
 
     async def get_prefix(self, message):
-        cluster = AsyncIOMotorClient(config_var['mango_link'])
         cursor = cluster["custom_prefix"]["prefix"]
         if not message.guild:
             return commands.when_mentioned_or("d!")(self, message)
