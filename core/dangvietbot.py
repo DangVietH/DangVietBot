@@ -60,11 +60,10 @@ class DangVietBot(commands.Bot):
         print(f"{self.user} is online! \nUsing discord.py {discord.__version__} \nDevelop by DvH#9980")
 
     async def on_message(self, message):
-        blacklist = cluster['bot']['blacklist']
         if message.guild is None or message.author.bot:
             return
-        if await blacklist.find_one({"id": message.author.id}):
-            return
+        """if await blacklist.find_one({"id": message.author.id}):
+            return"""
         await self.process_commands(message)
 
     async def on_command_error(self, ctx, error):
