@@ -121,25 +121,18 @@ class Owner(commands.Cog):
 
     @commands.group(help="Blacklist ppls")
     @commands.is_owner()
-    async def blacklist(self, ctx, user: discord.Member, *, reason):
+    async def blacklist(self, ctx, user: discord.User, *, reason):
         check = await cursor.find_one({"id": user.id})
-        if check is None:
-            if await ecursor.find_one({"id": user.id}) is not None:
-                await ecursor.delete_one({"id": user.id})
+        if check is not None:
+            return await ctx.send("User is already blacklisted")
+        await user.send(f"You have been **BLACKLISTED** from DangVietBot for: **{reason}**")
+        await cursor.insert_one({"id": user.id})
+        for guild in self.bot.guilds:
+            if guild.owner.id == user.id:
+                await guild.system_channel.send("Leave this server because the owner is blacklisted")
+                await guild.leave()
 
-            if await levelling.find_one({"user": user.id}) is not None:
-                await levelling.delete_one({"user": user.id})
-
-            await user.send(f"You have been blacklisted for: {reason}")
-
-            for guild in self.bot.guilds:
-                if guild.owner.id == user.id:
-                    await guild.system_channel.send("Leave this server because the owner is blacklisted")
-
-            await cursor.insert_one({"id": user.id})
-            await ctx.send("Blacklist user successfully")
-        else:
-            await ctx.send("User already blacklist")
+        await ctx.send("Blacklist user successfully")
 
     @commands.command(help="unBlacklist user")
     @commands.is_owner()
