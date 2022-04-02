@@ -66,13 +66,9 @@ class RTFM(commands.Cog):
         }
         self.cache = {}
 
-    @property
-    def session(self):
-        return self.bot.http._HTTPClient__session
-
     async def build(self, target) -> None:
         url = self.targets[target]
-        req = await self.session.get(url + "/objects.inv")
+        req = await self.bot.httpsession.get(url + "/objects.inv")
         if req.status != 200:
             warnings.warn(
                 Warning(

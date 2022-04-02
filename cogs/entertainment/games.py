@@ -9,26 +9,20 @@ class Games(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(help="Play some test quizs")
-    @commands.is_owner()
-    async def testtrivia(self, ctx):
-        async with aiohttp.ClientSession() as session:
-            async with session.get("https://opentdb.com/api.php?amount=1") as resp:
-                data = await resp.json()
-
     @commands.command(help="Play some quizs", aliases=["quiz"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def trivia(self, ctx):
-        async with aiohttp.ClientSession() as session:
-            async with session.get("https://opentdb.com/api.php?amount=1") as resp:
-                data = await resp.json()
+        resp = await self.bot.httpsession.get("https://opentdb.com/api.php?amount=1")
+        data = await resp.json()
 
         if data['response_code'] != 0:
             return await ctx.send("There was an error fetching the question! Just rerun the command")
 
         embed = discord.Embed(color=self.bot.embed_color)
         ldt = data['results'][0]
-        ques = ldt["incorrect_answers"]
+        ques = []
+        for incorrect_ans in ldt["incorrect_answers"]:
+            ques.append(incorrect_ans.replace("&quot;", "'").replace("&#039;", "'"))
         corret_ans = ldt["correct_answer"].replace("&quot;", "'").replace("&#039;", "'")
         ques.append(corret_ans)
         random.shuffle(ques)

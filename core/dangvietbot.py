@@ -7,6 +7,7 @@ os.environ["JISHAKU_HIDE"] = "True"
 os.environ["JISHAKU_NO_UNDERSCORE"] = "True"
 os.environ["JISHAKU_NO_DM_TRACEBACK"] = "True"
 os.environ['JISHAKU_RETAIN'] = "True"
+os.environ['JISHAKU_FORCE_PAGINATOR'] = "True"
 
 coglist = [
             'cogs.audio',
