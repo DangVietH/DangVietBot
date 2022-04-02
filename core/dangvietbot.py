@@ -1,15 +1,12 @@
 import discord
 from discord.ext import commands
-from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import datetime
-from utils.configs import config_var
 
 os.environ["JISHAKU_HIDE"] = "True"
 os.environ["JISHAKU_NO_UNDERSCORE"] = "True"
 os.environ["JISHAKU_NO_DM_TRACEBACK"] = "True"
 os.environ['JISHAKU_RETAIN'] = "True"
-os.environ["JISHAKU_FORCE_PAGINATOR"] = "True"
 
 coglist = [
             'cogs.audio',
@@ -23,8 +20,6 @@ coglist = [
             'cogs.utilities',
             'jishaku'
 ]
-
-cluster = AsyncIOMotorClient(config_var['mango_link'])
 
 
 class DangVietBot(commands.Bot):
@@ -44,9 +39,6 @@ class DangVietBot(commands.Bot):
         self.github = "https://github.com/DangVietH/DangVietBot"
         self.embed_color = 0x2F3136
 
-    def run(self):
-        super().run(config_var['token'], reconnect=True)
-
     async def setup_hook(self):
         # loading cogs
         for ext in coglist:
@@ -60,10 +52,11 @@ class DangVietBot(commands.Bot):
         print(f"{self.user} is online! \nUsing discord.py {discord.__version__} \nDevelop by DvH#9980")
 
     async def on_message(self, message):
+        blacklist = self.bot.mongo["custom_prefix"]["prefix"]
         if message.guild is None or message.author.bot:
             return
-        """if await blacklist.find_one({"id": message.author.id}):
-            return"""
+        if await blacklist.find_one({"id": message.author.id}):
+            return
         await self.process_commands(message)
 
     async def on_command_error(self, ctx, error):
@@ -98,7 +91,7 @@ class DangVietBot(commands.Bot):
             await guild.system_channel.send(embed=embed)
 
     async def get_prefix(self, message):
-        cursor = cluster["custom_prefix"]["prefix"]
+        cursor = self.bot.mongo["custom_prefix"]["prefix"]
         if not message.guild:
             return commands.when_mentioned_or("d!")(self, message)
         else:

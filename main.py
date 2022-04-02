@@ -1,12 +1,14 @@
 from core.dangvietbot import DangVietBot
+import asyncio
+from utils.configs import config_var
+from motor.motor_asyncio import AsyncIOMotorClient
 
 bot = DangVietBot()
 
 
-"""
-Remind me that mongo connection needs to be in asyncio
-"""
+async def main():
+    async with bot:
+        bot.mongo = AsyncIOMotorClient(config_var['mango_link'])
+        await bot.start('token')
 
-
-if __name__ == '__main__':
-    bot.run()
+asyncio.run(main())
