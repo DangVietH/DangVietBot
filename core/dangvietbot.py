@@ -50,7 +50,7 @@ class DangVietBot(commands.Bot):
                 print(f"Failed to load extension {ext}: {e}")
 
     async def on_ready(self):
-        print(f"{self.user} is online! \nUsing discord.py {discord.__version__} \nServer {len(self.guilds)} | User: {len(self.users)}\nDevelop by DvH#9980")
+        print(f"{self.user} is online! \nUsing discord.py {discord.__version__}\nServer {len(self.guilds)} | User: {len(self.users)}\nDevelop by DvH#9980")
 
     async def on_message(self, message):
         blacklist = self.mongo["custom_prefix"]["prefix"]

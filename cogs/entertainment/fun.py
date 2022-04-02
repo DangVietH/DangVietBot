@@ -41,9 +41,10 @@ class Fun(commands.Cog):
     @commands.command(help="Returns a quote")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def quote(self, ctx):
-        resp = await self.bot.httpsession.get("https://zenquotes.io/api/random")
-        data = await resp.json()
-        await ctx.send(f"**{data[0]['q']}**\n          -{data[0]['a']}")
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://zenquotes.io/api/random") as resp:
+                data = await resp.json()
+                await ctx.send(f"**{data[0]['q']}**\n          -{data[0]['a']}")
 
     @commands.command(help="Fresh reddit memes")
     async def meme(self, ctx):
@@ -68,23 +69,26 @@ class Fun(commands.Cog):
     @commands.command(help="Get dog facts")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def dogfact(self, ctx):
-        resp = await self.bot.httpsession.get("https://some-random-api.ml/facts/dog")
-        data = await resp.json()
-        await ctx.send(f"**Dog Fact:** {data['fact']}")
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://some-random-api.ml/facts/dog") as resp:
+                data = await resp.json()
+                await ctx.send(f"**Dog Fact:** {data['fact']}")
 
     @commands.command(help="Get cat facts")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def catfact(self, ctx):
-        resp = await self.bot.httpsession.get("https://some-random-api.ml/facts/cat")
-        data = await resp.json()
-        await ctx.send(f"**Cat Fact:** {data['fact']}")
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://some-random-api.ml/facts/cat") as resp:
+                data = await resp.json()
+                await ctx.send(f"**Cat Fact:** {data['fact']}")
 
     @commands.command(help="Get bird facts")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def birdfact(self, ctx):
-        resp = await self.bot.httpsession.get("https://some-random-api.ml/facts/bird")
-        data = await resp.json()
-        await ctx.send(f"**Bird Fact:** {data['fact']}")
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://some-random-api.ml/facts/bird") as resp:
+                data = await resp.json()
+                await ctx.send(f"**Bird Fact:** {data['fact']}")
 
     @commands.command(help="Measure your pp size", aliases=["cock", 'dong'])
     async def pp(self, ctx, *, member: discord.Member = None):
@@ -112,32 +116,42 @@ class Fun(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def gay(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(f'https://some-random-api.ml/gay?avatar={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'gay.png'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://some-random-api.ml/canvas/gay?avatar={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'gay.png'))
 
     @commands.command(help="Get a horny permission's card")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def horny(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(f'https://some-random-api.ml/horny?avatar={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'horny.png'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://some-random-api.ml/horny?avatar={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'horny.png'))
 
     @commands.command(help="U R arrested")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def jail(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(f'https://some-random-api.ml/jail?avatar={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'jail.png'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://some-random-api.ml/canvas/jail?avatar={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'jail.png'))
 
     @commands.command(help="Funny shit")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def joke(self, ctx):
-        resp = await self.bot.httpsession.get("https://some-random-api.ml/joke")
-        data = await resp.json()
-        await ctx.send(data['joke'])
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://some-random-api.ml/joke") as resp:
+                data = await resp.json()
+                await ctx.send(data['joke'])
 
     @commands.command(help="Show pokemon info")
     async def pokedex(self, ctx, *, pokemon):
@@ -173,135 +187,172 @@ class Fun(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def triggered(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(f'https://some-random-api.ml/triggered?avatar={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'triggered.gif'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'https://some-random-api.ml/canvas/triggered?avatar={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'triggered.gif'))
 
     @commands.command(help="ur very cute", aliases=['patpat'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def petpet(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(f'https://api.jeyy.xyz/image/patpat?image_url={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'petpet.gif'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/patpat?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'patpat.gif'))
 
     @commands.command(help="Steamy stuff")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def boil(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(
-            f'https://api.jeyy.xyz/image/boil?image_url={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'boil.gif'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/boil?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'boil.gif'))
 
     @commands.command(help="You just see the worst shit ever")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def canny(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(
-            f'https://api.jeyy.xyz/image/canny?image_url={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'canny.gif'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/canny?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'canny.png'))
 
     @commands.command(help="Waving in the wind")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def cloth(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(
-            f'https://api.jeyy.xyz/image/cloth?image_url={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'cloth.gif'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/cloth?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'boil.gif'))
 
     @commands.command(help="UR terrible")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def cartoon(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(
-            f'https://api.jeyy.xyz/image/cartoon?image_url={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'cartoon.png'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/cartoon?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'cartoon.png'))
 
     @commands.command(help="The best album ever")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def explicit(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(
-            f'https://api.jeyy.xyz/image/explicit?image_url={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'explicit.png'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/explicit?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'explicit.png'))
 
     @commands.command(help="Say sumthing")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def tv(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(
-            f'https://api.jeyy.xyz/image/tv?image_url={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'tv.gif'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/explicit?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'tv.gif'))
 
     @commands.command(help="Depressing")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def rain(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(
-            f'https://api.jeyy.xyz/image/rain?image_url={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'rain.gif'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/rain?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'rain.gif'))
 
     @commands.command(help="tic tic tic")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def clock(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(
-            f'https://api.jeyy.xyz/image/clock?image_url={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'clock.gif'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/clock?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'clock.gif'))
 
     @commands.command(help="Umm we have a tech problem")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def glitch(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(
-            f'https://api.jeyy.xyz/image/glitch?image_url={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'glitch.gif'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/glitch?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'glitch.gif'))
 
     @commands.command(help="Oh no")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def wasted(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(f'https://some-random-api.ml/wasted?avatar={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'wasted.png'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://some-random-api.ml/canvas/wasted?avatar={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'wasted.png'))
 
     @commands.command(help="Not fun fact: my owner lives in a communist country")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def comrade(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(f'https://some-random-api.ml/comrade?avatar={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'comrade.png'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://some-random-api.ml/canvas/comrade?avatar={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'comrade.png'))
 
     @commands.command(help="Respect")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def passed(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.httpsession.get(f'https://some-random-api.ml/passed?avatar={member.display_avatar.url}')
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'passed.png'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://some-random-api.ml/canvas/passed?avatar={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'wasted.png'))
 
     @commands.command(help="Make a fake youtube comment")
     async def ytcomment(self, ctx, *, comment="Nothing you idiot"):
-        resp = await self.bot.httpsession.get(f"https://some-random-api.ml/canvas/youtube-comment?avatar={ctx.author.display_avatar.url}&username={ctx.author.name}&comment={urllib.parse.quote(comment)}")
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'yt.png'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f"https://some-random-api.ml/canvas/youtube-comment?avatar={ctx.author.display_avatar.url}&username={ctx.author.name}&comment={urllib.parse.quote(comment)}") as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'yt.png'))
 
     @commands.command(help="Make a fake tweet")
     async def tweet(self, ctx, name, *, comment="Nothing you idiot"):
-        resp = await self.bot.httpsession.get(
-            f"https://some-random-api.ml/canvas/tweet?avatar={ctx.author.display_avatar.url}&displayname={name}&comment={urllib.parse.quote(comment)}&username={ctx.author.name}")
-        imageData = io.BytesIO(await resp.read())
-        await ctx.send(file=discord.File(imageData, 'tweet.png'))
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f"https://some-random-api.ml/canvas/tweet?avatar={ctx.author.display_avatar.url}&displayname={name}&comment={urllib.parse.quote(comment)}&username={ctx.author.name}") as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'tweet.png'))
 
     @commands.command(name="8ball", help="ask anything")
     async def _8ball(self, ctx, *, question):

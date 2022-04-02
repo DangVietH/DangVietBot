@@ -6,6 +6,7 @@ from discord.ext.commands.errors import CheckFailure
 from utils.menuUtils import SecondPageSource, MenuPages
 import datetime
 import urllib
+import aiohttp
 
 
 class LyricPageSource(menus.ListPageSource):
@@ -328,8 +329,9 @@ class Music(commands.Cog):
     @commands.command(aliases=['lyrc', 'lyric'], help="Shows the lyrics of a song")
     async def lyrics(self, ctx, *, song):
         await ctx.trigger_typing()
-        resp = await self.bot.httpsession.get(f"https://some-random-api.ml/lyrics?title={urllib.parse.quote(song)}")
-        data = await resp.json()
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"https://some-random-api.ml/lyrics?title={urllib.parse.quote(song)}") as resp:
+                data = await resp.json()
 
         if data.get('error'):
             return await ctx.send(f"Received unexpected error: {data['error']}")
