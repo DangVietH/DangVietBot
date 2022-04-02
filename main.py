@@ -9,6 +9,6 @@ bot = DangVietBot()
 async def main():
     async with bot:
         bot.mongo = AsyncIOMotorClient(config_var['mango_link'])
-        await bot.start('token')
+        await bot.start(config_var['token'])
 
 asyncio.run(main())
