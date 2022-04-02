@@ -49,10 +49,10 @@ class DangVietBot(commands.Bot):
                 print(f"Failed to load extension {ext}: {e}")
 
     async def on_ready(self):
-        print(f"{self.user} is online! \nUsing discord.py {discord.__version__} \nDevelop by DvH#9980")
+        print(f"{self.user} is online! \nUsing discord.py {discord.__version__} \nServer {len(self.guilds)} | User: {len(self.users)}\nDevelop by DvH#9980")
 
     async def on_message(self, message):
-        blacklist = self.bot.mongo["custom_prefix"]["prefix"]
+        blacklist = self.mongo["custom_prefix"]["prefix"]
         if message.guild is None or message.author.bot:
             return
         if await blacklist.find_one({"id": message.author.id}):
@@ -91,7 +91,7 @@ class DangVietBot(commands.Bot):
             await guild.system_channel.send(embed=embed)
 
     async def get_prefix(self, message):
-        cursor = self.bot.mongo["custom_prefix"]["prefix"]
+        cursor = self.mongo["custom_prefix"]["prefix"]
         if not message.guild:
             return commands.when_mentioned_or("d!")(self, message)
         else:
