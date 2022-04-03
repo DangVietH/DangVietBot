@@ -70,7 +70,6 @@ class MenuPages(discord.ui.View):
         await self._source._prepare_once()
         page = await self._source.get_page(0)
         kwargs = await self._get_kwargs_from_page(page)
-        self._update_labels(0)
         self.message = await self.ctx.send(**kwargs, view=self)
 
     async def on_timeout(self) -> None:
