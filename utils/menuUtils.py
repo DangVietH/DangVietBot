@@ -92,7 +92,7 @@ class MenuPages(discord.ui.View):
     async def before_page(self, interaction, button):
         await self.show_checked_page(interaction, self.current_page - 1)
 
-    @discord.ui.button(emoji='', style=discord.ButtonStyle.grey)
+    @discord.ui.button(emoji='⏩', style=discord.ButtonStyle.grey)
     async def next_page(self, interaction, button):
         await self.show_checked_page(interaction, self.current_page + 1)
 
