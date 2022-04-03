@@ -60,18 +60,20 @@ class MenuPages(discord.ui.View, menus.MenuPages):
     async def on_error(self, error, item, interaction) -> None:
         await interaction.response.send_message(f"**Error:** {error}", ephemeral=True)
 
-    async def show_interation_page(self, interaction, page):
-        self.current_page = page
+    async def show_interation_page(self, interaction, page_number):
+        page = await self._source.get_page(page_number)
+        self.current_page = page_number
+        kwargs = await self._get_kwargs_from_page(page)
         if interaction.response.is_done():
-            await self.show_page(page)
+            await self.message.edit(**kwargs)
 
-    async def show_check_interation_page(self, interaction, page):
+    async def show_check_interation_page(self, interaction, page_number):
         max_pages = self.source.get_max_pages()
         try:
             if max_pages is None:
-                await self.show_interation_page(interaction, page)
-            elif max_pages > page >= 0:
-                await self.show_interation_page(interaction, page)
+                await self.show_interation_page(interaction, page_number)
+            elif max_pages > page_number >= 0:
+                await self.show_interation_page(interaction, page_number)
         except IndexError:
             pass
 
