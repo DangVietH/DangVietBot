@@ -181,8 +181,7 @@ class Leveling(commands.Cog):
             to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        page = MenuPages(source=DefaultPageSource(f"Leaderboard of {ctx.guild.name}", data),
-                         clear_reactions_after=True)
+        page = MenuPages(DefaultPageSource(f"Leaderboard of {ctx.guild.name}", data))
         await page.start(ctx)
 
     @commands.command(help="See global rank")
@@ -197,7 +196,7 @@ class Leveling(commands.Cog):
                          f"**Server:** {self.bot.get_guild(x['guild'])} **Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = MenuPages(source=DefaultPageSource(f"Global Leaderboard", data), clear_reactions_after=True)
+        pages = MenuPages(DefaultPageSource(f"Global Leaderboard", data))
         await pages.start(ctx)
 
     @commands.Cog.listener()

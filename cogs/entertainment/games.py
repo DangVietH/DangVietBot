@@ -9,13 +9,6 @@ class Games(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(help="Play some test quizs")
-    @commands.is_owner()
-    async def testtrivia(self, ctx):
-        async with aiohttp.ClientSession() as session:
-            async with session.get("https://opentdb.com/api.php?amount=1") as resp:
-                data = await resp.json()
-
     @commands.command(help="Play some quizs", aliases=["quiz"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def trivia(self, ctx):

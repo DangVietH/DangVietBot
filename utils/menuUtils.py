@@ -1,7 +1,6 @@
 import discord
 from discord.ext import menus
 import datetime
-from discord.ext.menus.views import ViewMenuPages
 
 
 class DefaultPageSource(menus.ListPageSource):
@@ -29,7 +28,68 @@ class SecondPageSource(menus.ListPageSource):
         return embed
 
 
-class MenuPages(ViewMenuPages):
-    """Subclass ViewMenuPages to add interaction_check"""
+class MenuPages(discord.ui.View, menus.MenuPages):
+    """Custom MenuPages with buttons"""
+    def __init__(self, source):
+        super().__init__(timeout=120.0)
+        self._source = source
+        self.current_page = 0
+        self.ctx = None
+        self.message = None
+
+    async def start(self, ctx, *, channel=None, wait=False):
+        await self._source._prepare_once()
+        self.ctx = ctx
+        self.message = await self.send_initial_message(ctx, ctx.channel)
+
+    async def _get_kwargs_from_page(self, page):
+        value = await super()._get_kwargs_from_page(page)
+        if 'view' not in value:
+            value.update({'view': self})
+        return value
+
     async def interaction_check(self, interaction) -> bool:
-        return interaction.user == self.ctx.author
+        if interaction.user == self.ctx.author:
+            return True
+        await interaction.response.send_message('This pagination menu cannot be controlled by you, sorry!', ephemeral=True)
+        return False
+
+    async def on_timeout(self) -> None:
+        await self.message.edit(view=None)
+
+    async def show_interation_page(self, interaction, page):
+        self.current_page = page
+        if interaction.response.is_done():
+            await self.show_page(page)
+
+    async def show_check_interation_page(self, interaction, page):
+        max_pages = self.source.get_max_pages()
+        try:
+            if max_pages is None:
+                await self.show_page(interaction, page)
+            elif max_pages > page >= 0:
+                await self.show_page(interaction, page)
+        except IndexError:
+            pass
+
+    @discord.ui.button(emoji='⏪', style=discord.ButtonStyle.grey)
+    async def first_page(self, button, interaction):
+        await self.show_interation_page(interaction, 0)
+
+    @discord.ui.button(emoji='◀️', style=discord.ButtonStyle.grey)
+    async def before_page(self, button, interaction):
+        await self.show_check_interation_page(interaction, self.current_page - 1)
+
+    @discord.ui.button(emoji='▶️', style=discord.ButtonStyle.grey)
+    async def next_page(self, button, interaction):
+        await self.show_check_interation_page(interaction, self.current_page + 1)
+
+    @discord.ui.button(emoji='⏩', style=discord.ButtonStyle.grey)
+    async def last_page(self, button, interaction):
+        await self.show_interation_page(interaction, self._source.get_max_pages() - 1)
+
+    @discord.ui.button(emoji='🗑', style=discord.ButtonStyle.red)
+    async def stop_page(self, button, interaction):
+        self.cler_items()
+        await interaction.response.edit_mssage(view=self)
+        self.stop()

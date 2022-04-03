@@ -116,7 +116,7 @@ class Owner(commands.Cog):
         except Exception as e:
             result = "".join(format_exception(type(e), e, e.__traceback__))
 
-        page = MenuPages(source=EvalPageSource([result[i: i + 2000] for i in range(0, len(result), 2000)]), clear_reactions_after=True)
+        page = MenuPages(EvalPageSource([result[i: i + 2000] for i in range(0, len(result), 2000)]))
         await page.start(ctx)
 
     @commands.group(help="Blacklist ppls")

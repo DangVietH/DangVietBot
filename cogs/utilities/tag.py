@@ -114,7 +114,7 @@ class Tags(commands.Cog):
             for thing in ta:
                 to_append = (thing['name'], f"**Owner:** {self.bot.get_user(thing['owner'])}")
                 data.append(to_append)
-            page = MenuPages(source=DefaultPageSource(f"Tags of {ctx.guild.name}", data), clear_reactions_after=True)
+            page = MenuPages(DefaultPageSource(f"Tags of {ctx.guild.name}", data))
             await page.start(ctx)
 
     @commands.Cog.listener()

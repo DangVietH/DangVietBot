@@ -338,7 +338,7 @@ class Music(commands.Cog):
         pagData = []
         for chunk in data['lyrics'].split('\n'):
             pagData.append(chunk)
-        page = MenuPages(source=LyricPageSource(data['title'], data['links']['genius'], data['thumbnail']['genius'], pagData), clear_reactions_after=True)
+        page = MenuPages(LyricPageSource(data['title'], data['links']['genius'], data['thumbnail']['genius'], pagData))
         await page.start(ctx)
 
     @commands.command(aliases=['vol'], help="Change bot volume")
@@ -373,5 +373,5 @@ class Music(commands.Cog):
                 to_append = (f"**{num}**", f"[**{track.title}**]({track.uri})")
                 data.append(to_append)
 
-            page = MenuPages(source=SecondPageSource(f"📀 Queue of {ctx.author.guild.name} 📀", data), clear_reactions_after=True)
+            page = MenuPages(SecondPageSource(f"📀 Queue of {ctx.author.guild.name} 📀", data))
             await page.start(ctx)

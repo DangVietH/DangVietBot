@@ -117,7 +117,7 @@ class RTFM(commands.Cog):
                 f"No results found when searching for {term} in {docs}"
             )
 
-        page = MenuPages(source=RtfmPageSource(term, docs, results), clear_reactions_after=True)
+        page = MenuPages(RtfmPageSource(term, docs, results))
         await page.start(ctx)
 
     @rtfm.command(help="available modules")

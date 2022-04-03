@@ -61,7 +61,7 @@ class Economy(commands.Cog):
                 to_append = (f"{num}: {is_user_in_guild}", f"**Wallet:** {x['wallet']}")
                 data.append(to_append)
 
-        pages = MenuPages(source=DefaultPageSource(f"Richest user in {ctx.guild.name}", data), clear_reactions_after=True)
+        pages = MenuPages(DefaultPageSource(f"Richest user in {ctx.guild.name}", data))
         await pages.start(ctx)
 
     @commands.command(help="Who is the richest one around the world")
@@ -74,7 +74,7 @@ class Economy(commands.Cog):
             to_append = (f"{num}: {self.bot.get_user(x['id'])}", f"**Wallet:** {x['wallet']}")
             data.append(to_append)
 
-        pages = MenuPages(source=DefaultPageSource(f"Richest user in the world", data), clear_reactions_after=True)
+        pages = MenuPages(DefaultPageSource(f"Richest user in the world", data))
         await pages.start(ctx)
 
     @commands.command(help="Beg some money")
@@ -147,7 +147,7 @@ class Economy(commands.Cog):
         for i in range(len(items_name)):
             data.append((f"{items_name[i]} | 💵 {items_price[i]}",
                          items_description[i]))
-        page = MenuPages(source=DefaultPageSource(f"Shop", data), clear_reactions_after=True)
+        page = MenuPages(DefaultPageSource(f"Shop", data))
         await page.start(ctx)
 
     @commands.command(help="Buy some items")
@@ -228,7 +228,7 @@ class Economy(commands.Cog):
                 amount = item['amount']
                 to_append = (f"{name}", f"**Amount** {amount}")
                 data.append(to_append)
-            pages = MenuPages(source=DefaultPageSource(f"{ctx.author} Inventory", data), clear_reactions_after=True)
+            pages = MenuPages(DefaultPageSource(f"{ctx.author} Inventory", data))
             await pages.start(ctx)
 
     @commands.command(help="Claim your daily money")

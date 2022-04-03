@@ -11,7 +11,7 @@ class CogPageSource(menus.ListPageSource):
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(
-            color=0x2F3136,
+            color=menu.ctx.bot.embed_color,
             title=self.title,
             timestamp=datetime.datetime.utcnow(),
             description="<> = required argument | [] = optional argument"
@@ -33,7 +33,7 @@ class CustomHelp(commands.HelpCommand):
     async def send_bot_help(self, mapping):
         embed = discord.Embed(title='DangVietBot Categories',
                               description=f"{self.context.bot.description}",
-                              color=0x2F3136)
+                              color=self.context.bot.embed_color)
         for cog, command in mapping.items():
             command_signatures = [self.get_command_signature(c) for c in command]
             if command_signatures:
@@ -53,8 +53,7 @@ class CustomHelp(commands.HelpCommand):
         for command in filtered:
             data.append((f"- {command.name}", f"{self.get_command_signature(command)}\n`{command.short_doc}`"))
 
-        page = MenuPages(source=CogPageSource(f"{cog_.qualified_name} Commands", data),
-                         clear_reactions_after=True)
+        page = MenuPages(CogPageSource(f"{cog_.qualified_name} Commands", data))
         await page.start(self.context)
 
     async def send_group_help(self, group):
@@ -64,8 +63,7 @@ class CustomHelp(commands.HelpCommand):
             for command in filtered:
                 data.append((f"- {command.name}", f"{self.get_command_signature(command)}\n`{command.short_doc}`"))
 
-        page = MenuPages(source=CogPageSource(f"{group.qualified_name} Commands", data),
-                         clear_reactions_after=True)
+        page = MenuPages(CogPageSource(f"{group.qualified_name} Commands", data))
         await page.start(self.context)
 
     async def send_command_help(self, command):

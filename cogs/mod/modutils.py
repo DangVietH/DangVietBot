@@ -84,7 +84,7 @@ class ModUtils(commands.Cog):
         for case in results['cases']:
             gdata.append((f"Case {case['Number']}",
                           f"**Type:** {case['type']}\n **User:** {self.bot.get_user(int(case['user']))}\n**Mod:** {self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
-        page = MenuPages(source=GuildCasePageSource(results['num'], gdata), clear_reactions_after=True)
+        page = MenuPages(GuildCasePageSource(results['num'], gdata))
         await page.start(ctx)
 
     @commands.command(help="Look at user cases", aliases=["ucase"])
@@ -100,5 +100,5 @@ class ModUtils(commands.Cog):
                 udata.append((f"Case {case['Number']}",
                               f"**Type:** {case['type']}\n**Mod:** {self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
 
-        page = MenuPages(source=UserCasePageSource(member, user_check['total_cases'], udata), clear_reactions_after=True)
+        page = MenuPages(UserCasePageSource(member, user_check['total_cases'], udata))
         await page.start(ctx)
