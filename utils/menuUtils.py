@@ -71,9 +71,9 @@ class MenuPages(discord.ui.View, menus.MenuPages):
         max_pages = self.source.get_max_pages()
         try:
             if max_pages is None:
-                await self.show_page(interaction, page)
+                await self.show_interation_page(interaction, page)
             elif max_pages > page >= 0:
-                await self.show_page(interaction, page)
+                await self.show_interation_page(interaction, page)
         except IndexError:
             pass
 
@@ -95,6 +95,5 @@ class MenuPages(discord.ui.View, menus.MenuPages):
 
     @discord.ui.button(emoji='🗑', style=discord.ButtonStyle.red)
     async def stop_page(self, button, interaction):
-        self.cler_items()
-        await interaction.response.edit_mssage(view=self)
+        await self.message.edit(view=None)
         self.stop()
