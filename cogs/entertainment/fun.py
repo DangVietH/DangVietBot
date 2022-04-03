@@ -4,6 +4,7 @@ import asyncpraw
 import random
 import asyncio
 from utils.configs import config_var
+from googletrans import Translator
 import urllib
 import aiohttp
 import io
@@ -353,6 +354,11 @@ class Fun(commands.Cog):
                 imageData = io.BytesIO(await rsp.read())
                 await session.close()
                 await ctx.send(file=discord.File(imageData, 'tweet.png'))
+
+    @commands.command(help="Translate a messages")
+    async def translate(self, ctx, lang, *, args):
+        t = Translator().translate(args, dest=lang)
+        await ctx.send(t.text)
 
     @commands.command(name="8ball", help="ask anything")
     async def _8ball(self, ctx, *, question):

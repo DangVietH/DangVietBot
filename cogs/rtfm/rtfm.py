@@ -4,7 +4,8 @@ from discord.ext import commands, menus
 import cogs.rtfm.rtfm_utils as rtfm
 from utils.menuUtils import MenuPages
 
-# directly taken and modify from https://github.com/BruceCodesGithub/OG-Robocord/blob/main/cogs/rtfm.py
+# Directly taken from BruceCodesGithub/OG-Robocord
+# https://github.com/BruceCodesGithub/OG-Robocord/blob/main/cogs/rtfm.py
 
 
 class RtfmPageSource(menus.ListPageSource):
