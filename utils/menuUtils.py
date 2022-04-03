@@ -77,19 +77,19 @@ class MenuPages(discord.ui.View, menus.MenuPages):
 
     @discord.ui.button(emoji='⏪', style=discord.ButtonStyle.grey)
     async def first_page(self, interaction, button):
-        await self.show_interation_page(button, 0)
+        await self.show_interation_page(interaction, 0)
 
     @discord.ui.button(emoji='◀️', style=discord.ButtonStyle.grey)
     async def before_page(self, interaction, button):
-        await self.show_check_interation_page(button, self.current_page - 1)
+        await self.show_check_interation_page(interaction, self.current_page - 1)
 
     @discord.ui.button(emoji='▶️', style=discord.ButtonStyle.grey)
     async def next_page(self, interaction, button):
-        await self.show_check_interation_page(button, self.current_page + 1)
+        await self.show_check_interation_page(interaction, self.current_page + 1)
 
     @discord.ui.button(emoji='⏩', style=discord.ButtonStyle.grey)
     async def last_page(self, interaction, button):
-        await self.show_interation_page(button, self._source.get_max_pages() - 1)
+        await self.show_interation_page(interaction, self._source.get_max_pages() - 1)
 
     @discord.ui.button(emoji='🗑', style=discord.ButtonStyle.red)
     async def stop_page(self, interaction, button):
