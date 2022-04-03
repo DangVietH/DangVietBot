@@ -51,16 +51,14 @@ class MenuPages(discord.ui.View, menus.MenuPages):
     async def interaction_check(self, interaction) -> bool:
         if interaction.user == self.ctx.author:
             return True
-        await interaction.response.send_message('This pagination menu cannot be controlled by you, sorry!', ephemeral=True)
+        await interaction.response.send_message("You can't use these buttons", ephemeral=True)
         return False
 
     async def on_timeout(self) -> None:
         await self.message.edit(view=None)
 
     async def on_error(self, error, item, interaction) -> None:
-        await interaction.response.send_message(
-            f"An error occurred, sorry: {error}", ephemeral=True
-        )
+        await interaction.response.send_message(f"**Error:** {error}", ephemeral=True)
 
     async def show_interation_page(self, interaction, page):
         self.current_page = page
@@ -78,22 +76,22 @@ class MenuPages(discord.ui.View, menus.MenuPages):
             pass
 
     @discord.ui.button(emoji='⏪', style=discord.ButtonStyle.grey)
-    async def first_page(self, button, interaction):
-        await self.show_interation_page(interaction, 0)
+    async def first_page(self, interaction, button):
+        await self.show_interation_page(button, 0)
 
     @discord.ui.button(emoji='◀️', style=discord.ButtonStyle.grey)
-    async def before_page(self, button, interaction):
-        await self.show_check_interation_page(interaction, self.current_page - 1)
+    async def before_page(self, interaction, button):
+        await self.show_check_interation_page(button, self.current_page - 1)
 
     @discord.ui.button(emoji='▶️', style=discord.ButtonStyle.grey)
-    async def next_page(self, button, interaction):
-        await self.show_check_interation_page(interaction, self.current_page + 1)
+    async def next_page(self, interaction, button):
+        await self.show_check_interation_page(button, self.current_page + 1)
 
     @discord.ui.button(emoji='⏩', style=discord.ButtonStyle.grey)
-    async def last_page(self, button, interaction):
-        await self.show_interation_page(interaction, self._source.get_max_pages() - 1)
+    async def last_page(self, interaction, button):
+        await self.show_interation_page(button, self._source.get_max_pages() - 1)
 
     @discord.ui.button(emoji='🗑', style=discord.ButtonStyle.red)
-    async def stop_page(self, button, interaction):
+    async def stop_page(self, interaction, button):
         await self.message.edit(view=None)
         self.stop()
