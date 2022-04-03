@@ -57,6 +57,11 @@ class MenuPages(discord.ui.View, menus.MenuPages):
     async def on_timeout(self) -> None:
         await self.message.edit(view=None)
 
+    async def on_error(self, error, item, interaction) -> None:
+        await interaction.response.send_message(
+            f"An error occurred, sorry: {error}", ephemeral=True
+        )
+
     async def show_interation_page(self, interaction, page):
         self.current_page = page
         if interaction.response.is_done():
