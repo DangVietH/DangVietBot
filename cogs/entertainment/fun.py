@@ -266,10 +266,21 @@ class Fun(commands.Cog):
         member = member or ctx.author
         async with aiohttp.ClientSession() as session:
             async with session.get(
-                    f'https://api.jeyy.xyz/image/explicit?image_url={member.display_avatar.url}') as rsp:
+                    f'https://api.jeyy.xyz/image/tv?image_url={member.display_avatar.url}') as rsp:
                 imageData = io.BytesIO(await rsp.read())
                 await session.close()
                 await ctx.send(file=discord.File(imageData, 'tv.gif'))
+
+    @commands.command(help="shoot em")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def shoot(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/shoot?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'shoot.gif'))
 
     @commands.command(help="Depressing")
     @commands.cooldown(1, 10, commands.BucketType.user)

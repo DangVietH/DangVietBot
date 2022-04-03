@@ -46,7 +46,7 @@ class MenuPages(discord.ui.View):
             return {'embed': value, 'content': None}
 
     async def show_page(self, interaction, page_number):
-        page = await self.source.get_page(page_number)
+        page = await self._source.get_page(page_number)
         self.current_page = page_number
         kwargs = await self._get_kwargs_from_page(page)
         if kwargs:
