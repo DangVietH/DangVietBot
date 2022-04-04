@@ -28,7 +28,7 @@ class SecondPageSource(menus.ListPageSource):
         return embed
 
 
-class MenuPages(ui.View, menus.MenuPages):
+class MenuPages(discord.ui.View, menus.MenuPages):
     def __init__(self, source):
         super().__init__(timeout=60)
         self._source = source
