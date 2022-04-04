@@ -10,14 +10,15 @@ os.environ['JISHAKU_RETAIN'] = "True"
 os.environ['JISHAKU_FORCE_PAGINATOR'] = "True"
 
 coglist = [
-            'cogs.audio',
+            'cogs.configuration',
             'cogs.economy',
             'cogs.entertainment',
+            'cogs.info',
             'cogs.leveling',
             'cogs.mod',
+            'cogs.music',
             'cogs.owner',
             'cogs.rtfm',
-            'cogs.settings',
             'cogs.utilities',
             'jishaku'
 ]
@@ -86,8 +87,7 @@ class DangVietBot(commands.Bot):
                         value=f"[invite]({self.invite}) \n[Support Server](https://discord.gg/cnydBRnHU9)",
                         inline=False)
         embed.add_field(name="Some tips", value="Set up a modrole by using `d!modrole <role>`")
-        embed.set_thumbnail(
-            url="https://cdn.discordapp.com/avatars/875589545532485682/a5123a4fa15dad3beca44144d6749189.png?size=1024")
+        embed.set_thumbnail(url=self.bot.user.avatar.url)
         if guild.system_channel:
             await guild.system_channel.send(embed=embed)
 

@@ -5,6 +5,8 @@ A multi-purpose discord bot that has moderation, starboard, levelling, music, et
 ## Features
 - Level system with free role rewards
 - Starboard
+- Fun and Image commands 
+- Games (trivia, rps)
 - Moderation with Modlog
 - Music (support youtube, soundcloud, bandcamp, twitch, vimeo)
 - RTFM

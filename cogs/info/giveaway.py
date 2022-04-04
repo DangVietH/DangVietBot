@@ -77,12 +77,13 @@ class Giveaway(commands.Cog):
         await ctx.send(
             f'The giveaway for {prize} will begin shortly.\nPlease direct your attention to {channel.mention}, this giveaway will end in {time} seconds.')
 
-        give = discord.Embed(color=discord.Color.green(), title="🎉 GIVEAWAY TIME! 🎉")
-        give.add_field(name=f'{ctx.author.name} is giving away: {prize}!',
-                       value=f'React with 🎁 to enter!\n Ends in {datetime.timedelta(seconds=converted_time)} minutes!',
-                       inline=False)
         end = datetime.datetime.utcnow() + datetime.timedelta(seconds=converted_time)
-        give.set_footer(text=f'Giveaway ends at {end} UTC!')
+        give = discord.Embed(color=discord.Color.green(), title="🎉 GIVEAWAY TIME! 🎉", timestamp=end)
+        give.add_field(name=f'{ctx.author.name} is giving away: {prize}!',
+                       value=f'React with 🎁 to enter!\n Ends in <t:{int(datetime.datetime.timestamp(end))}:R> minutes!',
+                       inline=False)
+
+        give.set_footer(text=f'Giveaway ends at :')
         message = await channel.send(embed=give)
         await message.add_reaction("🎁")
 
