@@ -59,9 +59,9 @@ class MenuPages(discord.ui.View):
         max_pages = self._source.get_max_pages()
         try:
             if max_pages is None:
-                await self.show_interaction_page(interaction, page_number)
+                await self.show_page(interaction, page_number)
             elif max_pages > page_number >= 0:
-                await self.show_interaction_page(interaction, page_number)
+                await self.show_page(interaction, page_number)
         except IndexError:
             pass
 
