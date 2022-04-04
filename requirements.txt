@@ -12,4 +12,3 @@ git+https://github.com/Gorialis/jishaku
 PyNaCl==1.5.0
 ffmpeg==1.4
 pillow==9.0.1
-discord-together==1.2.4

@@ -4,7 +4,7 @@ from discord.ext import commands, menus
 import cogs.rtfm.rtfm_utils as rtfm
 from utils import MenuPages
 
-# Directly taken from BruceCodesGithub/OG-Robocord
+# Directly taken from BruceCodesGithub/OG-Robocord, which is Unlicense
 # https://github.com/BruceCodesGithub/OG-Robocord/blob/main/cogs/rtfm.py
 
 
