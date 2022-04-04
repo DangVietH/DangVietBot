@@ -28,24 +28,27 @@ class SecondPageSource(menus.ListPageSource):
         return embed
 
 
-class MenuPages(discord.ui.View):
-    def __init__(self, source: menus.PageSource):
-        super().__init__(timeout=120.0)
+class MenuPages(ui.View, menus.MenuPages):
+    def __init__(self, source):
+        super().__init__(timeout=60)
         self._source = source
+        self.current_page = 0
         self.ctx = None
         self.message = None
-        self.current_page = 0
+
+    async def start(self, ctx, *, channel=None, wait=False):
+        await self._source._prepare_once()
+        self.ctx = ctx
+        self.message = await self.send_initial_message(ctx, ctx.channel)
 
     async def _get_kwargs_from_page(self, page):
-        value = await discord.utils.maybe_coroutine(self._source.format_page, self, page)
-        if isinstance(value, dict):
-            return value
-        elif isinstance(value, str):
-            return {'content': value, 'embed': None}
-        elif isinstance(value, discord.Embed):
-            return {'embed': value, 'content': None}
+        """This method calls ListPageSource.format_page class"""
+        value = await super()._get_kwargs_from_page(page)
+        if 'view' not in value:
+            value.update({'view': self})
+        return value
 
-    async def show_page(self, interaction, page_number):
+    async def show_interaction_page(self, interaction, page_number):
         page = await self._source.get_page(page_number)
         self.current_page = page_number
         kwargs = await self._get_kwargs_from_page(page)
@@ -55,22 +58,15 @@ class MenuPages(discord.ui.View):
             else:
                 await interaction.response.edit_message(**kwargs, view=self)
 
-    async def show_checked_page(self, interaction, page_number):
+    async def show_checked_interaction_page(self, interaction, page_number):
         max_pages = self._source.get_max_pages()
         try:
             if max_pages is None:
-                await self.show_page(interaction, page_number)
+                await self.show_interaction_page(interaction, page_number)
             elif max_pages > page_number >= 0:
-                await self.show_page(interaction, page_number)
+                await self.show_interaction_page(interaction, page_number)
         except IndexError:
             pass
-
-    async def start(self, ctx) -> None:
-        self.ctx = ctx
-        await self._source._prepare_once()
-        page = await self._source.get_page(0)
-        kwargs = await self._get_kwargs_from_page(page)
-        self.message = await self.ctx.send(**kwargs, view=self)
 
     async def on_timeout(self) -> None:
         await self.message.edit(view=None)
@@ -86,19 +82,19 @@ class MenuPages(discord.ui.View):
 
     @discord.ui.button(emoji='⏪', style=discord.ButtonStyle.grey)
     async def first_page(self, interaction, button):
-        await self.show_page(interaction, 0)
+        await self.show_interaction_page(interaction, 0)
 
     @discord.ui.button(emoji='◀️', style=discord.ButtonStyle.grey)
     async def before_page(self, interaction, button):
-        await self.show_checked_page(interaction, self.current_page - 1)
+        await self.show_checked_interaction_page(interaction, self.current_page - 1)
 
-    @discord.ui.button(emoji='⏩', style=discord.ButtonStyle.grey)
+    @discord.ui.button(emoji='▶️', style=discord.ButtonStyle.grey)
     async def next_page(self, interaction, button):
-        await self.show_checked_page(interaction, self.current_page + 1)
+        await self.show_checked_interaction_page(interaction, self.current_page + 1)
 
     @discord.ui.button(emoji='⏩', style=discord.ButtonStyle.grey)
     async def last_page(self, interaction, button):
-        await self.show_page(interaction, self._source.get_max_pages() - 1)
+        await self.show_interaction_page(interaction, self._source.get_max_pages() - 1)
 
     @discord.ui.button(emoji='🗑', style=discord.ButtonStyle.red)
     async def stop_page(self, interaction, button):

@@ -62,47 +62,44 @@ class Setup(commands.Cog):
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
     async def remove(self, ctx):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            await welcome_cursors.delete_one(result)
-            await ctx.send("Welcome system has been remove")
-        else:
-            await ctx.send("You don't have a welcome system")
+        if result is None:
+            return await ctx.send("You don't have a welcome system")
+        await welcome_cursors.delete_one(result)
+        await ctx.send("Welcome system has been remove")
 
     @welcome.command(help="Create your welcome message. Use welcome text var to see the list of variables")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
     async def text(self, ctx, *, text):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
-            await ctx.send("You haven't configure a welcome channel yet")
-        else:
-            if text.lower() == "var":
-                return await ctx.send("""
+            return await ctx.send("You haven't configure a welcome channel yet")
+        if text.lower() == "var":
+            return await ctx.send("""
 {mention}: Mention the joined user
 {username}: user name and discriminator
 {count}: Display the member count
 {name}: The user's name
 {server}: The server's name
-                """)
-            await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"message": text}})
-            await ctx.send(f"Welcome message updated to ```{text}```")
+                        """)
+        await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"message": text}})
+        await ctx.send(f"Welcome message updated to ```{text}```")
 
     @welcome.command(help="Setup welcome dm. Use welcome dm var to see the list of variables")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
     async def dm(self, ctx, *, text):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
-            await ctx.send("You haven't configure a welcome channel yet")
-        else:
-            if text.lower() == "var":
-                return await ctx.send("""
+            return await ctx.send("You haven't configure a welcome channel yet")
+        if text.lower() == "var":
+            return await ctx.send("""
 {mention}: Mention the joined user
 {username}: user name and discriminator
 {count}: Display the member count
 {name}: The user's name
 {server}: The server's name
                             """)
-            await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"dm": text}})
-            await ctx.send(f"Welcome dm updated to ```{text}```")
+        await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"dm": text}})
+        await ctx.send(f"Welcome dm updated to ```{text}```")
 
     @welcome.command(help="Add role when member join")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
@@ -153,10 +150,9 @@ class Setup(commands.Cog):
     async def remove(self, ctx):
         result = await pcursor.find_one({"guild": ctx.guild.id})
         if result is None:
-            await ctx.send("You don't have a custom prefix yet")
-        elif result is not None:
-            await pcursor.delete_one(result)
-            await ctx.send(f"Server prefix set back to default")
+            return await ctx.send("You don't have a custom prefix yet")
+        await pcursor.delete_one(result)
+        await ctx.send(f"Server prefix set back to default")
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Reaction role setup")
     async def reaction(self, ctx):
