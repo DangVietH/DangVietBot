@@ -1,6 +1,6 @@
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils.configs import config_var
+from utils import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["react_role"]['reaction_roles']

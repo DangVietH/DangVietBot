@@ -1,6 +1,6 @@
 from core.dangvietbot import DangVietBot
 import asyncio
-from utils.configs import config_var
+from utils import config_var
 from motor.motor_asyncio import AsyncIOMotorClient
 
 bot = DangVietBot()

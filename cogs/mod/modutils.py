@@ -1,9 +1,7 @@
 import discord
 from discord.ext import commands, menus
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils.configs import config_var
-from utils.randomutils import has_mod_role
-from utils.menuUtils import MenuPages
+from utils import config_var, has_mod_role, MenuPages
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 modb = cluster["moderation"]

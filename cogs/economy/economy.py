@@ -2,8 +2,7 @@ import discord
 from discord.ext import commands
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils.menuUtils import DefaultPageSource, MenuPages
-from utils.configs import config_var
+from utils import DefaultPageSource, MenuPages, config_var
 import asyncio
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])

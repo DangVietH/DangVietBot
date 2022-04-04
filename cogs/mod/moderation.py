@@ -1,9 +1,8 @@
 import discord
 from discord.ext import commands, tasks
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils.configs import config_var
 import datetime
-from utils.randomutils import has_mod_role
+from utils import has_mod_role, config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 modb = cluster["moderation"]

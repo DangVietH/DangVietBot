@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils.configs import config_var
+from utils import config_var
 import datetime
 
 cluster = AsyncIOMotorClient(config_var["mango_link"])

@@ -2,7 +2,7 @@ import warnings
 import discord
 from discord.ext import commands, menus
 import cogs.rtfm.rtfm_utils as rtfm
-from utils.menuUtils import MenuPages
+from utils import MenuPages
 
 # Directly taken from BruceCodesGithub/OG-Robocord
 # https://github.com/BruceCodesGithub/OG-Robocord/blob/main/cogs/rtfm.py

@@ -1,9 +1,7 @@
 import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils.menuUtils import MenuPages
-from utils.menuUtils import DefaultPageSource
-from utils.configs import config_var
+from utils import DefaultPageSource, MenuPages, config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["bot"]["tag"]

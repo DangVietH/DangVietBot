@@ -3,9 +3,7 @@ from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from PIL import Image, ImageDraw, ImageFont
 import io
-from utils.randomutils import get_image_from_url
-from utils.menuUtils import DefaultPageSource, MenuPages
-from utils.configs import config_var
+from utils import get_image_from_url, DefaultPageSource, MenuPages, config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 db = cluster["levelling"]

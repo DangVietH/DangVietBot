@@ -1,8 +1,7 @@
 import discord
 from discord.ext import commands, menus
-from utils.menuUtils import MenuPages
+from utils import MenuPages, config_var
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils.configs import config_var
 import contextlib
 import io
 import textwrap

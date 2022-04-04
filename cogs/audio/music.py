@@ -3,7 +3,7 @@ from discord.ext import commands, menus
 import lavalink
 import re
 from discord.ext.commands.errors import CheckFailure
-from utils.menuUtils import SecondPageSource, MenuPages
+from utils import SecondPageSource, MenuPages
 import datetime
 import urllib
 import aiohttp

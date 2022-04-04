@@ -4,8 +4,7 @@ import datetime
 import asyncio
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils.configs import config_var
-from utils.randomutils import has_mod_role
+from utils import config_var, has_mod_role
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["timer"]["giveaway"]

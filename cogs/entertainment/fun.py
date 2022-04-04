@@ -3,7 +3,7 @@ from discord.ext import commands
 import asyncpraw
 import random
 import asyncio
-from utils.configs import config_var
+from utils import config_var
 from googletrans import Translator
 import urllib
 import aiohttp
@@ -314,6 +314,17 @@ class Fun(commands.Cog):
                 imageData = io.BytesIO(await rsp.read())
                 await session.close()
                 await ctx.send(file=discord.File(imageData, 'glitch.gif'))
+
+    @commands.command(help="You turn into tiny particles")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def balls(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/balls?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'balls.gif'))
 
     @commands.command(help="Oh no")
     @commands.cooldown(1, 10, commands.BucketType.user)

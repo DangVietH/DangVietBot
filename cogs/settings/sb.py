@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils.configs import config_var
+from utils import config_var
 
 # some code base on https://github.com/MenuDocs/Pyro/blob/master/cogs/starboard.py
 
