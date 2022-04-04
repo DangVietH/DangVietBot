@@ -115,6 +115,7 @@ class Economy(commands.Cog):
             return user.author == ctx.author and user.channel == ctx.channel
 
         embed = discord.Embed(timestamp=ctx.message.created_at)
+        embed.set_footer(text=f"{ctx.author}", icon_url=ctx.author.display_avatar.url)
         try:
             msg = await self.bot.wait_for('message', timeout=30.0, check=check)
         except asyncio.TimeoutError:
@@ -127,7 +128,7 @@ class Economy(commands.Cog):
         else:
             if msg.content.lower() == sentences.lower():
                 ymone = random.randint(1000, 100000)
-                embed.title = "GOOD WORK"
+                embed.title = "GOOD JOB"
                 embed.description = f"You got paid 💵 {ymone} for successfully converting the emojis to text"
                 embed.color = discord.Color.green()
                 await ctx.send(embed=embed)

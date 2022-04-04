@@ -38,9 +38,10 @@ class CustomHelp(commands.HelpCommand):
             command_signatures = [self.get_command_signature(c) for c in command]
             if command_signatures:
                 cog_name = getattr(cog, "qualified_name", "No Category")
-                embed.add_field(name=cog_name, value=f"Commands: {len(command)}")
+                if cog_name != "Jishaku":
+                    embed.add_field(name=cog_name, value=f"Commands: {len(command)}")
         embed.set_footer(
-            text=f'Use {self.context.clean_prefix}help [something] for more info on a command or category. \nExample: {self.context.clean_prefix}help Economy')
+            text=f'Use {self.context.clean_prefix}help [arg] for more info on a command or category. \nExample: {self.context.clean_prefix}help Economy')
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label='Invite',
                                         url='https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=1237420731614&scope=bot%20applications.commands'))
