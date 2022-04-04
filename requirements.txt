@@ -5,7 +5,7 @@ DateTime==4.4
 lavalink==3.1.5
 git+https://github.com/Rapptz/discord.py
 git+https://github.com/Rapptz/discord-ext-menus
-googletrans==3.1.0a0
+googletrans==4.0.0rc1
 aiohttp==3.8.1
 dnspython==2.2.1
 git+https://github.com/Gorialis/jishaku
