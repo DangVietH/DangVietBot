@@ -44,7 +44,7 @@ class CustomHelp(commands.HelpCommand):
             text=f'Use {self.context.clean_prefix}help [arg] for more info on a command or category. \nExample: {self.context.clean_prefix}help Economy')
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label='Invite',
-                                        url='https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=1237420731614&scope=bot%20applications.commands'))
+                                        url=self.context.bot.invite))
         view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9'))
         await self.get_destination().send(embed=embed, view=view)
 

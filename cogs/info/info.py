@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, menus
 from utils.menuUtils import MenuPages
 from cogs.info.help import CustomHelp
+import datetime
 
 
 class ServerPageSource(menus.ListPageSource):
@@ -86,6 +87,7 @@ class Info(commands.Cog):
         embed.add_field(name="Version", value="v0.9.5-alpha")
         embed.add_field(name="Written in", value="Python 3.10.1")
         embed.add_field(name="Library", value="[discord.py 2.0](https://github.com/Rapptz/discord.py)")
+        embed.add_field(name="Uptime", value=f"<t:{int(datetime.datetime.timestamp(self.bot.uptime))}:R>")
         embed.add_field(name="Create at", value=f"<t:{int(self.bot.user.created_at.timestamp())}:R>")
         embed.add_field(name="Command's", value=f"{len(self.bot.commands)}")
         embed.add_field(name="Server's", value=f"{len(self.bot.guilds)}")
