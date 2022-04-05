@@ -1,11 +1,6 @@
 from io import BytesIO
 import requests
-from motor.motor_asyncio import AsyncIOMotorClient
-from utils.configs import config_var
 from discord.ext import commands
-
-cluster = AsyncIOMotorClient(config_var['mango_link'])
-modrole = cluster["moderation"]['modrole']
 
 
 def get_image_from_url(link):
@@ -14,6 +9,7 @@ def get_image_from_url(link):
 
 def has_mod_role():
     async def predicate(ctx):
+        modrole = ctx.bot.mongo["moderation"]['modrole']
         result = await modrole.find_one({"guild": ctx.guild.id})
         if result is None:
             return False

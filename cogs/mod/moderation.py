@@ -293,11 +293,6 @@ class Moderation(commands.Cog):
     async def clear(self, ctx, amount: int):
         await ctx.channel.purge(limit=amount + 1)
 
-    @commands.command(help="Clear all messages in that channel")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
-    async def clear_all(self, ctx):
-        await ctx.channel.purge(limit=None)
-
     @commands.command(help="Lock channel")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
     async def lock(self, ctx, channel: discord.TextChannel = None):

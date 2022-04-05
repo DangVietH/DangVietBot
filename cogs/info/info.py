@@ -98,6 +98,10 @@ class Info(commands.Cog):
         view.add_item(discord.ui.Button(label='Github', url='https://github.com/DangVietH/DangVietBot'))
         await ctx.send(embed=embed, view=view)
 
+    @commands.command(help="Show bot uptime")
+    async def uptime(self, ctx):
+        await ctx.send(f"<t:{int(datetime.datetime.timestamp(self.bot.uptime))}:R>")
+
     @commands.command(help="Invite the bot")
     async def invite(self, ctx):
         embed = discord.Embed(title='Click here to Invite Me', url=self.bot.invite, description="**Default Prefix:** d!", color=self.bot.embed_color)
