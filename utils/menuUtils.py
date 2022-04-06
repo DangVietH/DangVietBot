@@ -36,53 +36,6 @@ class MenuPages(discord.ui.View):
         self.current_page = 0
         self.ctx = None
         self.message = None
-        self.clear_items()
-        self.add_buttons()
-
-    def add_buttons(self):
-        if not self.compact:
-            self.numbered_page.row = 1
-            self.stop_pages.row = 1
-
-        if self._source.is_paginating():
-            max_pages = self._source.get_max_pages()
-            use_last_and_first = max_pages is not None and max_pages >= 2
-            if use_last_and_first:
-                self.add_item(self.first_page)  # flake8: noqa
-
-            self.add_item(self.before_page)  # flake8: noqa
-
-            self.add_item(self.next_page)  # flake8: noqa
-
-            if use_last_and_first:
-                self.add_item(self.last_page)  # flake8: noqa
-
-            self.add_item(self.stop_page)  # flake8: noqa
-
-    def update_button(self, page_number):
-        self.first_page.disabled = page_number == 0
-        if self.compact:
-            max_pages = self._source.get_max_pages()
-            self.last_page.disabled = (
-                    max_pages is None or (page_number + 1) >= max_pages
-            )
-            self.next_page.disabled = (
-                    max_pages is not None and (page_number + 1) >= max_pages
-            )
-            self.before_page.disabled = page_number == 0
-            return
-
-        self.next_page.disabled = False
-        self.before_page.disabled = False
-        self.first_page.disabled = False
-
-        max_pages = self._source.get_max_pages()
-        if max_pages is not None:
-            self.go_to_last_page.disabled = (page_number + 1) >= max_pages
-            if (page_number + 1) >= max_pages:
-                self.next_page.disabled = True
-            if page_number == 0:
-                self.next_page.disabled = True
 
     async def _get_kwargs_from_page(self, page):
         value = await discord.utils.maybe_coroutine(self._source.format_page, self, page)
@@ -97,7 +50,6 @@ class MenuPages(discord.ui.View):
         page = await self._source.get_page(page_number)
         self.current_page = page_number
         kwargs = await self._get_kwargs_from_page(page)
-        self.update_button(page_number)
         if kwargs:
             if interaction.response.is_done():
                 await self.message.edit(**kwargs, view=self)
@@ -119,7 +71,6 @@ class MenuPages(discord.ui.View):
         await self._source._prepare_once()
         page = await self._source.get_page(0)
         kwargs = await self._get_kwargs_from_page(page)
-        self.update_button(0)
         self.message = await self.ctx.send(**kwargs, view=self)
 
     async def on_timeout(self) -> None:
