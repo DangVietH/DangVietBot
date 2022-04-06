@@ -31,9 +31,6 @@ class Utils(commands.Cog):
         self.bot = bot
         self.time_checker.start()
 
-    async def setup_hook(self) -> None:
-        self.time_checker.start()
-
     @commands.group(help="Remind your task", aliases=["reminder"], invoke_without_command=True, case_insensitive=True)
     async def remind(self, ctx, time, *, reason):
         converted_time = convert(time)

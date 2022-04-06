@@ -30,8 +30,6 @@ def convert(time):
 class Giveaway(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    async def setup_hook(self) -> None:
         self.time_checker.start()
 
     @commands.command(help="start Giveaway")

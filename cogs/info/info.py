@@ -94,7 +94,7 @@ class Info(commands.Cog):
         embed.add_field(name="User's", value=f"{len(self.bot.users)}")
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label='Invite', url=self.bot.invite))
-        view.add_item(discord.ui.Button(label='My server', url='https://discord.gg/cnydBRnHU9'))
+        view.add_item(discord.ui.Button(label='Support server', url='https://discord.gg/cnydBRnHU9'))
         view.add_item(discord.ui.Button(label='Github', url='https://github.com/DangVietH/DangVietBot'))
         await ctx.send(embed=embed, view=view)
 

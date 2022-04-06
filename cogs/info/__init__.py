@@ -1,7 +1,7 @@
 from .info import Info
-from .giveaway import Giveaway
+from .statcord import StatcordPost
 
 
 async def setup(bot):
-    await bot.add_cog(Giveaway(bot))
     await bot.add_cog(Info(bot))
+    await bot.add_cog(StatcordPost(bot))

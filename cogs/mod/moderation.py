@@ -33,8 +33,6 @@ def convert(time):
 class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    async def setup_hook(self) -> None:
         self.time_checker.start()
 
     async def modlogUtils(self, ctx, criminal, type_off: str, reason: str):
