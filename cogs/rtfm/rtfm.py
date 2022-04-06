@@ -95,9 +95,10 @@ class RTFM(commands.Cog):
 
         if not target:
             return await ctx.reply(
-                embed=ctx.error(
+                embed=discord.Embed(
                     title="Invalid Documentation",
                     description=f"Documentation {docs} is invalid. If you want to find valid ones, do {ctx.prefix}rtfm list",
+                    color=discord.Color.red()
                 )
             )
         if not term:

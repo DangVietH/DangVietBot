@@ -16,23 +16,21 @@ class Tags(commands.Cog):
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Tag setup")
     async def tag(self, ctx, *, name=None):
         if name is None:
-            _cmd = self.bot.get_command("help")
-            await _cmd(ctx, command='tag')
-        else:
-            check = await cursor.find_one({"guild": ctx.guild.id})
-            if check is None:
-                return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
+            return await ctx.send_help(ctx.command)
+        check = await cursor.find_one({"guild": ctx.guild.id})
+        if check is None:
+            return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
 
-            all_tag = check['tag']
-            value = None
-            for thing in all_tag:
-                if thing['name'] == name:
-                    value = thing['value']
-                    break
-            if value is None:
-                return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
+        all_tag = check['tag']
+        value = None
+        for thing in all_tag:
+            if thing['name'] == name:
+                value = thing['value']
+                break
+        if value is None:
+            return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
 
-            await ctx.send(value)
+        await ctx.send(value)
 
     @tag.command(help="Create a tag")
     async def create(self, ctx):

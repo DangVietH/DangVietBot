@@ -6,6 +6,7 @@ import datetime
 
 cluster = AsyncIOMotorClient(config_var["mango_link"])
 timer = cluster["timer"]['remind']
+afk = cluster["timer"]['afk']
 
 
 def convert(time):
@@ -70,24 +71,24 @@ class Utils(commands.Cog):
         except Exception as e:
             print(e)
 
-    @commands.command(help="Poll")
-    async def poll(self, ctx, question, *options: str):
-        await ctx.channel.purge(limit=1)
-        if len(options) <= 1:
-            await ctx.send('Not enough options')
-        if len(options) > 10:
-            await ctx.send('This bot does not support polls with more than 10 options')
-        else:
-            reactions = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if await afk.find_one({"guild": message.guild.id, "member": message.author.id}):
+            await afk.delete_one({"guild": message.guild.id, "member": message.author.id})
+            await message.channel.send(f"{message.author.mention}, I have remove your afk")
+        if message.mentions:
+            for mention in message.mentions:
+                is_afk = await afk.find_one({"guild": message.guild.id, "member": mention.id})
+                if is_afk:
+                    await message.channel.send(f"`{mention}` is currently afk! Reason: **{is_afk['reason']}**")
 
-        description = []
-        for x, option in enumerate(options):
-            description += '\n {} {} \n'.format(reactions[x], option)
-        embed = discord.Embed(title=question, description=''.join(description), timestamp=ctx.message.created_at)
-        embed.set_footer(text=f'Poll by {ctx.author}')
-        react_message = await ctx.send(embed=embed)
-        for reaction in reactions[:len(options)]:
-            await react_message.add_reaction(reaction)
+    @commands.command(help="Tell people that ur gone")
+    async def afk(self, ctx, *, reason="Poop"):
+        if await afk.find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is not None:
+            return await ctx.send("You're already afk")
+        await afk.insert_one({"guild": ctx.guild.id, "member": ctx.author.id, "reason": reason})
+        await ctx.author.edit(nick="")
+        await ctx.send(f"You're now afk for: **{reason}**")
 
     @commands.command(aliases=['math'], help="Do math stuff")
     async def calculate(self, ctx, num1: float, op: str, num2: float):

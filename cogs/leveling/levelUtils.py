@@ -44,10 +44,26 @@ class LevelUtils(commands.Cog):
         await levelConfig.update_one({"guild": ctx.guild.id}, {"$set": {"xp": level}})
         await ctx.send(f"Xp per message set to {level}")
 
-    @commands.group(invoke_without_command=True, case_insensitive=True, help="Level rewarding role setup")
+    @commands.group(invoke_without_command=True, case_insensitive=True, help="Level utils")
+    async def lvl(self, ctx):
+        await ctx.send_help(ctx.command)
+
+    @lvl.command(help="Custom level up message. Use welcome text var to see the list of variables")
+    @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
+    async def text(self, ctx, *, text):
+        if text.lower() == "var":
+            return await ctx.send("""
+{mention}: Mention the joined user
+{username}: user name and discriminator
+{name}: The user's name
+{server}: The server's name
+                        """)
+        await levelConfig.update_one({"guild": ctx.guild.id}, {"$set": {"msg": text}})
+        await ctx.send(f"Welcome message updated to ```{text}```")
+
+    @lvl.group(invoke_without_command=True, case_insensitive=True, help="Level rewarding role setup")
     async def role(self, ctx):
-        _cmd = self.bot.get_command("help")
-        await _cmd(ctx, command='role')
+        await ctx.send_help(ctx.command)
 
     @role.command(help="Set up the roles")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
@@ -80,24 +96,6 @@ class LevelUtils(commands.Cog):
         page = MenuPages(source=SecondPageSource(f"{ctx.author.guild.name} role rewards", data),
                          clear_reactions_after=True)
         await page.start(ctx)
-
-    @commands.group(invoke_without_command=True, case_insensitive=True, help="Level utils")
-    async def lvl(self, ctx):
-        _cmd = self.bot.get_command("help")
-        await _cmd(ctx, command='lvl')
-
-    @lvl.command(help="Custom level up message. Use welcome text var to see the list of variables")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
-    async def text(self, ctx, *, text):
-        if text.lower() == "var":
-            return await ctx.send("""
-{mention}: Mention the joined user
-{username}: user name and discriminator
-{name}: The user's name
-{server}: The server's name
-                        """)
-        await levelConfig.update_one({"guild": ctx.guild.id}, {"$set": {"msg": text}})
-        await ctx.send(f"Welcome message updated to ```{text}```")
 
     @lvl.command(help="Setup level up channel if you like to")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
