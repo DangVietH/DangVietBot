@@ -87,7 +87,6 @@ class Utils(commands.Cog):
         if await afk.find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is not None:
             return await ctx.send("You're already afk")
         await afk.insert_one({"guild": ctx.guild.id, "member": ctx.author.id, "reason": reason})
-        await ctx.author.edit(nick="")
         await ctx.send(f"You're now afk for: **{reason}**")
 
     @commands.command(aliases=['math'], help="Do math stuff")
