@@ -20,6 +20,8 @@ coglist = [
             'cogs.owner',
             'cogs.rtfm',
             'cogs.utilities',
+            'events.config',
+            'events.moderation',
             'jishaku'
 ]
 

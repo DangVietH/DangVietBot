@@ -47,7 +47,7 @@ class Moderation(commands.Cog):
 
         await cases.update_one({"guild": ctx.guild.id}, {"$push": {
             "cases": {"Number": int(num_of_case), "user": f"{criminal.id}", "type": type_off, "Mod": f"{ctx.author.id}",
-                      "reason": str(reason)}}})
+                      "reason": str(reason), "time": datetime.datetime.utcnow()}}})
         await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
         result = await cursors.find_one({"guild": ctx.guild.id})
@@ -61,7 +61,7 @@ class Moderation(commands.Cog):
             await channel.send(embed=embed)
 
         if not criminal.bot:
-            if "ban" or "kick" not in type_off:
+            if "ban" or "kick" or "unban "not in type_off:
                 check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": criminal.id})
                 if check_user_case is None:
                     return await user_case.insert_one({"guild": ctx.guild.id, "user": criminal.id, "total_cases": 1})
@@ -193,25 +193,7 @@ class Moderation(commands.Cog):
             if not member.bot:
                 await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for **{reason}**. What a shame 👎")
             await member.ban(reason=reason)
-        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-
-        embed = discord.Embed(title=f"Case {num_of_case}",
-                              description=f"{', '.join([str(member) for member in members])} has been banned for: {reason}",
-                              color=discord.Color.red(),
-                              timestamp=ctx.message.created_at)
-        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-        await ctx.send(embed=embed)
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: MassBan!",
-                                  description=f"**Users:** {', '.join([str(member) for member in members])} ({', '.join([str(member.id) for member in members])}) \n**Mod:** {ctx.author} ({ctx.author.id})\n**Reason:** {reason}",
-                                  color=discord.Color.red(),
-                                  timestamp=ctx.message.created_at)
-            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-            await channel.send(embed=embed)
+        await ctx.message.add_reaction("✅")
 
     @commands.command(help="Ban member but temporarily")
     @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
@@ -265,26 +247,7 @@ class Moderation(commands.Cog):
         user = self.bot.get_user(int(member_id))
         await ctx.guild.unban(user)
 
-        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
-        embed = discord.Embed(title=f"Case {num_of_case}", description=f"{user.mention} has been unban for: {reason}",
-                              color=discord.Color.red(),
-                              timestamp=ctx.message.created_at)
-        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-        await ctx.send(embed=embed)
-        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
-            "cases": {"Number": int(num_of_case), "user": f"{user.id}", "type": "unban", "Mod": f"{ctx.author.id}",
-                      "reason": str(reason)}}})
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
-
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: Unban!",
-                                  description=f"**User:** {user} \n**Mod:**{ctx.author} \n**Reason:** {reason}",
-                                  color=discord.Color.red(),
-                                  timestamp=ctx.message.created_at)
-            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-            await channel.send(embed=embed)
+        await self.modlogUtils(ctx, user, "unban", reason)
 
     @commands.command(help="Clear messages in a certain amount", aliases=['purge'])
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))

@@ -6,7 +6,7 @@ cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["react_role"]['reaction_roles']
 
 
-# code base on https://github.com/AdvicSaha443/Discord.py-Self-Role-Bot/blob/main/main.py
+# code base on https://github.com/AdvicSaha443/Discord.py-Self-Role-Bot/blob/main/main.py, which is unlicensed
 
 
 class Reaction(commands.Cog):

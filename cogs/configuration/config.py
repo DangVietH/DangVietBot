@@ -152,6 +152,12 @@ class Configuration(commands.Cog):
         await pcursor.delete_one(result)
         await ctx.send(f"Server prefix set back to default")
 
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
+        result = await pcursor.find_one({"guild": guild.id})
+        if result is not None:
+            await pcursor.delete_one({"guild": guild.id})
+
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Reaction role setup")
     async def reaction(self, ctx):
         await ctx.send_help(ctx.command)
