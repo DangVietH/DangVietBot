@@ -47,7 +47,7 @@ class Moderation(commands.Cog):
 
         await cases.update_one({"guild": ctx.guild.id}, {"$push": {
             "cases": {"Number": int(num_of_case), "user": f"{criminal.id}", "type": type_off, "Mod": f"{ctx.author.id}",
-                      "reason": str(reason), "time": datetime.datetime.utcnow()}}})
+                      "reason": str(reason)}}})
         await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
         result = await cursors.find_one({"guild": ctx.guild.id})
@@ -144,10 +144,9 @@ class Moderation(commands.Cog):
                                               read_message_history=True,
                                               read_messages=False)
         await member.add_roles(mutedRole, reason=reason)
+        final_time = datetime.datetime.now() + datetime.timedelta(seconds=converted_time)
         await member.send(
-            f"You were temporarily muted for {str(datetime.timedelta(seconds=converted_time))} in **{guild.name}** for **{reason}**")
-        current_time = datetime.datetime.now()
-        final_time = current_time + datetime.timedelta(seconds=converted_time)
+            f"You were temporarily muted for <t:{int(datetime.datetime.timestamp(final_time))}:R> in **{guild.name}** for **{reason}**")
         await timer.insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id})
         await self.modlogUtils(ctx, member, "tempmute", reason)
 
@@ -206,14 +205,12 @@ class Moderation(commands.Cog):
 
         elif converted_time == -2:
             return await ctx.send("Time must be an integer")
+        final_time = datetime.datetime.now() + datetime.timedelta(seconds=converted_time)
         if not member.bot:
             await member.send(
-                f"You've been banned for {str(datetime.timedelta(seconds=converted_time))} from **{ctx.guild.name}** for **{reason}**. Don't worry, it will be a short time!!")
+                f"You've been banned for <t:{int(datetime.datetime.timestamp(final_time))}:R> from **{ctx.guild.name}** for **{reason}**. Don't worry, it will be a short time!!")
         await ctx.guild.ban(member)
         await self.modlogUtils(ctx, member, "tempban", reason)
-
-        current_time = datetime.datetime.now()
-        final_time = current_time + datetime.timedelta(seconds=converted_time)
         await timer.insert_one({"guild": ctx.guild.id, "type": "ban", "time": final_time, "user": member.id})
 
     @tasks.loop(seconds=10)

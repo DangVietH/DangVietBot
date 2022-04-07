@@ -20,8 +20,7 @@ class ModLog(commands.Cog):
                 await self.cases.update_one({"guild": guild.id}, {"$push": {
                     "cases": {"Number": int(num_of_case), "user": f"{user.id}", "type": "ban",
                               "Mod": f"{entry.user.id}",
-                              "reason": entry.reason if entry.reason else None,
-                              "time": datetime.datetime.utcnow()}}})
+                              "reason": entry.reason if entry.reason else None}}})
                 await self.cases.update_one({"guild": guild.id}, {"$inc": {"num": 1}})
 
                 if await self.modlogChannel.find_one({"guild": guild.id}):
@@ -45,8 +44,7 @@ class ModLog(commands.Cog):
                 await self.cases.update_one({"guild": guild.id}, {"$push": {
                     "cases": {"Number": int(num_of_case), "user": f"{user.id}", "type": "unban",
                               "Mod": f"{entry.user.id}",
-                              "reason": entry.reason if entry.reason else None,
-                              "time": datetime.datetime.utcnow()}}})
+                              "reason": entry.reason if entry.reason else None,}}})
                 await self.cases.update_one({"guild": guild.id}, {"$inc": {"num": 1}})
 
                 if await self.modlogChannel.find_one({"guild": guild.id}):
