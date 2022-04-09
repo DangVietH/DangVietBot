@@ -41,7 +41,7 @@ class MenuPages(discord.ui.View):
 
     def add_buttons(self) -> None:
         if self._source.is_paginating():
-            use_last_and_first = self._source.get_max_pages() is not None and self._source.get_max_pages() <= 2
+            use_last_and_first = self._source.get_max_pages() is not None and self._source.get_max_pages() >= 2
             if use_last_and_first:
                 self.add_item(self.first_page)
 
