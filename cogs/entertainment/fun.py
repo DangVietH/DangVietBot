@@ -194,6 +194,17 @@ class Fun(commands.Cog):
                 await session.close()
                 await ctx.send(file=discord.File(imageData, 'triggered.gif'))
 
+    @commands.command(help="ur tracking me right")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def ads(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    f'https://api.jeyy.xyz/image/ads?image_url={member.display_avatar.url}') as rsp:
+                imageData = io.BytesIO(await rsp.read())
+                await session.close()
+                await ctx.send(file=discord.File(imageData, 'ads.png'))
+
     @commands.command(help="ur very cute", aliases=['patpat'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def petpet(self, ctx, member: discord.Member = None):
