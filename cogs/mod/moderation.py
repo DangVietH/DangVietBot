@@ -47,7 +47,7 @@ class Moderation(commands.Cog):
 
         await cases.update_one({"guild": ctx.guild.id}, {"$push": {
             "cases": {"Number": int(num_of_case), "user": f"{criminal.id}", "type": type_off, "Mod": f"{ctx.author.id}",
-                      "reason": str(reason)}}})
+                      "reason": str(reason), "time": datetime.datetime.utcnow()}}})
         await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
         result = await cursors.find_one({"guild": ctx.guild.id})
@@ -70,10 +70,9 @@ class Moderation(commands.Cog):
     @commands.command(help="Warn member")
     @commands.check_any(has_mod_role(), commands.has_permissions(moderate_members=True))
     async def warn(self, ctx, member: discord.Member, *, reason=None):
-        guild = ctx.guild
         if reason is None:
             return await ctx.send("You need a reason for this command to work")
-        emb = discord.Embed(description=f"You have been warned in **{guild.name}** for: **{reason}**",
+        emb = discord.Embed(description=f"You have been warned in **{ctx.guild.name}** for: **{reason}**",
                             color=discord.Color.red())
         await member.send(embed=emb)
         await self.modlogUtils(ctx, member, "warn", reason)
@@ -180,7 +179,6 @@ class Moderation(commands.Cog):
         if not member.bot:
             await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for **{reason}**. What a shame 👎")
         await member.ban(reason=reason)
-
         await self.modlogUtils(ctx, member, "ban", reason)
 
     @commands.command(help="Ban loads of people")
@@ -240,8 +238,8 @@ class Moderation(commands.Cog):
 
     @commands.command(help="Unban member")
     @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
-    async def unban(self, ctx, member_id: int, *, reason=None):
-        user = self.bot.get_user(int(member_id))
+    async def unban(self, ctx, user_id: int, *, reason=None):
+        user = self.bot.get_user(int(user_id))
         await ctx.guild.unban(user)
 
         await self.modlogUtils(ctx, user, "unban", reason)

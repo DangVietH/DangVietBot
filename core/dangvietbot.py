@@ -21,7 +21,6 @@ coglist = [
             'cogs.rtfm',
             'cogs.utilities',
             'events.config',
-            'events.moderation',
             'jishaku'
 ]
 

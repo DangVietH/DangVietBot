@@ -85,8 +85,8 @@ class ModUtils(commands.Cog):
         page = MenuPages(GuildCasePageSource(results['num'], gdata))
         await page.start(ctx)
 
-    @commands.command(help="Look at user cases", aliases=["ucase"])
-    async def usercase(self, ctx, member: discord.Member = None):
+    @commands.command(help="Look at user cases")
+    async def casesfor(self, ctx, member: discord.Member = None):
         member = member or ctx.author
         udata = []
         user_check = await user_case.find_one({"guild": ctx.guild.id, "user": member.id})

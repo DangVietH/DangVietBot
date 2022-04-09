@@ -51,8 +51,10 @@ class Utils(commands.Cog):
         if all_timer is None:
             return await ctx.send("You don't have any reminders")
         embed = discord.Embed(title="Your remind list", color=self.bot.embed_color)
+        num = 0
         async for x in all_timer:
-            embed.add_field(name=f"End at: {x['time']}", value=f"**Reason:** {x['reason']}")
+            num += 1
+            embed.add_field(name=f"{num}", value=f"**End at:** <t:{int(datetime.datetime.timestamp(x['time']))}:R>**Reason:** {x['reason']}")
         await ctx.send(embed=embed)
 
     @tasks.loop(seconds=10)
@@ -63,7 +65,7 @@ class Utils(commands.Cog):
             async for x in all_timer:
                 if current_time >= x['time']:
                     user = self.bot.get_user(x['user'])
-                    await user.send(f"**Reminder:** {x['reason']}")
+                    await user.send(f"**Reminder:** {x['reason']}\nFrom <t:{int(datetime.datetime.timestamp(x['time']))}:R>")
                     await timer.delete_one({"user": user.id})
         except Exception as e:
             print(e)
