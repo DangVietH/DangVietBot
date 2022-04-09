@@ -78,6 +78,8 @@ class DangVietBot(commands.Bot):
         elif isinstance(error, commands.CommandOnCooldown):
             seconds = int(error.retry_after)
             await ctx.send(f'⏱️ This command is on a cooldown. Use it after {str(datetime.timedelta(seconds=seconds))}')
+        elif isinstance(error, commands.DisabledCommand):
+            await ctx.send(f'{ctx.command} has been disabled.')
         else:
             await ctx.send(error)
 

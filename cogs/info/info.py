@@ -27,7 +27,7 @@ class Info(commands.Cog):
     async def ping(self, ctx):
         await ctx.send(f"🏓**Pong!** My latency is {round(self.bot.latency * 1000)}ms")
 
-    @commands.command(help="See user info", aliases=['userinfo'])
+    @commands.command(help="See user info", aliases=['userinfo', 'ui'])
     async def whois(self, ctx, user: discord.Member = None):
         user = user or ctx.author
         if user.activity is not None:

@@ -36,6 +36,22 @@ class MenuPages(discord.ui.View):
         self.current_page = 0
         self.ctx = None
         self.message = None
+        self.clear_items()
+        self.add_buttons()
+
+    def add_buttons(self) -> None:
+        if self._source.is_paginating():
+            use_last_and_first = self._source.get_max_pages() is not None and self._source.get_max_pages() >= 2
+            if use_last_and_first:
+                self.add_item(self.first_page)
+
+            self.add_item(self.before_page)
+            self.add_item(self.next_page)
+
+            if use_last_and_first:
+                self.add_item(self.last_page)
+
+            self.add_item(self.stop_page)
 
     async def _get_kwargs_from_page(self, page):
         value = await discord.utils.maybe_coroutine(self._source.format_page, self, page)

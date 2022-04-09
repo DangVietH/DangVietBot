@@ -4,7 +4,7 @@ import datetime
 import asyncio
 import random
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils import config_var, has_mod_role
+from utils import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 cursor = cluster["timer"]["giveaway"]
@@ -33,7 +33,7 @@ class Giveaway(commands.Cog):
         self.time_checker.start()
 
     @commands.command(help="start Giveaway")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
+    @commands.has_permissions(manage_guild=True)
     async def gstart(self, ctx):
         giveaway_questions = ['Which channel will I host the giveaway in?', 'What is the prize?',
                               'How long should the giveaway run for (ex: 3h, 1d)?', ]
@@ -90,7 +90,7 @@ class Giveaway(commands.Cog):
         await cursor.insert_one({'message_id': message.id, 'time': final_time, "channel": c_id, "prize": prize})
 
     @commands.command(help="Reroll the giveaway")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
+    @commands.has_permissions(manage_guild=True)
     async def gend(self, ctx, msg_id):
         if await cursor.find_one({'message_id': msg_id}) is None:
             return await ctx.send("Invalid Message ID.")
@@ -107,7 +107,7 @@ class Giveaway(commands.Cog):
         await gmsg.edit(embed=embed)
 
     @commands.command(help="Reroll the giveaway")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
+    @commands.has_permissions(manage_guild=True)
     async def greroll(self, ctx, msg_id):
         reroll_msg = await ctx.fetch_message(msg_id)
         if reroll_msg.author.id != self.bot.user.id:

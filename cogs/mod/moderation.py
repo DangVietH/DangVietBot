@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands, tasks
 from motor.motor_asyncio import AsyncIOMotorClient
 import datetime
-from utils import has_mod_role, config_var
+from utils import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 modb = cluster["moderation"]
@@ -28,6 +28,18 @@ def convert(time):
         return -2
 
     return val * time_dict[unit]
+
+
+def has_mod_role():
+    async def predicate(ctx):
+        modrole = ctx.bot.mongo["moderation"]['modrole']
+        result = await modrole.find_one({"guild": ctx.guild.id})
+        if result is None:
+            return False
+        if ctx.guild.get_role(result['role']) in ctx.author.roles:
+            return True
+
+    return commands.check(predicate)
 
 
 class Moderation(commands.Cog):

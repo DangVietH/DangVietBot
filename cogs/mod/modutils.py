@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, menus
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils import config_var, has_mod_role, MenuPages
+from utils import config_var,  MenuPages
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 modb = cluster["moderation"]
@@ -49,7 +49,7 @@ class ModUtils(commands.Cog):
             await cases.insert_one(insert)
 
     @commands.command(help="Set up modlog channel")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
+    @commands.has_permissions(manage_channels=True)
     async def modlog(self, ctx, channel: discord.TextChannel):
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -58,10 +58,10 @@ class ModUtils(commands.Cog):
             await ctx.send(f"Modlog channel set to {channel.mention}")
             return
         await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
-        await ctx.send(f"Modlog channel updated to {channel.mention}")
+        await ctx.send(f"Modlog channel updated to {channel.mention}\n**Notice:** Until v1.0 is released, modlog will only work when any mod command from this bot is used.")
 
     @commands.command(help="Set up custom mod role")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
+    @commands.has_permissions(manage_roles=True)
     async def modrole(self, ctx, role: discord.Role):
         result = await modrole.find_one({"guild": ctx.guild.id})
         if result is None:

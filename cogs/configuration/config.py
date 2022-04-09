@@ -3,7 +3,6 @@ from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio
 from utils import config_var
-from utils import has_mod_role
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 
@@ -44,7 +43,7 @@ class Configuration(commands.Cog):
         await ctx.send_help(ctx.command)
 
     @welcome.command(help="Setup welcome channel")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
+    @commands.has_permissions(manage_channels=True)
     async def channel(self, ctx, channel: discord.TextChannel):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -58,7 +57,7 @@ class Configuration(commands.Cog):
             await ctx.send(f"Welcome channel updated to {channel.mention}")
 
     @welcome.command(help="Remove welcome system", aliases=['disable'])
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
+    @commands.commands.has_permissions(manage_channels=True)
     async def remove(self, ctx):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -67,7 +66,7 @@ class Configuration(commands.Cog):
         await ctx.send("Welcome system has been remove")
 
     @welcome.command(help="Create your welcome message. Use welcome text var to see the list of variables")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
+    @commands.has_permissions(manage_messages=True)
     async def text(self, ctx, *, text):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -84,7 +83,7 @@ class Configuration(commands.Cog):
         await ctx.send(f"Welcome message updated to ```{text}```")
 
     @welcome.command(help="Setup welcome dm. Use welcome dm var to see the list of variables")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
+    @commands.has_permissions(manage_messages=True)
     async def dm(self, ctx, *, text):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -101,7 +100,7 @@ class Configuration(commands.Cog):
         await ctx.send(f"Welcome dm updated to ```{text}```")
 
     @welcome.command(help="Add role when member join")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
+    @commands.has_permissions(manage_roles=True)
     async def role(self, ctx, role: discord.Role):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -110,7 +109,7 @@ class Configuration(commands.Cog):
         await ctx.send(f"Successfully updated welcome role")
 
     @welcome.command(help="remove role when member join")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
+    @commands.has_permissions(manage_roles=True)
     async def roleremove(self, ctx):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -119,7 +118,7 @@ class Configuration(commands.Cog):
         await ctx.send(f"Successfully remove welcome role")
 
     @welcome.command(help="Custom image. Make sure it's a link", aliases=["img"])
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))
+    @commands.has_permissions(manage_messages=True)
     async def image(self, ctx, *, link: str):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -132,7 +131,7 @@ class Configuration(commands.Cog):
         await ctx.send_help(ctx.command)
 
     @prefix.command(help="Set custom prefix")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_guild=True))
+    @commands.has_permissions(manage_guild=True)
     async def set(self, ctx, *, prefixes):
         result = await pcursor.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -144,7 +143,7 @@ class Configuration(commands.Cog):
             await ctx.send(f"Server prefix update to `{prefixes}`")
 
     @prefix.command(help="Set prefix back to default")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_guild=True))
+    @commands.has_permissions(manage_guild=True)
     async def remove(self, ctx):
         result = await pcursor.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -163,7 +162,7 @@ class Configuration(commands.Cog):
         await ctx.send_help(ctx.command)
 
     @reaction.command(help="Set up reaction role")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
+    @commands.has_permissions(manage_roles=True)
     async def create(self, ctx):
         await ctx.send("Answer These Question In Next 10Min!")
 
@@ -213,7 +212,7 @@ class Configuration(commands.Cog):
         await ctx.send(embed=embed)
 
     @starboard.command(help="Setup starboard channel")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
+    @commands.has_permissions(manage_channels=True)
     async def channel(self, ctx, channel: discord.TextChannel):
         result = await scursor.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -233,7 +232,7 @@ class Configuration(commands.Cog):
         await ctx.send(f"Starboard channel updated to {channel.mention}")
 
     @starboard.command(help="Toggle self star")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_guild=True))
+    @commands.has_permissions(manage_guild=True)
     async def selfStar(self, ctx):
         result = await scursor.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -246,7 +245,7 @@ class Configuration(commands.Cog):
             await ctx.send("Selfstar is now on")
 
     @starboard.command(help="Ignore channels from starboard")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
+    @commands.has_permissions(manage_channels=True)
     async def ignoreChannel(self, ctx, channel: commands.Greedy[discord.TextChannel]):
         result = await scursor.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -258,7 +257,7 @@ class Configuration(commands.Cog):
         await ctx.send(f"Ignored channels {[x.mention for x in channel]}")
 
     @starboard.command(help="Un ignore channels from starboard")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
+    @commands.has_permissions(manage_channels=True)
     async def unignoreChannel(self, ctx, channel: commands.Greedy[discord.TextChannel]):
         result = await scursor.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -270,7 +269,7 @@ class Configuration(commands.Cog):
         await ctx.send(f"Unignored channels {[x.mention for x in channel]}")
 
     @starboard.command(help="Set starboard emoji amount", aliases=["amount"])
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_guild=True))
+    @commands.has_permissions(manage_guild=True)
     async def threshold(self, ctx, threshold: int):
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
             return await ctx.send("You don't have a starboard system")
@@ -278,7 +277,7 @@ class Configuration(commands.Cog):
         await ctx.send(f"Starboard threshold updated to {threshold}")
 
     @starboard.command(help="Lock starboard")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_guild=True))
+    @commands.has_permissions(manage_guild=True)
     async def lock(self, ctx):
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
             return await ctx.send("You don't have a starboard system")
@@ -286,7 +285,7 @@ class Configuration(commands.Cog):
         await ctx.send("Starboard locked")
 
     @starboard.command(help="Lock starboard")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_guild=True))
+    @commands.has_permissions(manage_guild=True)
     async def unlock(self, ctx):
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
             return await ctx.send("You don't have a starboard system")
@@ -294,7 +293,7 @@ class Configuration(commands.Cog):
         await ctx.send("Starboard unlocked")
 
     @starboard.command(help="Allow to star in nsfw channels. value should be yes or no")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_guild=True))
+    @commands.has_permissions(manage_guild=True)
     async def nsfw(self, ctx, value="yes"):
         if value.lower() not in ['yes', 'no']:
             return await ctx.send("Value should be `yes` or `no`")
@@ -313,7 +312,7 @@ class Configuration(commands.Cog):
             await ctx.send("NSFW is now not allowed")
 
     @starboard.command(help="Disable starboard system")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_channels=True))
+    @commands.has_permissions(manage_guild=True)
     async def disable(self, ctx):
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
             return await ctx.send("You don't have a starboard system")
