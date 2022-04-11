@@ -5,7 +5,6 @@ import re
 from discord.ext.commands.errors import CheckFailure
 from utils import SecondPageSource, MenuPages
 import datetime
-import urllib
 
 
 class LyricPageSource(menus.ListPageSource):
@@ -329,7 +328,7 @@ class Music(commands.Cog):
     async def lyrics(self, ctx, *, song):
         await ctx.trigger_typing()
         resp = await self.bot.session.get(
-            f"https://some-random-api.ml/lyrics", params={"title": urllib.parse.quote(song)}
+            f"https://some-random-api.ml/lyrics", params={"title": song}
         )
         data = await resp.json()
 

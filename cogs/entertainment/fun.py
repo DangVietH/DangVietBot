@@ -5,7 +5,6 @@ import random
 import asyncio
 from utils import config_var
 from googletrans import Translator
-import urllib
 import io
 
 
@@ -151,7 +150,7 @@ class Fun(commands.Cog):
     @commands.command(help="Show pokemon info")
     async def pokedex(self, ctx, *, pokemon):
         resp = await self.bot.session.get(
-            f"https://some-random-api.ml/pokedex", params={"pokemon": urllib.parse.quote(pokemon)}
+            f"https://some-random-api.ml/pokedex", params={"pokemon": pokemon}
         )
         data = await resp.json()
 
@@ -373,7 +372,7 @@ class Fun(commands.Cog):
             f"https://some-random-api.ml/canvas/youtube-comment", params={
                 "avatar": ctx.author.display_avatar.url,
                 "username": ctx.author.name,
-                "comment": urllib.parse.quote(comment)
+                "comment": comment
             }
         )
         await ctx.send(file=discord.File(io.BytesIO(await resp.read()), 'yt.png'))
@@ -385,7 +384,7 @@ class Fun(commands.Cog):
                 "avatar": ctx.author.display_avatar.url,
                 "username": ctx.author.name,
                 "displayname": name,
-                "comment": urllib.parse.quote(comment)
+                "comment": comment
             }
         )
         await ctx.send(file=discord.File(io.BytesIO(await resp.read()), 'tweet.png'))
