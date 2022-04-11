@@ -73,7 +73,7 @@ class Moderation(commands.Cog):
             await channel.send(embed=embed)
 
         if not criminal.bot:
-            if "ban" or "kick" or "unban "not in type_off:
+            if ("ban", "kick", "unban") not in type_off:
                 check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": criminal.id})
                 if check_user_case is None:
                     return await user_case.insert_one({"guild": ctx.guild.id, "user": criminal.id, "total_cases": 1})
