@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-import aiohttp
 import random
 import asyncio
 
@@ -12,9 +11,8 @@ class Games(commands.Cog):
     @commands.command(help="Play some quizs", aliases=["quiz"])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def trivia(self, ctx):
-        async with aiohttp.ClientSession() as session:
-            async with session.get("https://opentdb.com/api.php?amount=1") as resp:
-                data = await resp.json()
+        resp = await self.bot.session.get(f"https://opentdb.com/api.php?amount=1")
+        data = await resp.json()
 
         if data['response_code'] != 0:
             return await ctx.send("There was an error fetching the question! Just rerun the command")
