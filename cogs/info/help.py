@@ -41,7 +41,7 @@ class CustomHelp(commands.HelpCommand):
                 if cog_name != "Jishaku":
                     embed.add_field(name=cog_name, value=f"Commands: {len(command)}")
         embed.set_footer(
-            text=f'Use {self.context.clean_prefix}help [arg] for more info on a command or category. \nExample: {self.context.clean_prefix}help Economy')
+            text=f'Use {self.context.clean_prefix}help [arg] for more info on a command or category. \nExample: {self.context.clean_prefix}help Fun')
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label='Invite',
                                         url=self.context.bot.invite))
@@ -52,7 +52,7 @@ class CustomHelp(commands.HelpCommand):
         data = []
         filtered = await self.filter_commands(cog_.get_commands(), sort=True)
         for command in filtered:
-            data.append((f"- {command.name}", f"{self.get_command_signature(command)}\n`{command.short_doc}`"))
+            data.append((f"- {command.name}", f"{self.get_command_signature(command)}\n`{command.short_doc or 'No help for now'}`"))
 
         page = MenuPages(CogPageSource(f"{cog_.qualified_name} Commands", data))
         await page.start(self.context)

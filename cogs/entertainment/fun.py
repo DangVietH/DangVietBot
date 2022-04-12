@@ -366,7 +366,7 @@ class Fun(commands.Cog):
             io.BytesIO(await resp.read()), f"passed.png"
         ))
 
-    @commands.command(help="Make a fake youtube comment")
+    @commands.command(help="Make a fake youtube comment", aliases=["ytc"])
     async def ytcomment(self, ctx, *, comment="Nothing you idiot"):
         resp = await self.bot.session.get(
             f"https://some-random-api.ml/canvas/youtube-comment", params={

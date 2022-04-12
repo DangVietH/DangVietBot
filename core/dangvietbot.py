@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import os
 import datetime
+import re
 
 os.environ["JISHAKU_HIDE"] = "True"
 os.environ["JISHAKU_NO_UNDERSCORE"] = "True"
@@ -62,6 +63,13 @@ class DangVietBot(commands.Bot):
             return
         if await blacklist.find_one({"id": message.author.id}):
             return
+        if re.fullmatch(rf"<@!?{self.user.id}>", message.content):
+            cursor = self.mongo["custom_prefix"]["prefix"]
+            result = await cursor.find_one({"guild": message.guild.id})
+            if result is None:
+                return await message.channel.send(f"**Prefix:** d!")
+            return await message.channel.send(f"**Prefix:** {result['prefix']}")
+
         await self.process_commands(message)
 
     async def on_command_error(self, ctx, error):
@@ -102,7 +110,6 @@ class DangVietBot(commands.Bot):
             return commands.when_mentioned_or("d!")(self, message)
         else:
             result = await cursor.find_one({"guild": message.guild.id})
-            if result is not None:
-                return commands.when_mentioned_or(str(result["prefix"]).lower())(self, message)
-            else:
+            if result is None:
                 return commands.when_mentioned_or("d!".lower())(self, message)
+            return commands.when_mentioned_or(str(result["prefix"]).lower())(self, message)
