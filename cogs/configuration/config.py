@@ -210,8 +210,8 @@ class Configuration(commands.Cog):
         questions = [
             "What should be the starboard emoji (type `false` if you want default ⭐️):",
             "What should be the starboard amount (type `false` if you want default value, which is 2):",
-            "Do you want users to self star their own message (type `true` or 'false'):",
-            "Do you want users to star message inn NSFW channel (type `true` or 'false'):",
+            "Do you want users to self star their own message (type `true` or `false`):",
+            "Do you want users to star message inn NSFW channel (type `true` or `false`):",
             "Last question, which channel you want to send the starboard message at:"
         ]
         answers = []
@@ -225,10 +225,12 @@ class Configuration(commands.Cog):
             msg_check = await self.bot.wait_for('message', check=check)
             answers.append(msg_check.content)
             await ctx.channel.purge(limit=1)
+
         try:
-            c_id = int(answers[4])
+            c_id = int(answers[4][2:-1])
         except ValueError:
-            await msg.edit(content=f'Wizard crash because you failed to mention the channel correctly.  Please do it like this: {ctx.channel.mention}')
+            await msg.edit(
+                content=f'Wizard crash because you failed to mention the channel correctly.  Please do it like this: {ctx.channel.mention}')
             return
 
         def check_value(v, *dtype):
@@ -238,10 +240,9 @@ class Configuration(commands.Cog):
                 return int(v)
             return v
 
-        channel = self.bot.get_channel(c_id)
         insert_data = {
             "guild": ctx.guild.id,
-            "channel": channel.id,
+            "channel": c_id,
             "emoji": check_value(answers[0]) or '⭐️',
             "threshold": check_value(answers[1], "int") or 2,
             "ignoreChannel": [],
