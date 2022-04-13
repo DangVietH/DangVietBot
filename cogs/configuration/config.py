@@ -240,6 +240,11 @@ class Configuration(commands.Cog):
                 return int(v)
             return v
 
+        def check_return_dtype(v):
+            if v.lower() == 'false':
+                return None
+            return True
+
         insert_data = {
             "guild": ctx.guild.id,
             "channel": c_id,
@@ -247,12 +252,12 @@ class Configuration(commands.Cog):
             "threshold": check_value(answers[1], "int") or 2,
             "ignoreChannel": [],
             "lock": False,
-            "selfStar": check_value(answers[2]) or False,
-            "nsfw": check_value(answers[3]) or False
+            "selfStar": check_return_dtype(answers[2]) or False,
+            "nsfw": check_return_dtype(answers[3]) or False
         }
         await scursor.insert_one(insert_data)
         embed.description = "Wizard finished successfully!"
-        embed.add_field(name="Starboard Channel", value=channel.mention)
+        embed.add_field(name="Starboard Channel", value=self.bot.get_channel(c_id).mention)
         embed.add_field(name="Starboard Emoji", value=insert_data["emoji"])
         embed.add_field(name="Starboard Amount", value=insert_data["threshold"])
         embed.add_field(name="Self Star", value=insert_data["selfStar"])
