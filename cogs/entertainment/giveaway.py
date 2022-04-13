@@ -55,9 +55,8 @@ class Giveaway(commands.Cog):
 
         try:
             c_id = int(giveaway_answers[0][2:-1])
-        except:
-            await ctx.send(
-                f'You failed to mention the channel correctly.  Please do it like this: {ctx.channel.mention}')
+        except ValueError:
+            await ctx.send(f'Wizard crash because you failed to mention the channel correctly.  Please do it like this: {ctx.channel.mention}')
             return
 
         channel = self.bot.get_channel(c_id)

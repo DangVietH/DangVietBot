@@ -43,7 +43,7 @@ class Tags(commands.Cog):
 
         for question in questions:
             await ctx.send(question)
-            msg = await self.bot.wait_for('message', timeout=600.0, check=check)
+            msg = await self.bot.wait_for('message', check=check)
             answers.append(msg.content)
         check = await cursor.find_one({"guild": ctx.guild.id})
         if check is None:

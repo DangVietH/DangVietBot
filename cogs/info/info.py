@@ -3,6 +3,7 @@ from discord.ext import commands, menus
 from utils.menuUtils import MenuPages
 from cogs.info.help import CustomHelp
 import datetime
+import io
 
 
 class ServerPageSource(menus.ListPageSource):
@@ -61,7 +62,8 @@ class Info(commands.Cog):
     @commands.command(help="Get user avatar")
     async def avatar(self, ctx, user: discord.Member = None):
         user = user or ctx.author
-        await ctx.send(user.display_avatar.url)
+        resp = await self.bot.session.get(user.display_avatar.url)
+        await ctx.send(file=discord.File(io.BytesIO(await resp.read()), f"avatar.png"))
 
     @commands.command(help="Server information")
     async def serverinfo(self, ctx):

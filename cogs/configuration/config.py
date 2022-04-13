@@ -48,7 +48,8 @@ class Configuration(commands.Cog):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             insert = {"guild": ctx.guild.id, "channel": channel.id, "message": "Welcome {mention}",
-                      "dm": f"Have fun at **{ctx.guild.name}**", "img": "https://cdn.discordapp.com/attachments/875886792035946496/936446668293935204/bridge.png",
+                      "dm": f"Have fun at **{ctx.guild.name}**",
+                      "img": "https://cdn.discordapp.com/attachments/875886792035946496/936446668293935204/bridge.png",
                       "role": 0}
             await welcome_cursors.insert_one(insert)
             await ctx.send(f"Welcome channel set to {channel.mention}")
@@ -57,7 +58,7 @@ class Configuration(commands.Cog):
             await ctx.send(f"Welcome channel updated to {channel.mention}")
 
     @welcome.command(help="Remove welcome system", aliases=['disable'])
-    @commands.commands.has_permissions(manage_channels=True)
+    @commands.has_permissions(manage_channels=True)
     async def remove(self, ctx):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
@@ -199,6 +200,64 @@ class Configuration(commands.Cog):
     async def starboard(self, ctx):
         await ctx.send_help(ctx.command)
 
+    @starboard.command(help="Use wizard if you want to save time")
+    @commands.has_permissions(manage_guild=True)
+    async def wizard(self, ctx):
+        if await scursor.find_one({"guild": ctx.guild.id}):
+            await scursor.delete_one({"guild": ctx.guild.id})
+        embed = discord.Embed(title="Starboard Wizard", description="Use this wizard to setup starboard", color=self.bot.embed_color)
+        msg = await ctx.send(embed=embed)
+        questions = [
+            "What should be the starboard emoji (type `false` if you want default ⭐️):",
+            "What should be the starboard amount (type `false` if you want default value, which is 2):",
+            "Do you want users to self star their own message (type `true` or 'false'):",
+            "Do you want users to star message inn NSFW channel (type `true` or 'false'):",
+            "Last question, which channel you want to send the starboard message at:"
+        ]
+        answers = []
+
+        def check(user):
+            return user.author == ctx.author and user.channel == ctx.channel
+
+        for question in questions:
+            embed.description = question
+            await msg.edit(embed=embed)
+            msg_check = await self.bot.wait_for('message', check=check)
+            answers.append(msg_check.content)
+            await ctx.channel.purge(limit=1)
+        try:
+            c_id = int(answers[4])
+        except ValueError:
+            await msg.edit(content=f'Wizard crash because you failed to mention the channel correctly.  Please do it like this: {ctx.channel.mention}')
+            return
+
+        def check_value(v, *dtype):
+            if v.lower() == 'false':
+                return None
+            if dtype == "int":
+                return int(v)
+            return v
+
+        channel = self.bot.get_channel(c_id)
+        insert_data = {
+            "guild": ctx.guild.id,
+            "channel": channel.id,
+            "emoji": check_value(answers[0]) or '⭐️',
+            "threshold": check_value(answers[1], "int") or 2,
+            "ignoreChannel": [],
+            "lock": False,
+            "selfStar": check_value(answers[2]) or False,
+            "nsfw": check_value(answers[3]) or False
+        }
+        await scursor.insert_one(insert_data)
+        embed.description = "Wizard finished successfully!"
+        embed.add_field(name="Starboard Channel", value=channel.mention)
+        embed.add_field(name="Starboard Emoji", value=insert_data["emoji"])
+        embed.add_field(name="Starboard Amount", value=insert_data["threshold"])
+        embed.add_field(name="Self Star", value=insert_data["selfStar"])
+        embed.add_field(name="Allow NSFW", value=insert_data["nsfw"])
+        await msg.edit(embed=embed)
+
     @starboard.command(help="Show starboard stats")
     async def stats(self, ctx):
         result = await scursor.find_one({"guild": ctx.guild.id})
@@ -206,9 +265,10 @@ class Configuration(commands.Cog):
             return await ctx.send("You don't have a starboard system")
         embed = discord.Embed(title="Starboard Stats", color=discord.Color.random())
         embed.add_field(name="Starboard Channel", value=f"{self.bot.get_channel(result['channel']).mention}")
-        embed.add_field(name="Starboard Emojis", value=f"{result['emoji']}")
-        embed.add_field(name="Starboard Threshold", value=f"{result['threshold']}")
-        embed.add_field(name="Starboard Ignored Channels", value=f"{[self.bot.get_channel(channel).mention for channel in result['ignoreChannel']]}")
+        embed.add_field(name="Starboard Emoji", value=f"{result['emoji']}")
+        embed.add_field(name="Starboard Amount", value=f"{result['threshold']}")
+        embed.add_field(name="Starboard Ignored Channels",
+                        value=f"{[self.bot.get_channel(channel).mention for channel in result['ignoreChannel']]}")
         await ctx.send(embed=embed)
 
     @starboard.command(help="Setup starboard channel")
@@ -246,26 +306,24 @@ class Configuration(commands.Cog):
 
     @starboard.command(help="Ignore channels from starboard")
     @commands.has_permissions(manage_channels=True)
-    async def ignoreChannel(self, ctx, channel: commands.Greedy[discord.TextChannel]):
+    async def ignoreChannel(self, ctx, channel: discord.TextChannel):
         result = await scursor.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You don't have a starboard system")
-        for c in channel:
-            if c in result['ignoreChannel']:
-                continue
-            await scursor.update_one({"guild": ctx.guild.id}, {"$push": {"ignoreChannel": c.id}})
+        if channel.id in result['ignoreChannel']:
+            return await ctx.send("This channel is already ignored")
+        await scursor.update_one({"guild": ctx.guild.id}, {"$push": {"ignoreChannel": channel.id}})
         await ctx.send(f"Ignored channels {[x.mention for x in channel]}")
 
     @starboard.command(help="Un ignore channels from starboard")
     @commands.has_permissions(manage_channels=True)
-    async def unignoreChannel(self, ctx, channel: commands.Greedy[discord.TextChannel]):
+    async def unignoreChannel(self, ctx, channel: discord.TextChannel):
         result = await scursor.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You don't have a starboard system")
-        for c in channel:
-            if c in result['ignoreChannel']:
-                continue
-            await scursor.update_one({"guild": ctx.guild.id}, {"$pull": {"ignoreChannel": c.id}})
+        if channel.id not in result['ignoreChannel']:
+            return await ctx.send(f"{channel.mention} is not ignored")
+        await scursor.update_one({"guild": ctx.guild.id}, {"$pull": {"ignoreChannel": channel.id}})
         await ctx.send(f"Unignored channels {[x.mention for x in channel]}")
 
     @starboard.command(help="Set starboard emoji amount", aliases=["amount"])
@@ -276,40 +334,42 @@ class Configuration(commands.Cog):
         await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"threshold": threshold}})
         await ctx.send(f"Starboard threshold updated to {threshold}")
 
-    @starboard.command(help="Lock starboard")
+    @starboard.command(help="Lock starboard to prevent spam")
     @commands.has_permissions(manage_guild=True)
-    async def lock(self, ctx):
+    async def lock(self, ctx, value="true"):
+        if value.lower() not in ['true', 'false']:
+            return await ctx.send("Value should be `true` or `false`")
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
             return await ctx.send("You don't have a starboard system")
-        await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": True}})
-        await ctx.send("Starboard locked")
-
-    @starboard.command(help="Lock starboard")
-    @commands.has_permissions(manage_guild=True)
-    async def unlock(self, ctx):
-        if await scursor.find_one({"guild": ctx.guild.id}) is None:
-            return await ctx.send("You don't have a starboard system")
-        await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": False}})
-        await ctx.send("Starboard unlocked")
+        if value.lower() == "true":
+            if (await scursor.find_one({"guild": ctx.guild.id}))['lock'] is True:
+                return await ctx.send("Starboard is already locked")
+            await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": True}})
+            await ctx.send("Starboard is now LOCKED")
+        elif value.lower() == "false":
+            if (await scursor.find_one({"guild": ctx.guild.id}))['lock'] is False:
+                return await ctx.send("Starboard is already unlocked")
+            await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": False}})
+            await ctx.send("Starboard is now UNLOCKED")
 
     @starboard.command(help="Allow to star in nsfw channels. value should be yes or no")
     @commands.has_permissions(manage_guild=True)
-    async def nsfw(self, ctx, value="yes"):
-        if value.lower() not in ['yes', 'no']:
-            return await ctx.send("Value should be `yes` or `no`")
+    async def nsfw(self, ctx, value="true"):
+        if value.lower() not in ['true', 'false']:
+            return await ctx.send("Value should be `true` or `false`")
         result = await scursor.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You don't have a starboard system")
-        if value.lower() == "yes":
+        if value.lower() == "true":
             if result['nsfw'] is True:
                 return await ctx.send("NSFW is already allowed")
             await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"nsfw": True}})
             await ctx.send("NSFW is now allowed")
-        elif value.lower() == "no":
+        elif value.lower() == "false":
             if result['nsfw'] is False:
                 return await ctx.send("NSFW is already not allowed")
             await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"nsfw": False}})
-            await ctx.send("NSFW is now not allowed")
+            await ctx.send("NSFW is now false")
 
     @starboard.command(help="Disable starboard system")
     @commands.has_permissions(manage_guild=True)
