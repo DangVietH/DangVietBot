@@ -87,8 +87,8 @@ Use the dropdown menu below to select a category.
                 value=(
                     f"Hi, I'm a discord bot made by DvH#9980! I've been running since <t:{int(menu.ctx.bot.user.created_at.timestamp())}>. "
                     "I have features such as starboard, moderation, leveling, music and more!\n",
-                    f"I'm currently running on **{len(self.bot.guilds)}** servers and watching **{len(self.bot.users)}** users.\n",
-                    f"I'm also open source on [github]({self.bot.github})",
+                    f"I'm currently running on **{len(menu.ctx.bot.guilds)}** servers and watching **{len(menu.ctx.bot.users)}** users.\n",
+                    f"I'm also open source on [github]({menu.ctx.bot.github})",
                 ),
                 inline=False
             )
@@ -187,12 +187,7 @@ class CustomHelp(commands.HelpCommand):
         await page.start()
 
     async def send_group_help(self, group):
-        data = []
         filtered = await self.filter_commands(group.commands, sort=True)
-        if isinstance(group, commands.Group):
-
-            for command in filtered:
-                data.append((f"- {command.name}", f"{self.get_command_signature(command)}\n`{command.short_doc}`"))
 
         page = MenuPages(CogPageSource(group, filtered, prefix=self.context.clean_prefix), self.context)
         await page.start()
