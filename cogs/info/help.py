@@ -85,7 +85,7 @@ Use the dropdown menu below to select a category.
             embed.add_field(
                 name='Information',
                 value=(
-                    f"Hi, I'm a discord bot made by DvH#9980! I've been running since <t:{int(self.bot.user.created_at.timestamp())}>. "
+                    f"Hi, I'm a discord bot made by DvH#9980! I've been running since <t:{int(menu.ctx.bot.user.created_at.timestamp())}>. "
                     "I have features such as starboard, moderation, leveling, music and more!\n",
                     f"I'm currently running on **{len(self.bot.guilds)}** servers and watching **{len(self.bot.users)}** users.\n",
                     f"I'm also open source on [github]({self.bot.github})",
