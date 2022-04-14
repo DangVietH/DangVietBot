@@ -1,5 +1,5 @@
 import discord
-from discord.ext import menus
+from discord.ext import menus, commands
 import datetime
 
 
@@ -30,18 +30,18 @@ class SecondPageSource(menus.ListPageSource):
 
 class MenuPages(discord.ui.View):
     """View Paginator for ext.menus"""
-    def __init__(self, source: menus.PageSource):
+    def __init__(self, source: menus.PageSource, ctx: commands.Context):
         super().__init__(timeout=120.0)
         self._source = source
         self.current_page = 0
-        self.ctx = None
+        self.ctx = ctx
         self.message = None
         self.clear_items()
         self.add_buttons()
 
     def add_buttons(self) -> None:
         if self._source.is_paginating():
-            use_last_and_first = self._source.get_max_pages() is not None and self._source.get_max_pages() >= 3
+            use_last_and_first = self._source.get_max_pages() is not None and self._source.get_max_pages() >= 2
             if use_last_and_first:
                 self.add_item(self.first_page)
 
@@ -82,8 +82,7 @@ class MenuPages(discord.ui.View):
         except IndexError:
             pass
 
-    async def start(self, ctx) -> None:
-        self.ctx = ctx
+    async def start(self) -> None:
         await self._source._prepare_once()
         page = await self._source.get_page(0)
         kwargs = await self._get_kwargs_from_page(page)

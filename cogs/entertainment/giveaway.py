@@ -28,6 +28,8 @@ def convert(time):
 
 
 class Giveaway(commands.Cog):
+    emoji = "🎉"
+
     def __init__(self, bot):
         self.bot = bot
         self.time_checker.start()

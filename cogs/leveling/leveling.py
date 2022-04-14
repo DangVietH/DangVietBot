@@ -15,6 +15,8 @@ image_cursor = db['image']
 
 
 class Leveling(commands.Cog):
+    emoji = "📊"
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -179,8 +181,8 @@ class Leveling(commands.Cog):
             to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        page = MenuPages(DefaultPageSource(f"Leaderboard of {ctx.guild.name}", data))
-        await page.start(ctx)
+        page = MenuPages(DefaultPageSource(f"Leaderboard of {ctx.guild.name}", data), ctx)
+        await page.start()
 
     @commands.command(help="See global rank")
     @commands.is_owner()
@@ -194,8 +196,40 @@ class Leveling(commands.Cog):
                          f"**Server:** {self.bot.get_guild(x['guild'])} **Level:** {x['level']} **XP:** {x['xp']}")
             data.append(to_append)
 
-        pages = MenuPages(DefaultPageSource(f"Global Leaderboard", data))
-        await pages.start(ctx)
+        pages = MenuPages(DefaultPageSource(f"Global Leaderboard", data), ctx)
+        await pages.start()
+
+    @commands.command(help="Add xp to member")
+    @commands.has_permissions(manage_channels=True)
+    async def add_xp(self, ctx, member: discord.Member, amount: int):
+        if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
+            return await ctx.send("User has no account")
+        await levelling.update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": amount}})
+        await ctx.send(f"Successfully added {amount} xp to {member}")
+
+    @commands.command(help="Remove xp from member")
+    @commands.has_permissions(manage_channels=True)
+    async def remove_xp(self, ctx, member: discord.Member, amount: int):
+        if await levelling.find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
+            return await ctx.send("User has no account")
+
+        await levelling.update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": -amount}})
+        await ctx.send(f"Successfully remove {amount} xp from {member}")
+
+    @commands.command(help="Set background for your server rank")
+    async def setbackground(self, ctx, link):
+        if await image_cursor.find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is not None:
+            await image_cursor.update_one({"guild": ctx.guild.id, "member": ctx.author.id}, {"$set": {"image": link}})
+        else:
+            await image_cursor.insert_one({"guild": ctx.guild.id, "member": ctx.author.id, "image": link})
+        await ctx.send("New Background set")
+
+    @commands.command(help="Set background back to default")
+    async def resetbackground(self, ctx):
+        if await image_cursor.find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is None:
+            await ctx.send("You don't have a custom background")
+        await image_cursor.delete_one({"guild": ctx.guild.id, "member": ctx.author.id})
+        await ctx.send("👍")
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):

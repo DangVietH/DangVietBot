@@ -25,6 +25,8 @@ async def gen_meme():
 
 
 class Fun(commands.Cog):
+    emoji = "😄"
+
     def __init__(self, bot):
         self.bot = bot
 

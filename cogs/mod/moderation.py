@@ -43,6 +43,8 @@ def has_mod_role():
 
 
 class Moderation(commands.Cog):
+    emoji = "🔨"
+
     def __init__(self, bot):
         self.bot = bot
         self.time_checker.start()

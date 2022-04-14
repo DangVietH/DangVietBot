@@ -33,6 +33,8 @@ class RtfmListPageSource(menus.ListPageSource):
 
 
 class RTFM(commands.Cog):
+    emoji = "📚"
+
     def __init__(self, bot):
         self.bot = bot
         self.targets = {
@@ -115,8 +117,8 @@ class RTFM(commands.Cog):
                 f"No results found when searching for {term} in {docs}"
             )
 
-        page = MenuPages(RtfmPageSource(term, docs, results))
-        await page.start(ctx)
+        page = MenuPages(RtfmPageSource(term, docs, results), ctx)
+        await page.start()
 
     @rtfm.command(help="available modules")
     async def list(self, ctx):

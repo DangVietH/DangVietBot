@@ -48,6 +48,8 @@ def check_return_dtype(v):
 
 
 class Configuration(commands.Cog):
+    emoji = "⚙️"
+
     def __init__(self, bot):
         self.bot = bot
 

@@ -19,6 +19,8 @@ class ServerPageSource(menus.ListPageSource):
 
 
 class Info(commands.Cog):
+    emoji = "📋"
+
     def __init__(self, bot):
         self.bot = bot
         bot.help_command = CustomHelp()
@@ -116,5 +118,5 @@ class Info(commands.Cog):
         for guild in self.bot.guilds:
             to_append = (f"{guild.name}", f"**Owner** {guild.owner} **Member** {guild.member_count} **ID** {guild.id}")
             data.append(to_append)
-        menu = MenuPages(ServerPageSource(data))
-        await menu.start(ctx)
+        menu = MenuPages(ServerPageSource(data), ctx)
+        await menu.start()

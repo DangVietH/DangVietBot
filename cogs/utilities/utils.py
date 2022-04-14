@@ -3,10 +3,12 @@ from discord.ext import commands, tasks
 from motor.motor_asyncio import AsyncIOMotorClient
 from utils import config_var
 import datetime
+from utils import DefaultPageSource, MenuPages
 
 cluster = AsyncIOMotorClient(config_var["mango_link"])
 timer = cluster["timer"]['remind']
 afk = cluster["timer"]['afk']
+tagCursor = cluster["bot"]["tag"]
 
 
 def convert(time):
@@ -27,11 +29,13 @@ def convert(time):
 
 
 class Utils(commands.Cog):
+    emoji = "📝"
+
     def __init__(self, bot):
         self.bot = bot
         self.time_checker.start()
 
-    @commands.group(help="Remind your task", aliases=["reminder"], invoke_without_command=True, case_insensitive=True)
+    @commands.group(help="Remind your task", aliases=["reminder", "remindme"], invoke_without_command=True, case_insensitive=True)
     async def remind(self, ctx, time, *, reason):
         converted_time = convert(time)
         if converted_time == -1:
@@ -42,8 +46,15 @@ class Utils(commands.Cog):
         else:
             current_time = datetime.datetime.now()
             final_time = current_time + datetime.timedelta(seconds=converted_time)
-            await timer.insert_one({"user": ctx.author.id, "time": final_time, "reason": reason})
+            await timer.insert_one({"id": ctx.message.id, "user": ctx.author.id, "time": final_time, "reason": reason})
             await ctx.send("⏰ Reminder set")
+
+    @remind.command(help="Delete an unwanted reminder")
+    async def delete(self, ctx, remind_id: int):
+        if await timer.find_one({"id": remind_id}) is None:
+            return await ctx.send("You don't have that reminder")
+        await timer.delete_one({"id": remind_id})
+        await ctx.send("Reminder deleted!")
 
     @remind.command(help="See your remind list")
     async def list(self, ctx):
@@ -51,10 +62,8 @@ class Utils(commands.Cog):
         if all_timer is None:
             return await ctx.send("You don't have any reminders")
         embed = discord.Embed(title="Your remind list", color=self.bot.embed_color)
-        num = 0
         async for x in all_timer:
-            num += 1
-            embed.add_field(name=f"{num}", value=f"**End at:** <t:{int(datetime.datetime.timestamp(x['time']))}:R>**Reason:** {x['reason']}")
+            embed.add_field(name=f"{x['id']}", value=f"**End at:** <t:{int(datetime.datetime.timestamp(x['time']))}:R>**Reason:** {x['reason']}")
         await ctx.send(embed=embed)
 
     @tasks.loop(seconds=10)
@@ -98,6 +107,109 @@ class Utils(commands.Cog):
             await ctx.send(num1 * num2)
         elif op == "/":
             await ctx.send(num1 / num2)
+
+    @commands.group(invoke_without_command=True, case_insensitive=True, help="Tag setup")
+    async def tag(self, ctx, *, name=None):
+        if name is None:
+            return await ctx.send_help(ctx.command)
+
+        all_tag = (await tagCursor.find_one({"guild": ctx.guild.id}))['tag']
+        value = None
+        for thing in all_tag:
+            if thing['name'] == name:
+                value = thing['value']
+                break
+        if value is None:
+            return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
+
+        await ctx.send(value)
+
+    @tag.command(help="Create a tag")
+    async def create(self, ctx):
+        questions = ["What is the tag name: ",
+                     "What is the tag value: "]
+        answers = []
+
+        def check(user):
+            return user.author == ctx.author and user.channel == ctx.channel
+
+        for question in questions:
+            await ctx.send(question)
+            msg = await self.bot.wait_for('message', check=check)
+            answers.append(msg.content)
+        check = await tagCursor.find_one({"guild": ctx.guild.id})
+        if check is None:
+            await tagCursor.insert_one({"guild": ctx.guild.id, "tag": [
+                {"name": answers[0], "value": answers[1], "owner": ctx.author.id}
+            ]})
+            await ctx.send(f"Tag {answers[0]} successfully created")
+        else:
+            is_exist = await tagCursor.find_one({"guild": ctx.guild.id, "tag.name": answers[0]})
+            if is_exist is not None:
+                await ctx.send("Tag already exist. Remember that tag name are case SENSITIVE")
+            else:
+                await tagCursor.update_one({"guild": ctx.guild.id}, {
+                    "$push": {"tag": {"name": answers[0], "value": answers[1], "owner": ctx.author.id}}})
+                await ctx.send(f"Tag {answers[0]} successfully created")
+
+    @tag.command(help="Remove a tag", aliases=['remove'])
+    @commands.has_permissions(manage_guild=True)
+    async def delete(self, ctx, *, name):
+        if await tagCursor.find_one({"guild": ctx.guild.id, "tag.name": name}) is None:
+            await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
+        else:
+            await tagCursor.update_one({"guild": ctx.guild.id}, {"$pull": {"tag": {"name": name}}})
+            await ctx.send("Tag deleted successfully")
+
+    @tag.command(help="Edit a tag")
+    async def edit(self, ctx, *, name):
+        gcheck = await tagCursor.find_one({"guild": ctx.guild.id})
+        if gcheck is None:
+            return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
+
+        tnname = None
+        owner = None
+        for thing in gcheck['tag']:
+            if thing['name'] == name:
+                tnname = thing['name']
+                owner = thing['owner']
+                break
+
+        if tnname is None:
+            return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
+
+        if ctx.author.id != owner:
+            return await ctx.send("You are not the owner of this tag")
+        await ctx.send("What is the new tag value: `Type end to abort the process`")
+
+        def check(user):
+            return user.author == ctx.author and user.channel == ctx.channel
+
+        user_choice = (await self.bot.wait_for('message', check=check)).content
+        if user_choice == "end".lower():
+            return await ctx.send("Task abort successfully")
+        await tagCursor.update_one({"guild": ctx.guild.id, "tag.name": name}, {"$set": {"tag.value": user_choice}})
+        await ctx.send("Tag edited successfully")
+
+    @tag.command(help="See a list of tags")
+    async def list(self, ctx):
+        check = await tagCursor.find_one({"guild": ctx.guild.id})
+        if check is None:
+            await ctx.send("No tags in here")
+        else:
+            data = []
+            ta = check['tag']
+            for thing in ta:
+                to_append = (thing['name'], f"**Owner:** {self.bot.get_user(thing['owner'])}")
+                data.append(to_append)
+            page = MenuPages(DefaultPageSource(f"Tags of {ctx.guild.name}", data), ctx)
+            await page.start()
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild):
+        check = await tagCursor.find_one({"guild": guild.id})
+        if check is not None:
+            await tagCursor.delete_one({"guild": guild.id})
 
     @commands.command(help="Suggest something to this bot")
     async def suggest(self, ctx, *, text):

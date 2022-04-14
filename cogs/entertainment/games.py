@@ -5,6 +5,8 @@ import asyncio
 
 
 class Games(commands.Cog):
+    emoji = "🎮"
+
     def __init__(self, bot):
         self.bot = bot
 

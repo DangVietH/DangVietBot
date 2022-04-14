@@ -20,6 +20,8 @@ items_description = ["KFC GO BRRR", "talking birb machine", "moniter ye time", "
 
 
 class Economy(commands.Cog):
+    emoji = "💰"
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -60,8 +62,8 @@ class Economy(commands.Cog):
                 to_append = (f"{num}: {is_user_in_guild}", f"**Wallet:** {x['wallet']}")
                 data.append(to_append)
 
-        pages = MenuPages(DefaultPageSource(f"Richest user in {ctx.guild.name}", data))
-        await pages.start(ctx)
+        pages = MenuPages(DefaultPageSource(f"Richest user in {ctx.guild.name}", data), ctx)
+        await pages.start()
 
     @commands.command(help="Who is the richest one around the world")
     async def grich(self, ctx):
@@ -73,8 +75,8 @@ class Economy(commands.Cog):
             to_append = (f"{num}: {self.bot.get_user(x['id'])}", f"**Wallet:** {x['wallet']}")
             data.append(to_append)
 
-        pages = MenuPages(DefaultPageSource(f"Richest user in the world", data))
-        await pages.start(ctx)
+        pages = MenuPages(DefaultPageSource(f"Richest user in the world", data), ctx)
+        await pages.start()
 
     @commands.command(help="Beg some money")
     @commands.cooldown(1, 7200, commands.BucketType.user)
@@ -147,8 +149,8 @@ class Economy(commands.Cog):
         for i in range(len(items_name)):
             data.append((f"{items_name[i]} | 💵 {items_price[i]}",
                          items_description[i]))
-        page = MenuPages(DefaultPageSource(f"Shop", data))
-        await page.start(ctx)
+        page = MenuPages(DefaultPageSource(f"Shop", data), ctx)
+        await page.start()
 
     @commands.command(help="Buy some items")
     async def buy(self, ctx, item_name: str, amount=1):
@@ -228,8 +230,8 @@ class Economy(commands.Cog):
                 amount = item['amount']
                 to_append = (f"{name}", f"**Amount** {amount}")
                 data.append(to_append)
-            pages = MenuPages(DefaultPageSource(f"{ctx.author} Inventory", data))
-            await pages.start(ctx)
+            pages = MenuPages(DefaultPageSource(f"{ctx.author} Inventory", data), ctx)
+            await pages.start()
 
     @commands.command(help="Claim your daily money")
     @commands.cooldown(1, 60 * 60 * 24, commands.BucketType.user)

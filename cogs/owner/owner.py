@@ -26,6 +26,8 @@ class EvalPageSource(menus.ListPageSource):
 
 class Owner(commands.Cog):
     """Only DvH can use it"""
+    emoji = "👑"
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -115,8 +117,8 @@ class Owner(commands.Cog):
         except Exception as e:
             result = "".join(format_exception(type(e), e, e.__traceback__))
 
-        page = MenuPages(EvalPageSource([result[i: i + 2000] for i in range(0, len(result), 2000)]))
-        await page.start(ctx)
+        page = MenuPages(EvalPageSource([result[i: i + 2000] for i in range(0, len(result), 2000)]), ctx)
+        await page.start()
 
     @commands.group(help="Blacklist ppls")
     @commands.is_owner()

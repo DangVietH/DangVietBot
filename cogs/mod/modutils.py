@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, menus
 from motor.motor_asyncio import AsyncIOMotorClient
-from utils import config_var,  MenuPages
+from utils import config_var, MenuPages
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
 modb = cluster["moderation"]
@@ -82,8 +82,8 @@ class ModUtils(commands.Cog):
         for case in results['cases']:
             gdata.append((f"Case {case['Number']}",
                           f"**Type:** {case['type']}\n **User:** {self.bot.get_user(int(case['user']))}\n**Mod:** {self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
-        page = MenuPages(GuildCasePageSource(results['num'], gdata))
-        await page.start(ctx)
+        page = MenuPages(GuildCasePageSource(results['num'], gdata), ctx)
+        await page.start()
 
     @commands.command(help="Look at user cases")
     async def casesfor(self, ctx, member: discord.Member = None):
@@ -98,5 +98,5 @@ class ModUtils(commands.Cog):
                 udata.append((f"Case {case['Number']}",
                               f"**Type:** {case['type']}\n**Mod:** {self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
 
-        page = MenuPages(UserCasePageSource(member, user_check['total_cases'], udata))
-        await page.start(ctx)
+        page = MenuPages(UserCasePageSource(member, user_check['total_cases'], udata), ctx)
+        await page.start()

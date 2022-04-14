@@ -67,8 +67,8 @@ class DangVietBot(commands.Bot):
             cursor = self.mongo["custom_prefix"]["prefix"]
             result = await cursor.find_one({"guild": message.guild.id})
             if result is None:
-                return await message.channel.send(f"**Prefix:** d!")
-            return await message.channel.send(f"**Prefix:** {result['prefix']}")
+                return await message.channel.send(f"**Prefix:** `d!`")
+            return await message.channel.send(f"**Prefix:** `{result['prefix']}`")
 
         await self.process_commands(message)
 
@@ -92,6 +92,8 @@ class DangVietBot(commands.Bot):
             await ctx.send(error)
 
     async def on_guild_join(self, guild):
+        cursor = self.mongo["levelling"]["disable"]
+        await cursor.insert_one({"guild": guild.id})
         embed = discord.Embed(title=f"Greetings {guild.name}",
                               description=f"Thanks for adding {self.user.name} into your server! To get started type d!help!",
                               color=discord.Color.from_rgb(225, 0, 92))
