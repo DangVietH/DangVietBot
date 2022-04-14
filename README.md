@@ -8,7 +8,6 @@ A multi-purpose discord bot that has moderation, starboard, levelling, music, et
 - Fun and Image commands 
 - Games (trivia, rps)
 - Moderation with Modlog
-- Music (support youtube, soundcloud, bandcamp, twitch, vimeo)
 - RTFM
 - Welcome system 
 - Fun commands 

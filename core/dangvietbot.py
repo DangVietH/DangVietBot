@@ -17,7 +17,6 @@ coglist = [
             'cogs.info',
             'cogs.leveling',
             'cogs.mod',
-            'cogs.music',
             'cogs.owner',
             'cogs.rtfm',
             'cogs.utilities',
