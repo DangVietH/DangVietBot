@@ -178,7 +178,6 @@ class CustomHelp(commands.HelpCommand):
 
         menu = HelpMenuPage(FrontPageSource(), ctx=self.context)
         menu.add_categories(all_commands)
-        await self.context.release()
         await menu.start()
 
     async def send_cog_help(self, cog_):
