@@ -30,12 +30,13 @@ class SecondPageSource(menus.ListPageSource):
 
 class MenuPages(discord.ui.View):
     """View Paginator for ext.menus"""
-    def __init__(self, source: menus.PageSource, ctx: commands.Context):
+    def __init__(self, source: menus.PageSource, ctx: commands.Context, *, compact: bool = False):
         super().__init__(timeout=120.0)
         self._source = source
         self.current_page = 0
         self.ctx = ctx
         self.message = None
+        self.compact = compact
         self.clear_items()
         self.fill_items()
 
@@ -52,6 +53,30 @@ class MenuPages(discord.ui.View):
                 self.add_item(self.last_page)
 
             self.add_item(self.stop_page)
+
+    def update_labels(self, page_number):
+        self.first_page.disabled = page_number == 0
+        max_pages = self._source.get_max_pages()
+        if self.compact:
+            self.last_page.disabled = (
+                    max_pages is None or (page_number + 1) >= max_pages
+            )
+            self.next_page.disabled = (
+                    max_pages is not None and (page_number + 1) >= max_pages
+            )
+            self.before_page.disabled = page_number == 0
+            return
+
+        self.next_page.disabled = False
+        self.before_page.disabled = False
+        self.first_page.disabled = False
+
+        if max_pages is not None:
+            self.go_to_last_page.disabled = (page_number + 1) >= max_pages
+            if (page_number + 1) >= max_pages:
+                self.next_page.disabled = True
+            if page_number == 0:
+                self.before_page.disabled = True
 
     async def _get_kwargs_from_page(self, page):
         value = await discord.utils.maybe_coroutine(self._source.format_page, self, page)

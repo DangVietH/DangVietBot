@@ -242,7 +242,7 @@ class Economy(commands.Cog):
             embed=discord.Embed(title="Daily Claimed", description="You just got 90000 💵",
                                 color=discord.Color.green()))
 
-    @commands.command(help="we work for the right to work")
+    @commands.command(help="Time to get a bit shady")
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def gamble(self, ctx, amount: int):
         await self.open_account(ctx.author)

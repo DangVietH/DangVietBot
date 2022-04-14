@@ -372,7 +372,7 @@ Valid Variables:
             await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"selfStar": True}})
             await ctx.send("Selfstar is now on")
 
-    @starboard.command(help="Ignore channels from starboard", name="ignoreChannel")
+    @starboard.command(help="Ignore channels from starboard", name="inchannel")
     @commands.has_permissions(manage_channels=True)
     async def sbignoreChannel(self, ctx, channel: discord.TextChannel):
         result = await scursor.find_one({"guild": ctx.guild.id})
@@ -383,7 +383,7 @@ Valid Variables:
         await scursor.update_one({"guild": ctx.guild.id}, {"$push": {"ignoreChannel": channel.id}})
         await ctx.send(f"Ignored channels {[x.mention for x in channel]}")
 
-    @starboard.command(help="Un ignore channels from starboard", name="unignoreChannel")
+    @starboard.command(help="Un ignore channels from starboard", name="unichannel")
     @commands.has_permissions(manage_channels=True)
     async def sbunignoreChannel(self, ctx, channel: discord.TextChannel):
         result = await scursor.find_one({"guild": ctx.guild.id})

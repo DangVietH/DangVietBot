@@ -60,10 +60,11 @@ class Utils(commands.Cog):
         all_timer = timer.find({'user': ctx.author.id})
         if all_timer is None:
             return await ctx.send("You don't have any reminders")
-        embed = discord.Embed(title="Your remind list", color=self.bot.embed_color)
+        data = []
         async for x in all_timer:
-            embed.add_field(name=f"{x['id']}", value=f"**End at:** <t:{int(datetime.datetime.timestamp(x['time']))}:R> **Reason:** {x['reason']}")
-        await ctx.send(embed=embed)
+            data.append((f"{x['id']}", f"**End at:** <t:{int(datetime.datetime.timestamp(x['time']))}:R> **Reason:** {x['reason']}"))
+        page = MenuPages(DefaultPageSource(f"Your reminder list", data), ctx)
+        await page.start()
 
     @tasks.loop(seconds=10)
     async def time_checker(self):
@@ -80,7 +81,7 @@ class Utils(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if await afk.find_one({"guild": message.guild.id, "member": message.author.id}):
+        if await afk.find_one({"guild": message.guild.id, "member": message.author.id}) is not None:
             await afk.delete_one({"guild": message.guild.id, "member": message.author.id})
             await message.channel.send(f"{message.author.mention}, I have remove your afk")
         if message.mentions:
@@ -194,15 +195,14 @@ class Utils(commands.Cog):
     async def taglist(self, ctx):
         check = await tagCursor.find_one({"guild": ctx.guild.id})
         if check is None:
-            await ctx.send("No tags in here")
-        else:
-            data = []
-            ta = check['tag']
-            for thing in ta:
-                to_append = (thing['name'], f"**Owner:** {self.bot.get_user(thing['owner'])}")
-                data.append(to_append)
-            page = MenuPages(DefaultPageSource(f"Tags of {ctx.guild.name}", data), ctx)
-            await page.start()
+            return await ctx.send("No tags in here")
+        data = []
+        ta = check['tag']
+        for thing in ta:
+            to_append = (thing['name'], f"**Owner:** {self.bot.get_user(thing['owner'])}")
+            data.append(to_append)
+        page = MenuPages(DefaultPageSource(f"Tags of {ctx.guild.name}", data), ctx)
+        await page.start()
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):

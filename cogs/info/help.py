@@ -70,7 +70,6 @@ class FrontPageSource(menus.PageSource):
     def format_page(self, menu, page):
         embed = discord.Embed(title='Bot Help', colour=menu.ctx.bot.embed_color, timestamp=datetime.datetime.utcnow())
         embed.description = f"""
-Hello! Welcome to the help page.
 Use "{menu.ctx.clean_prefix}help command" for more info on a command.
 Use "{menu.ctx.clean_prefix}help category" for more info on a category.
 Use the dropdown menu below to select a category.
@@ -86,13 +85,12 @@ Use the dropdown menu below to select a category.
             embed.add_field(
                 name='Information',
                 value=(
-                    (
                         f"Hi, I'm a discord bot made by DvH#9980! I've been running since <t:{int(menu.ctx.bot.user.created_at.timestamp())}>. "
-                        "I have features such as starboard, moderation, leveling, music and more!\n",
-                        f"I'm currently running on **{len(menu.ctx.bot.guilds)}** servers and watching **{len(menu.ctx.bot.users)}** users.\n",
-                        f"I'm also open source on [github]({menu.ctx.bot.github})",
-                    )
-                ),
+                        "I have features such as starboard, moderation, leveling, and more!\n"
+                        f"I'm currently running on **{len(menu.ctx.bot.guilds)}** servers and watching **{len(menu.ctx.bot.users)}** users.\n"
+                        f"I'm also open source on [github]({menu.ctx.bot.github})\n\n"
+                        "Go to the next page to learn about the bot signature (it's pretty simple)"
+                    ),
                 inline=False
             )
         elif self.index == 1:
@@ -118,7 +116,7 @@ Use the dropdown menu below to select a category.
 
 class HelpMenuPage(MenuPages):
     def __init__(self, source: menus.PageSource, ctx: commands.Context):
-        super().__init__(source, ctx=ctx)
+        super().__init__(source, ctx=ctx, compact=True)
 
     def add_categories(self, command: Dict[commands.Cog, List[commands.Command]]) -> None:
         self.clear_items()
@@ -132,6 +130,7 @@ class HelpMenuPage(MenuPages):
         await self._source._prepare_once()
         page = await self._source.get_page(0)
         kwargs = await self._get_kwargs_from_page(page)
+        self.update_labels(0)
         await interaction.response.edit_message(**kwargs, view=self)
 
 
@@ -145,10 +144,11 @@ class CogPageSource(menus.ListPageSource):
     async def format_page(self, menu, entries):
         embed = discord.Embed(title=self.title,
                               description=f'Use "{self.prefix}help command" for more info on a command.',
-                              color=menu.ctx.bot.embed_color)
+                              color=menu.ctx.bot.embed_color,
+                              timestamp=datetime.datetime.utcnow())
 
         for command in entries:
-            signature = f'`{command.qualified_name} {command.signature}`'
+            signature = f'`{self.prefix}{command.qualified_name} {command.signature}`'
             embed.add_field(name=command.name, value=signature + "\n" + command.short_doc or 'No help given for now...',
                             inline=False)
 
