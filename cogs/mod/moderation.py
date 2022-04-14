@@ -73,11 +73,12 @@ class Moderation(commands.Cog):
             await channel.send(embed=embed)
 
         if not criminal.bot:
-            if ("ban", "kick", "unban") not in type_off:
-                check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": criminal.id})
-                if check_user_case is None:
-                    return await user_case.insert_one({"guild": ctx.guild.id, "user": criminal.id, "total_cases": 1})
-                await user_case.update_one({"guild": ctx.guild.id, "user": criminal.id}, {"$inc": {"total_cases": 1}})
+            if type_off in ["ban", "kick", "unban"]:
+                return
+            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": criminal.id})
+            if check_user_case is None:
+                return await user_case.insert_one({"guild": ctx.guild.id, "user": criminal.id, "total_cases": 1})
+            await user_case.update_one({"guild": ctx.guild.id, "user": criminal.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Warn member")
     @commands.check_any(has_mod_role(), commands.has_permissions(moderate_members=True))

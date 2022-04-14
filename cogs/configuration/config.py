@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
-import asyncio
 from utils import config_var
 
 cluster = AsyncIOMotorClient(config_var['mango_link'])
@@ -34,6 +33,20 @@ def convert(time):
     return val * time_dict[unit]
 
 
+def check_value(v, *dtype):
+    if v.lower() == 'false':
+        return None
+    if dtype == "int":
+        return int(v)
+    return v
+
+
+def check_return_dtype(v):
+    if v.lower() == 'false':
+        return None
+    return True
+
+
 class Configuration(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -41,6 +54,74 @@ class Configuration(commands.Cog):
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Welcome system setup")
     async def welcome(self, ctx):
         await ctx.send_help(ctx.command)
+
+    @welcome.command(help="Use wizard if you want to save time")
+    @commands.has_permissions(manage_guild=True)
+    async def wizard(self, ctx):
+        if await welcome_cursors.find_one({"guild": ctx.guild.id}):
+            await welcome_cursors.delete_one({"guild": ctx.guild.id})
+        questions = [
+            """
+What do you want your welcome message:
+
+Valid Variables:
+```
+{mention}: Mention the joined user
+{username}: user name and discriminator
+{count}: Display the member count
+{name}: The user's name
+{server}: The server's name   
+```     
+            """,
+            """
+What do you want your welcome dm will be:
+
+Valid Variables:
+```
+{mention}: Mention the joined user
+{username}: user name and discriminator
+{count}: Display the member count
+{name}: The user's name
+{server}: The server's name 
+```     
+            """,
+            "What role will i add when user join: (type `false` if you do not want one)",
+            "What background link you want me to use: (type `false` if you want the default one)",
+            "Last question, which channel you want to send the welcome message at:"
+        ]
+        answers = []
+        msg = await ctx.send("Starting wizard")
+
+        def check(user):
+            return user.author == ctx.author and user.channel == ctx.channel
+
+        for question in questions:
+            await msg.edit(content=question)
+            msg = await self.bot.wait_for('message', check=check)
+            answers.append(msg.content)
+            await ctx.channel.purge(limit=1)
+
+        try:
+            c_id = int(answers[4][2:-1])
+        except ValueError:
+            await msg.edit(
+                content=f'Wizard crash because you failed to mention the channel correctly.  Please do it like this: {ctx.channel.mention}')
+            return
+
+        wrole = answers[2][2:-1]
+        if wrole.lower() == 'false':
+            wrole = 0
+        wrole = int(wrole)
+
+        await welcome_cursors.insert_one({
+            "guild": ctx.guild.id,
+            "channel": c_id,
+            "message": answers[0],
+            "dm": answers[1],
+            "img": check_value(answers[3]) or "https://cdn.discordapp.com/attachments/875886792035946496/936446668293935204/bridge.png",
+            "role": wrole
+        })
+        await msg.edit(content="Wizard complete!")
 
     @welcome.command(help="Setup welcome channel")
     @commands.has_permissions(manage_channels=True)
@@ -158,31 +239,21 @@ class Configuration(commands.Cog):
         if result is not None:
             await pcursor.delete_one({"guild": guild.id})
 
-    @commands.group(invoke_without_command=True, case_insensitive=True, help="Reaction role setup")
-    async def reaction(self, ctx):
-        await ctx.send_help(ctx.command)
-
-    @reaction.command(help="Set up reaction role")
+    @commands.command(help="Create a reaction role message")
     @commands.has_permissions(manage_roles=True)
-    async def create(self, ctx):
-        await ctx.send("Answer These Question In Next 10Min!")
-
+    async def reaction(self, ctx):
         questions = ["Enter Message: ", "Enter Emojis: ", "Enter Roles (only type role id): ", "Enter Channel: "]
         answers = []
+        msg = await ctx.send("Reaction role wizard")
 
         def check(user):
             return user.author == ctx.author and user.channel == ctx.channel
 
         for question in questions:
-            await ctx.send(question)
-
-            try:
-                msg = await self.bot.wait_for('message', timeout=600.0, check=check)
-            except asyncio.TimeoutError:
-                await ctx.send("Type Faster Next Time!")
-                return
-            else:
-                answers.append(msg.content)
+            await msg.edit(content=question)
+            msg = await self.bot.wait_for('message', check=check)
+            answers.append(msg.content)
+            await ctx.channel.purge(limit=1)
 
         emojis = answers[1].split(" ")
         roles = answers[2].split(" ")
@@ -195,6 +266,7 @@ class Configuration(commands.Cog):
         await rcursor.insert_one(insert)
         for emoji in emojis:
             await bot_msg.add_reaction(emoji)
+        await msg.edit(content="Wizard Complete. Now check the reaction role message")
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Starboard stuff", aliases=['sb', 'star'])
     async def starboard(self, ctx):
@@ -232,18 +304,6 @@ class Configuration(commands.Cog):
             await msg.edit(
                 content=f'Wizard crash because you failed to mention the channel correctly.  Please do it like this: {ctx.channel.mention}')
             return
-
-        def check_value(v, *dtype):
-            if v.lower() == 'false':
-                return None
-            if dtype == "int":
-                return int(v)
-            return v
-
-        def check_return_dtype(v):
-            if v.lower() == 'false':
-                return None
-            return True
 
         insert_data = {
             "guild": ctx.guild.id,

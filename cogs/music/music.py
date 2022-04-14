@@ -66,9 +66,9 @@ class LavalinkVoiceClient(discord.VoiceClient):
         else:
             self.client.lavalink = lavalink.Client(client.user.id)
             self.client.lavalink.add_node(
-                    'losingtime.dpaste.org',
-                    2124,
-                    'SleepingOnTrains',
+                    'lavalink.islantay.tk',
+                    8880,
+                    'waifufufufu',
                     'singapore',
                     'MAIN')
             self.lavalink = self.client.lavalink
@@ -129,9 +129,9 @@ class Music(commands.Cog):
         if not hasattr(bot, 'lavalink'):  # This ensures the client isn't overwritten during cog reloads.
             bot.lavalink = lavalink.Client(875589545532485682)  # bot id
             bot.lavalink.add_node(
-                    'losingtime.dpaste.org',
-                    2124,
-                    'SleepingOnTrains',
+                    'lavalink.islantay.tk',
+                    8880,
+                    'waifufufufu',
                     'singapore',
                     'MAIN')
 

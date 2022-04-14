@@ -86,7 +86,7 @@ class Giveaway(commands.Cog):
 
         current_time = datetime.datetime.now()
         final_time = current_time + datetime.timedelta(seconds=converted_time)
-        await cursor.insert_one({'message_id': message.id, 'time': final_time, "channel": c_id.id, "prize": prize})
+        await cursor.insert_one({'message_id': message.id, 'time': final_time, "channel": channel.id, "prize": prize})
 
     @commands.command(help="Reroll the giveaway")
     @commands.has_permissions(manage_guild=True)
