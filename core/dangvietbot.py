@@ -40,7 +40,7 @@ class DangVietBot(commands.Bot):
         )
         self.invite = "https://discord.com/oauth2/authorize?client_id=875589545532485682&permissions=1237420731614&scope=bot%20applications.commands"
         self.github = "https://github.com/DangVietH/DangVietBot"
-        self.embed_color = 0x2F3136
+        self.embed_color = discord.Color.from_rgb(225, 0, 92)
 
     async def setup_hook(self):
         # loading cogs

@@ -68,7 +68,7 @@ class FrontPageSource(menus.PageSource):
         return self
 
     def format_page(self, menu, page):
-        embed = discord.Embed(title='Bot Help', colour=discord.Colour(0xA8B9CD), timestamp=datetime.datetime.utcnow())
+        embed = discord.Embed(title='Bot Help', colour=menu.ctx.bot.embed_color, timestamp=datetime.datetime.utcnow())
         embed.description = f"""
 Hello! Welcome to the help page.
 Use "{menu.ctx.clean_prefix}help command" for more info on a command.
@@ -86,10 +86,12 @@ Use the dropdown menu below to select a category.
             embed.add_field(
                 name='Information',
                 value=(
-                    f"Hi, I'm a discord bot made by DvH#9980! I've been running since <t:{int(menu.ctx.bot.user.created_at.timestamp())}>. "
-                    "I have features such as starboard, moderation, leveling, music and more!\n",
-                    f"I'm currently running on **{len(menu.ctx.bot.guilds)}** servers and watching **{len(menu.ctx.bot.users)}** users.\n",
-                    f"I'm also open source on [github]({menu.ctx.bot.github})",
+                    (
+                        f"Hi, I'm a discord bot made by DvH#9980! I've been running since <t:{int(menu.ctx.bot.user.created_at.timestamp())}>. "
+                        "I have features such as starboard, moderation, leveling, music and more!\n",
+                        f"I'm currently running on **{len(menu.ctx.bot.guilds)}** servers and watching **{len(menu.ctx.bot.users)}** users.\n",
+                        f"I'm also open source on [github]({menu.ctx.bot.github})",
+                    )
                 ),
                 inline=False
             )
@@ -141,11 +143,14 @@ class CogPageSource(menus.ListPageSource):
         self.title = f'{self.cog.qualified_name} Commands'
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(title=self.title, description=f'Use "{self.prefix}help command" for more info on a command.', color=menu.ctx.bot.embed_color)
+        embed = discord.Embed(title=self.title,
+                              description=f'Use "{self.prefix}help command" for more info on a command.',
+                              color=menu.ctx.bot.embed_color)
 
         for command in entries:
             signature = f'`{command.qualified_name} {command.signature}`'
-            embed.add_field(name=command.name, value=signature + command.short_doc or 'No help given for now...', inline=False)
+            embed.add_field(name=command.name, value=signature + "\n" + command.short_doc or 'No help given for now...',
+                            inline=False)
 
         embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
         return embed

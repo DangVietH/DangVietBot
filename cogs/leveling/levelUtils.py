@@ -48,9 +48,9 @@ class LevelUtils(commands.Cog):
     async def lvl(self, ctx):
         await ctx.send_help(ctx.command)
 
-    @lvl.command(help="Custom level up message. Use welcome text var to see the list of variables")
+    @lvl.command(help="Custom level up message. Use welcome text var to see the list of variables", name="text")
     @commands.has_permissions(manage_messages=True)
-    async def text(self, ctx, *, text):
+    async def lvltext(self, ctx, *, text):
         if text.lower() == "var":
             return await ctx.send("""
 {mention}: Mention the joined user
@@ -65,9 +65,9 @@ class LevelUtils(commands.Cog):
     async def role(self, ctx):
         await ctx.send_help(ctx.command)
 
-    @role.command(help="Set up the roles")
+    @role.command(help="Set up the roles", name="add")
     @commands.has_permissions(manage_roles=True)
-    async def add(self, ctx, level: int, roles: discord.Role):
+    async def roleadd(self, ctx, level: int, roles: discord.Role):
         role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})
         if roles.id in role_cursor['role']:
             await ctx.send("That role is already added")
@@ -75,9 +75,9 @@ class LevelUtils(commands.Cog):
             await levelConfig.update_one({"guild": ctx.guild.id}, {"$push": {"role": roles.id, "level": level}})
             await ctx.send(f"{roles.name} role added.")
 
-    @role.command(help="Remove the role from level")
+    @role.command(help="Remove the role from level", name="remove")
     @commands.has_permissions(manage_roles=True)
-    async def remove(self, ctx, level: int, roles: discord.Role):
+    async def roleremove(self, ctx, level: int, roles: discord.Role):
         role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})
         if roles.id in role_cursor['role']:
             await levelConfig.update_one({"guild": ctx.guild.id}, {"$pull": {"role": roles.id, "level": level}})
@@ -85,8 +85,8 @@ class LevelUtils(commands.Cog):
         else:
             await ctx.send("I don't remember I put that role in. do role list to see")
 
-    @role.command(help="See list of rewarding roles")
-    async def list(self, ctx):
+    @role.command(help="See list of rewarding roles", name="list")
+    async def rolelist(self, ctx):
         role_cursor = await levelConfig.find_one({"guild": ctx.guild.id})
         levelrole = role_cursor['role']
         levelnum = role_cursor['level']
@@ -94,8 +94,8 @@ class LevelUtils(commands.Cog):
         for i in range(len(levelrole)):
             data.append((f"Level **{levelnum[i]}** role reward", ctx.guild.get_role(levelrole[i]).mention))
         page = MenuPages(source=SecondPageSource(f"{ctx.author.guild.name} role rewards", data),
-                         clear_reactions_after=True)
-        await page.start(ctx)
+                         ctx=ctx)
+        await page.start()
 
     @lvl.command(help="Setup level up channel if you like to")
     @commands.has_permissions(manage_channels=True)
@@ -118,9 +118,9 @@ class LevelUtils(commands.Cog):
         else:
             await upchannel.delete_one(result)
 
-    @lvl.command(help="Disable levelling")
+    @lvl.command(help="Disable levelling", name="disable")
     @commands.has_permissions(manage_guild=True)
-    async def disable(self, ctx):
+    async def lvldisable(self, ctx):
         check = await disable.find_one({"guild": ctx.guild.id})
         if check is not None:
             await ctx.send("Bruh")
@@ -134,9 +134,9 @@ class LevelUtils(commands.Cog):
                         await levelling.delete_one({"guild": ctx.guild.id, "user": member.id})
             await ctx.send('Levelling disabled')
 
-    @lvl.command(help="Re-enable levelling")
+    @lvl.command(help="Re-enable levelling", name="enable")
     @commands.has_permissions(manage_guild=True)
-    async def enable(self, ctx):
+    async def lvlenable(self, ctx):
         check = await disable.find_one({"guild": ctx.guild.id})
         if check is not None:
             await disable.delete_one(check)

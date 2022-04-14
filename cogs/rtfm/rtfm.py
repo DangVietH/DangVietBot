@@ -120,8 +120,8 @@ class RTFM(commands.Cog):
         page = MenuPages(RtfmPageSource(term, docs, results), ctx)
         await page.start()
 
-    @rtfm.command(help="available modules")
-    async def list(self, ctx):
+    @rtfm.command(help="available modules", name="list")
+    async def rtfmlist(self, ctx):
         aliases = {v: k for k, v in self.aliases.items()}
         embed = discord.Embed(title="List of available docs", color=discord.Color.green())
         embed.description = "\n".join(

@@ -57,9 +57,9 @@ class Configuration(commands.Cog):
     async def welcome(self, ctx):
         await ctx.send_help(ctx.command)
 
-    @welcome.command(help="Use wizard if you want to save time")
+    @welcome.command(name="wizard", help="Use wizard if you want to save time")
     @commands.has_permissions(manage_guild=True)
-    async def wizard(self, ctx):
+    async def welcome_wizard(self, ctx):
         if await welcome_cursors.find_one({"guild": ctx.guild.id}):
             await welcome_cursors.delete_one({"guild": ctx.guild.id})
         questions = [
@@ -125,9 +125,9 @@ Valid Variables:
         })
         await msg.edit(content="Wizard complete!")
 
-    @welcome.command(help="Setup welcome channel")
+    @welcome.command(name="welcome", help="Setup welcome channel")
     @commands.has_permissions(manage_channels=True)
-    async def channel(self, ctx, channel: discord.TextChannel):
+    async def welcome_channel(self, ctx, channel: discord.TextChannel):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             insert = {"guild": ctx.guild.id, "channel": channel.id, "message": "Welcome {mention}",
@@ -140,18 +140,18 @@ Valid Variables:
             await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
             await ctx.send(f"Welcome channel updated to {channel.mention}")
 
-    @welcome.command(help="Remove welcome system", aliases=['disable'])
+    @welcome.command(help="Remove welcome system", aliases=['disable'], name="remove")
     @commands.has_permissions(manage_channels=True)
-    async def remove(self, ctx):
+    async def wremove(self, ctx):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You don't have a welcome system")
         await welcome_cursors.delete_one(result)
         await ctx.send("Welcome system has been remove")
 
-    @welcome.command(help="Create your welcome message. Use welcome text var to see the list of variables")
+    @welcome.command(help="Create your welcome message. Use welcome text var to see the list of variables", name="text")
     @commands.has_permissions(manage_messages=True)
-    async def text(self, ctx, *, text):
+    async def wtext(self, ctx, *, text):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You haven't configure a welcome channel yet")
@@ -166,9 +166,9 @@ Valid Variables:
         await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"message": text}})
         await ctx.send(f"Welcome message updated to ```{text}```")
 
-    @welcome.command(help="Setup welcome dm. Use welcome dm var to see the list of variables")
+    @welcome.command(help="Setup welcome dm. Use welcome dm var to see the list of variables", name="dm")
     @commands.has_permissions(manage_messages=True)
-    async def dm(self, ctx, *, text):
+    async def wdm(self, ctx, *, text):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You haven't configure a welcome channel yet")
@@ -183,27 +183,27 @@ Valid Variables:
         await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"dm": text}})
         await ctx.send(f"Welcome dm updated to ```{text}```")
 
-    @welcome.command(help="Add role when member join")
+    @welcome.command(help="Add role when member join", name="role")
     @commands.has_permissions(manage_roles=True)
-    async def role(self, ctx, role: discord.Role):
+    async def wrole(self, ctx, role: discord.Role):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You haven't configure a welcome channel yet")
         await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"role": role.id}})
         await ctx.send(f"Successfully updated welcome role")
 
-    @welcome.command(help="remove role when member join")
+    @welcome.command(help="remove the give role when join system", name="roleremove")
     @commands.has_permissions(manage_roles=True)
-    async def roleremove(self, ctx):
+    async def wroleremove(self, ctx):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You haven't configure a welcome channel yet")
         await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"role": 0}})
         await ctx.send(f"Successfully remove welcome role")
 
-    @welcome.command(help="Custom image. Make sure it's a link", aliases=["img"])
+    @welcome.command(help="Custom image. Make sure it's a link", aliases=["img"], name="image")
     @commands.has_permissions(manage_messages=True)
-    async def image(self, ctx, *, link: str):
+    async def wimage(self, ctx, *, link: str):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You haven't configure a welcome channel yet")
@@ -214,9 +214,9 @@ Valid Variables:
     async def prefix(self, ctx):
         await ctx.send_help(ctx.command)
 
-    @prefix.command(help="Set custom prefix")
+    @prefix.command(help="Set custom prefix", name="set")
     @commands.has_permissions(manage_guild=True)
-    async def set(self, ctx, *, prefixes):
+    async def pset(self, ctx, *, prefixes):
         result = await pcursor.find_one({"guild": ctx.guild.id})
         if result is None:
             insert = {"guild": ctx.guild.id, "prefix": f"{prefixes}"}
@@ -226,9 +226,9 @@ Valid Variables:
             await pcursor.update_one({"guild": ctx.guild.id}, {"$set": {"prefix": f"{prefixes}"}})
             await ctx.send(f"Server prefix update to `{prefixes}`")
 
-    @prefix.command(help="Set prefix back to default")
+    @prefix.command(help="Set prefix back to default", name="remove")
     @commands.has_permissions(manage_guild=True)
-    async def remove(self, ctx):
+    async def premove(self, ctx):
         result = await pcursor.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You don't have a custom prefix yet")
@@ -274,9 +274,9 @@ Valid Variables:
     async def starboard(self, ctx):
         await ctx.send_help(ctx.command)
 
-    @starboard.command(help="Use wizard if you want to save time")
+    @starboard.command(name="wizard", help="Use wizard if you want to save time")
     @commands.has_permissions(manage_guild=True)
-    async def wizard(self, ctx):
+    async def starboard_wizard(self, ctx):
         if await scursor.find_one({"guild": ctx.guild.id}):
             await scursor.delete_one({"guild": ctx.guild.id})
         embed = discord.Embed(title="Starboard Wizard", description="Use this wizard to setup starboard", color=self.bot.embed_color)
@@ -326,8 +326,8 @@ Valid Variables:
         embed.add_field(name="Allow NSFW", value=insert_data["nsfw"])
         await msg.edit(embed=embed)
 
-    @starboard.command(help="Show starboard stats")
-    async def stats(self, ctx):
+    @starboard.command(help="Show starboard stats", name="stats")
+    async def sbstats(self, ctx):
         result = await scursor.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You don't have a starboard system")
@@ -339,9 +339,9 @@ Valid Variables:
                         value=f"{[self.bot.get_channel(channel).mention for channel in result['ignoreChannel']]}")
         await ctx.send(embed=embed)
 
-    @starboard.command(help="Setup starboard channel")
+    @starboard.command(name="channel", help="Setup starboard channel")
     @commands.has_permissions(manage_channels=True)
-    async def channel(self, ctx, channel: discord.TextChannel):
+    async def starboard_channel(self, ctx, channel: discord.TextChannel):
         result = await scursor.find_one({"guild": ctx.guild.id})
         if result is None:
             await scursor.insert_one({
@@ -359,9 +359,9 @@ Valid Variables:
         await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
         await ctx.send(f"Starboard channel updated to {channel.mention}")
 
-    @starboard.command(help="Toggle self star")
+    @starboard.command(help="Toggle self star", name="selfStar")
     @commands.has_permissions(manage_guild=True)
-    async def selfStar(self, ctx):
+    async def sbselfStar(self, ctx):
         result = await scursor.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You don't have a starboard system")
@@ -372,9 +372,9 @@ Valid Variables:
             await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"selfStar": True}})
             await ctx.send("Selfstar is now on")
 
-    @starboard.command(help="Ignore channels from starboard")
+    @starboard.command(help="Ignore channels from starboard", name="ignoreChannel")
     @commands.has_permissions(manage_channels=True)
-    async def ignoreChannel(self, ctx, channel: discord.TextChannel):
+    async def sbignoreChannel(self, ctx, channel: discord.TextChannel):
         result = await scursor.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You don't have a starboard system")
@@ -383,9 +383,9 @@ Valid Variables:
         await scursor.update_one({"guild": ctx.guild.id}, {"$push": {"ignoreChannel": channel.id}})
         await ctx.send(f"Ignored channels {[x.mention for x in channel]}")
 
-    @starboard.command(help="Un ignore channels from starboard")
+    @starboard.command(help="Un ignore channels from starboard", name="unignoreChannel")
     @commands.has_permissions(manage_channels=True)
-    async def unignoreChannel(self, ctx, channel: discord.TextChannel):
+    async def sbunignoreChannel(self, ctx, channel: discord.TextChannel):
         result = await scursor.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You don't have a starboard system")
@@ -394,17 +394,17 @@ Valid Variables:
         await scursor.update_one({"guild": ctx.guild.id}, {"$pull": {"ignoreChannel": channel.id}})
         await ctx.send(f"Unignored channels {[x.mention for x in channel]}")
 
-    @starboard.command(help="Set starboard emoji amount", aliases=["amount"])
+    @starboard.command(help="Set starboard emoji amount", aliases=["threshold"], name="amounnt")
     @commands.has_permissions(manage_guild=True)
-    async def threshold(self, ctx, threshold: int):
+    async def sbamount(self, ctx, threshold: int):
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
             return await ctx.send("You don't have a starboard system")
         await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"threshold": threshold}})
         await ctx.send(f"Starboard threshold updated to {threshold}")
 
-    @starboard.command(help="Lock starboard to prevent spam")
+    @starboard.command(help="Lock starboard to prevent spam", name="lock")
     @commands.has_permissions(manage_guild=True)
-    async def lock(self, ctx, value="true"):
+    async def sblock(self, ctx, value="true"):
         if value.lower() not in ['true', 'false']:
             return await ctx.send("Value should be `true` or `false`")
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
@@ -420,9 +420,9 @@ Valid Variables:
             await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"lock": False}})
             await ctx.send("Starboard is now UNLOCKED")
 
-    @starboard.command(help="Allow to star in nsfw channels. value should be yes or no")
+    @starboard.command(help="Allow to star in nsfw channels. value should be yes or no", name="nsfw")
     @commands.has_permissions(manage_guild=True)
-    async def nsfw(self, ctx, value="true"):
+    async def sbnsfw(self, ctx, value="true"):
         if value.lower() not in ['true', 'false']:
             return await ctx.send("Value should be `true` or `false`")
         result = await scursor.find_one({"guild": ctx.guild.id})
@@ -439,9 +439,9 @@ Valid Variables:
             await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"nsfw": False}})
             await ctx.send("NSFW is now false")
 
-    @starboard.command(help="Disable starboard system")
+    @starboard.command(help="Disable starboard system", name="ignoreChannel")
     @commands.has_permissions(manage_guild=True)
-    async def disable(self, ctx):
+    async def sbdisable(self, ctx):
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
             return await ctx.send("You don't have a starboard system")
         await scursor.delete_one({"guild": ctx.guild.id})
