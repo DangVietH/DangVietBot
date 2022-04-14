@@ -91,6 +91,7 @@ class MenuPages(discord.ui.View):
         page = await self._source.get_page(page_number)
         self.current_page = page_number
         kwargs = await self._get_kwargs_from_page(page)
+        self.update_labels(page_number)
         if kwargs:
             if interaction.response.is_done():
                 await self.message.edit(**kwargs, view=self)
@@ -111,6 +112,7 @@ class MenuPages(discord.ui.View):
         await self._source._prepare_once()
         page = await self._source.get_page(0)
         kwargs = await self._get_kwargs_from_page(page)
+        self.update_labels(0)
         self.message = await self.ctx.send(**kwargs, view=self)
 
     async def on_timeout(self) -> None:
