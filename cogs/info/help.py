@@ -68,7 +68,7 @@ class FrontPageSource(menus.PageSource):
         return self
 
     def format_page(self, menu, page):
-        embed = discord.Embed(title='Bot Help', colour=discord.Colour(0xA8B9CD))
+        embed = discord.Embed(title='Bot Help', colour=discord.Colour(0xA8B9CD), timestamp=datetime.datetime.utcnow())
         embed.description = f"""
 Hello! Welcome to the help page.
 Use "{menu.ctx.clean_prefix}help command" for more info on a command.
@@ -80,7 +80,6 @@ Use the dropdown menu below to select a category.
             name='Support Server',
             value='For more help, consider joining the support server at https://discord.gg/cnydBRnHU9',
             inline=False,
-            timestamp=datetime.datetime.utcnow()
         )
 
         if self.index == 0:
