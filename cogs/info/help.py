@@ -130,7 +130,6 @@ class HelpMenuPage(MenuPages):
         await self._source._prepare_once()
         page = await self._source.get_page(0)
         kwargs = await self._get_kwargs_from_page(page)
-        self._update_labels(0)
         await interaction.response.edit_message(**kwargs, view=self)
 
 
