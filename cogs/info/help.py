@@ -3,6 +3,7 @@ from discord.ext import commands, menus
 from utils.menuUtils import MenuPages
 from typing import Dict, List, Union, Optional, Any
 import itertools
+import datetime
 
 
 class HelpSelectMenu(discord.ui.Select['HelpMenuPage']):
@@ -47,7 +48,7 @@ class HelpSelectMenu(discord.ui.Select['HelpMenuPage']):
                 await interaction.response.send_message('This category has no commands for you', ephemeral=True)
                 return
 
-            source = CogPageSource(cog, commands, prefix=self.view.ctx.clean_prefix)
+            source = CogPageSource(cog, command, prefix=self.view.ctx.clean_prefix)
             await self.view.rebind(source, interaction)
 
 
@@ -79,6 +80,7 @@ Use the dropdown menu below to select a category.
             name='Support Server',
             value='For more help, consider joining the support server at https://discord.gg/cnydBRnHU9',
             inline=False,
+            timestamp=datetime.datetime.utcnow()
         )
 
         if self.index == 0:
