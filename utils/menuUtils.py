@@ -72,7 +72,7 @@ class MenuPages(discord.ui.View):
         self.first_page.disabled = False
 
         if max_pages is not None:
-            self.go_to_last_page.disabled = (page_number + 1) >= max_pages
+            self.last_page.disabled = (page_number + 1) >= max_pages
             if (page_number + 1) >= max_pages:
                 self.next_page.disabled = True
             if page_number == 0:
