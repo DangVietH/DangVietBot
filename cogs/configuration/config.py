@@ -99,8 +99,8 @@ Valid Variables:
 
         for question in questions:
             await msg.edit(content=question)
-            msg = await self.bot.wait_for('message', check=check)
-            answers.append(msg.content)
+            user_msg = await self.bot.wait_for('message', check=check)
+            answers.append(user_msg.content)
             await ctx.channel.purge(limit=1)
 
         try:
@@ -253,8 +253,8 @@ Valid Variables:
 
         for question in questions:
             await msg.edit(content=question)
-            msg = await self.bot.wait_for('message', check=check)
-            answers.append(msg.content)
+            user_msg = await self.bot.wait_for('message', check=check)
+            answers.append(user_msg.content)
             await ctx.channel.purge(limit=1)
 
         emojis = answers[1].split(" ")
@@ -372,7 +372,7 @@ Valid Variables:
             await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"selfStar": True}})
             await ctx.send("Selfstar is now on")
 
-    @starboard.command(help="Ignore channels from starboard", name="inchannel")
+    @starboard.command(help="Ignore channels from starboard", name="ignoreChannel")
     @commands.has_permissions(manage_channels=True)
     async def sbignoreChannel(self, ctx, channel: discord.TextChannel):
         result = await scursor.find_one({"guild": ctx.guild.id})
@@ -383,7 +383,7 @@ Valid Variables:
         await scursor.update_one({"guild": ctx.guild.id}, {"$push": {"ignoreChannel": channel.id}})
         await ctx.send(f"Ignored channels {[x.mention for x in channel]}")
 
-    @starboard.command(help="Un ignore channels from starboard", name="unichannel")
+    @starboard.command(help="Un ignore channels from starboard", name="uNignoreChannel")
     @commands.has_permissions(manage_channels=True)
     async def sbunignoreChannel(self, ctx, channel: discord.TextChannel):
         result = await scursor.find_one({"guild": ctx.guild.id})
@@ -439,7 +439,7 @@ Valid Variables:
             await scursor.update_one({"guild": ctx.guild.id}, {"$set": {"nsfw": False}})
             await ctx.send("NSFW is now false")
 
-    @starboard.command(help="Disable starboard system", name="ignoreChannel")
+    @starboard.command(help="Disable starboard system", name="disable")
     @commands.has_permissions(manage_guild=True)
     async def sbdisable(self, ctx):
         if await scursor.find_one({"guild": ctx.guild.id}) is None:
