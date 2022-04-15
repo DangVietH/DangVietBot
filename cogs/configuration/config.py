@@ -87,7 +87,6 @@ Valid Variables:
 {server}: The server's name 
 ```     
             """,
-            "What role will i add when user join: (type `false` if you do not want one)",
             "What background link you want me to use: (type `false` if you want the default one)",
             "Last question, which channel you want to send the welcome message at:"
         ]
@@ -104,24 +103,19 @@ Valid Variables:
             await ctx.channel.purge(limit=1)
 
         try:
-            c_id = int(answers[4][2:-1])
+            c_id = int(answers[3][2:-1])
         except ValueError:
             await msg.edit(
                 content=f'Wizard crash because you failed to mention the channel correctly.  Please do it like this: {ctx.channel.mention}')
             return
-
-        wrole = answers[2][2:-1]
-        if wrole.lower() == 'false':
-            wrole = 0
-        wrole = int(wrole)
 
         await welcome_cursors.insert_one({
             "guild": ctx.guild.id,
             "channel": c_id,
             "message": answers[0],
             "dm": answers[1],
-            "img": check_value(answers[3]) or "https://cdn.discordapp.com/attachments/875886792035946496/936446668293935204/bridge.png",
-            "role": wrole
+            "img": check_value(answers[2]) or "https://cdn.discordapp.com/attachments/875886792035946496/936446668293935204/bridge.png",
+            "role": 0
         })
         await msg.edit(content="Wizard complete!")
 
