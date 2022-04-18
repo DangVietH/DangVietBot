@@ -116,7 +116,7 @@ Use the dropdown menu below to select a category.
 
 class HelpMenuPage(MenuPages):
     def __init__(self, source: menus.PageSource, ctx: commands.Context):
-        super().__init__(source, ctx=ctx, compact=True)
+        super().__init__(source, ctx=ctx)
 
     def add_categories(self, command: Dict[commands.Cog, List[commands.Command]]) -> None:
         self.clear_items()

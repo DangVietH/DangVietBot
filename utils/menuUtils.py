@@ -57,19 +57,14 @@ class MenuPages(discord.ui.View):
     def update_labels(self, page_number):
         self.first_page.disabled = page_number == 0
         max_pages = self._source.get_max_pages()
-        if self.compact:
-            self.last_page.disabled = (
-                    max_pages is None or (page_number + 1) >= max_pages
-            )
-            self.next_page.disabled = (
-                    max_pages is not None and (page_number + 1) >= max_pages
-            )
-            self.before_page.disabled = page_number == 0
-            return
 
-        self.next_page.disabled = False
-        self.before_page.disabled = False
-        self.first_page.disabled = False
+        self.last_page.disabled = (
+                max_pages is None or (page_number + 1) >= max_pages
+        )
+        self.next_page.disabled = (
+                max_pages is not None and (page_number + 1) >= max_pages
+        )
+        self.before_page.disabled = page_number == 0
 
         if max_pages is not None:
             self.last_page.disabled = (page_number + 1) >= max_pages

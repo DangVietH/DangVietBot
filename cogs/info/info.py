@@ -50,7 +50,6 @@ class Info(commands.Cog):
         embed.add_field(name="Nick", value=user.nick, inline=False)
         embed.add_field(name="ID", value=user.id)
         embed.add_field(name="Status", value=user.status)
-        embed.add_field(name="Timeout", value=user.is_timed_out)
         embed.add_field(name="In voice", value=voice_state)
         embed.add_field(name="Activity", value=activity)
         embed.add_field(name="Top role", value=user.top_role.mention)

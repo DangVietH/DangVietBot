@@ -1,14 +1,9 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import random
-from motor.motor_asyncio import AsyncIOMotorClient
-from utils import DefaultPageSource, MenuPages, config_var
+from utils import DefaultPageSource, MenuPages
 import asyncio
 
-cluster = AsyncIOMotorClient(config_var['mango_link'])
-db = cluster["economy"]
-cursor = db["users"]
-nfts = db["nft"]
 
 items_name = ["chicken", "parrot", "watch", "horse", "sword", "rifle", "laptop", "platinum", "silver", "gold",
               "diamonds",
@@ -24,12 +19,14 @@ class Economy(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.economy = self.bot.mongo["economy"]["users"]
+        self.save_data.start()
 
     async def open_account(self, user):
-        users = await cursor.find_one({"id": user.id})
+        users = await self.economy.find_one({"id": user.id})
         if users is None:
             insert = {"id": user.id, "job": "None", "wallet": 0, "bank": 0, "inventory": [], "rank": "None", "stock": "None"}
-            await cursor.insert_one(insert)
+            await self.economy.insert_one(insert)
 
     @commands.command(help="See how much money you have", aliases=["bal"])
     async def balance(self, ctx, user: discord.Member = None):
@@ -37,7 +34,7 @@ class Economy(commands.Cog):
         if not user.bot:
             await self.open_account(user)
 
-            check = await cursor.find_one({"id": user.id})
+            check = await self.economy.find_one({"id": user.id})
             wallet = check['wallet']
             bank = check['bank']
             balance = wallet + bank
@@ -52,7 +49,7 @@ class Economy(commands.Cog):
 
     @commands.command(help="Who is the richest one in your server")
     async def rich(self, ctx):
-        stats = cursor.find().sort("wallet", -1)
+        stats = self.economy.find().sort("wallet", -1)
         data = []
         num = 0
         async for x in stats:
@@ -67,7 +64,7 @@ class Economy(commands.Cog):
 
     @commands.command(help="Who is the richest one around the world")
     async def grich(self, ctx):
-        stats = cursor.find().sort("wallet", -1)
+        stats = self.economy.find().sort("wallet", -1)
         data = []
         num = 0
         async for x in stats:
@@ -86,7 +83,7 @@ class Economy(commands.Cog):
         await self.open_account(user)
 
         random_money = random.randint(1, 1000)
-        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
+        await self.economy.update_one({"id": user.id}, {"$inc": {"wallet": random_money}})
         await ctx.send(f"Someone gave you 💵 {random_money}")
 
     @commands.command(help="we work for the right to work")
@@ -126,7 +123,7 @@ class Economy(commands.Cog):
             embed.description = f"You took too long to respond. You're paid 💵 {lowMone}"
             embed.color = discord.Color.red()
             await ctx.send(embed=embed)
-            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": lowMone}})
+            await self.economy.update_one({"id": ctx.author.id}, {"$inc": {"wallet": lowMone}})
         else:
             if msg.content.lower() == sentences.lower():
                 ymone = random.randint(1000, 100000)
@@ -134,14 +131,14 @@ class Economy(commands.Cog):
                 embed.description = f"You got paid 💵 {ymone} for successfully converting the emojis to text"
                 embed.color = discord.Color.green()
                 await ctx.send(embed=embed)
-                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": ymone}})
+                await self.economy.update_one({"id": ctx.author.id}, {"$inc": {"wallet": ymone}})
             else:
                 lowMone = random.randint(1, 100)
                 embed.title = "FAIL"
                 embed.description = f"You're paid 💵 {lowMone} for unsuccessfully converting the emojis to text"
                 embed.color = discord.Color.red()
                 await ctx.send(embed=embed)
-                await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": lowMone}})
+                await self.economy.update_one({"id": ctx.author.id}, {"$inc": {"wallet": lowMone}})
 
     @commands.command(help="View the store", aliases=['store'])
     async def shop(self, ctx):
@@ -157,7 +154,7 @@ class Economy(commands.Cog):
         user = ctx.author
 
         await self.open_account(user)
-        check = await cursor.find_one({"id": user.id})
+        check = await self.economy.find_one({"id": user.id})
         item_name = item_name.lower()
         if item_name not in items_name:
             await ctx.send("Item does not exist in shop")
@@ -167,16 +164,16 @@ class Economy(commands.Cog):
                     cost = int(items_price[i]) * amount
                     if cost > check['wallet']:
                         return await ctx.send("You don't have enough money in your wallet")
-                    inventory_check = await cursor.find_one({"id": user.id, "inventory.name": str(item_name)})
+                    inventory_check = await self.economy.find_one({"id": user.id, "inventory.name": str(item_name)})
                     if inventory_check is None:
-                        await cursor.update_one({"id": user.id},
+                        await self.economy.update_one({"id": user.id},
                                                 {"$push": {"inventory": {"name": item_name,
                                                                          "price": int(items_price[i]),
                                                                          "amount": int(amount)}}})
                     else:
-                        await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
+                        await self.economy.update_one({"id": user.id, "inventory.name": str(item_name)},
                                                 {"$inc": {"inventory.$.amount": int(amount)}})
-                    await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -cost}})
+                    await self.economy.update_one({"id": user.id}, {"$inc": {"wallet": -cost}})
                     await ctx.send(
                         f"You just brought {amount} {item_name} that cost 💵 {cost}")
 
@@ -187,7 +184,7 @@ class Economy(commands.Cog):
         user = ctx.author
 
         await self.open_account(user)
-        check = await cursor.find_one({"id": user.id})
+        check = await self.economy.find_one({"id": user.id})
 
         item_name = item_name.lower()
         name = None
@@ -205,20 +202,19 @@ class Economy(commands.Cog):
             return await ctx.send("Item not in inventory")
         if amounts < amount:
             return await ctx.send(f"You do not have enough {item_name} in the inventory")
-        await cursor.update_one({"id": user.id, "inventory.name": str(item_name)},
-                                {"$inc": {"inventory.$.amount": -amount}})
+        await self.economy.update_one({"id": user.id, "inventory.name": str(item_name)}, {"$inc": {"inventory.$.amount": -amount}})
 
-        is_amount_zero = await cursor.find_one(
+        is_amount_zero = await self.economy.find_one(
             {"id": user.id, "inventory.name": str(item_name), "inventory.amount": 0})
         if is_amount_zero is not None:
-            await cursor.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}})
-        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
+            await self.economy.update_one({"id": user.id}, {"$pull": {"inventory": {"name": item_name}}})
+        await self.economy.update_one({"id": user.id}, {"$inc": {"wallet": amounts * price}})
         await ctx.send(f"Successfully sold {amount} {item_name} for 💵 {price}")
 
     @commands.command(help="See your items", aliases=["bag"])
     async def inventory(self, ctx):
         await self.open_account(ctx.author)
-        check = await cursor.find_one({"id": ctx.author.id})
+        check = await self.economy.find_one({"id": ctx.author.id})
 
         data = []
         items = check['inventory']
@@ -237,7 +233,7 @@ class Economy(commands.Cog):
     @commands.cooldown(1, 60 * 60 * 24, commands.BucketType.user)
     async def daily(self, ctx):
         await self.open_account(ctx.author)
-        await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": 90000}})
+        await self.economy.update_one({"id": ctx.author.id}, {"$inc": {"wallet": 90000}})
         await ctx.send(
             embed=discord.Embed(title="Daily Claimed", description="You just got 90000 💵",
                                 color=discord.Color.green()))
@@ -246,28 +242,28 @@ class Economy(commands.Cog):
     @commands.cooldown(1, 60, commands.BucketType.user)
     async def gamble(self, ctx, amount: int):
         await self.open_account(ctx.author)
-        check = await cursor.find_one({"id": ctx.author.id})
+        check = await self.economy.find_one({"id": ctx.author.id})
         if check['wallet'] < amount:
             return await ctx.send("Too much")
         elif amount <= 0:
             return await ctx.send("Too less")
         chance = random.randint(1, 100)
         if chance <= 50:
-            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount}})
+            await self.economy.update_one({"id": ctx.author.id}, {"$inc": {"wallet": amount}})
             await ctx.send(f"You just won 💵 {amount}")
         else:
-            await cursor.update_one({"id": ctx.author.id}, {"$inc": {"wallet": -amount}})
+            await self.economy.update_one({"id": ctx.author.id}, {"$inc": {"wallet": -amount}})
             await ctx.send(f"You have lost 💵 {amount}")
 
     @commands.command(help="Deposit your money into the bank", aliases=['dep'])
     async def deposit(self, ctx, amount=None):
         user = ctx.author
         await self.open_account(user)
-        check = await cursor.find_one({"id": user.id})
+        check = await self.economy.find_one({"id": user.id})
 
         if amount.lower() == "all":
-            await cursor.update_one({"id": user.id}, {"$inc": {"bank": check['wallet']}})
-            await cursor.update_one({"id": user.id}, {"$set": {"wallet": 0}})
+            await self.economy.update_one({"id": user.id}, {"$inc": {"bank": check['wallet']}})
+            await self.economy.update_one({"id": user.id}, {"$set": {"wallet": 0}})
             await ctx.message.add_reaction("✅")
             return
         amount = int(amount)
@@ -275,19 +271,19 @@ class Economy(commands.Cog):
             return await ctx.send("You can't deposit more money than your wallet")
         elif amount <= 0:
             return await ctx.send("You can't send negative")
-        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": -amount}})
-        await cursor.update_one({"id": user.id}, {"$inc": {"bank": amount}})
+        await self.economy.update_one({"id": user.id}, {"$inc": {"wallet": -amount}})
+        await self.economy.update_one({"id": user.id}, {"$inc": {"bank": amount}})
         await ctx.message.add_reaction("✅")
 
     @commands.command(help="Withdraw your money from the bank")
     async def withdraw(self, ctx, amount=None):
         user = ctx.author
         await self.open_account(user)
-        check = await cursor.find_one({"id": user.id})
+        check = await self.economy.find_one({"id": user.id})
 
         if amount.lower() == "all":
-            await cursor.update_one({"id": user.id}, {"$inc": {"wallet": check['bank']}})
-            await cursor.update_one({"id": user.id}, {"$set": {"bank": 0}})
+            await self.economy.update_one({"id": user.id}, {"$inc": {"wallet": check['bank']}})
+            await self.economy.update_one({"id": user.id}, {"$set": {"bank": 0}})
             await ctx.message.add_reaction("✅")
             return
         amount = int(amount)
@@ -295,23 +291,23 @@ class Economy(commands.Cog):
             return await ctx.send("You can't deposit more money than your bank")
         elif amount <= 0:
             return await ctx.send("You can't send negative")
-        await cursor.update_one({"id": user.id}, {"$inc": {"wallet": amount}})
-        await cursor.update_one({"id": user.id}, {"$inc": {"bank": -amount}})
+        await self.economy.update_one({"id": user.id}, {"$inc": {"wallet": amount}})
+        await self.economy.update_one({"id": user.id}, {"$inc": {"bank": -amount}})
         await ctx.message.add_reaction("✅")
 
     @commands.command(help="Transfer money to someone", aliases=['send'])
     async def transfer(self, ctx, user: discord.Member = None, amount=1):
         await self.open_account(ctx.author)
-        check = await cursor.find_one({"id": ctx.author.id})
-        check2 = await cursor.find_one({"id": user.id})
+        check = await self.economy.find_one({"id": ctx.author.id})
+        check2 = await self.economy.find_one({"id": user.id})
         if check2 is None:
             return await ctx.send("They don't have an economy account")
         if amount > check['wallet']:
             return await ctx.send("You didn't have enough money in your bank to give someone")
         elif amount <= 0:
             return await ctx.send("You can't send negative")
-        await cursor.update_one({"id": ctx.author.id}, {"$inc": {"bank": -amount}})
-        await cursor.update_one({"id": user.id}, {"$inc": {"bank": amount}})
+        await self.economy.update_one({"id": ctx.author.id}, {"$inc": {"bank": -amount}})
+        await self.economy.update_one({"id": user.id}, {"$inc": {"bank": amount}})
         await ctx.message.add_reaction("✅")
         await user.send(f"**{ctx.author}** just gave you 💵 {amount}")
 
@@ -322,19 +318,19 @@ class Economy(commands.Cog):
         if amount <= 0:
             return await ctx.send("You can't send negative")
 
-        check1 = await cursor.find_one({"id": ctx.author.id})
-        check2 = await cursor.find_one({"id": user.id})
+        check1 = await self.economy.find_one({"id": ctx.author.id})
+        check2 = await self.economy.find_one({"id": user.id})
         if check2 is None:
             return await ctx.send("They haven't registered yet")
         total_check = check1['wallet'] + check1['bank']
         if total_check < 10000:
             return await ctx.send("You need 💵 10000 to rob someone")
-        anti_rob_1 = await cursor.find_one({"id": user.id, "inventory.name": "robber-shield"})
+        anti_rob_1 = await self.economy.find_one({"id": user.id, "inventory.name": "robber-shield"})
         if anti_rob_1 is not None:
             author_update = check1['wallet'] + 10
             user_update = check2['wallet'] - 10
-            await cursor.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
-            await cursor.update_one({"id": user.id}, {"$set": {"bank": user_update}})
+            await self.economy.update_one({"id": ctx.author.id}, {"$set": {"bank": author_update}})
+            await self.economy.update_one({"id": user.id}, {"$set": {"bank": user_update}})
             await ctx.send(f"You tried to rob him but you only got 💵 10")
             return
         if amount > check2['wallet']:
@@ -342,18 +338,21 @@ class Economy(commands.Cog):
                 'You tried to rob him, but he caught you and force you to pay 💵 1000')
             author_update = check1['wallet'] - 1000
             user_update = check2['wallet'] + 1000
-            await cursor.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
-            await cursor.update_one({"id": user.id}, {"$set": {"wallet": user_update}})
+            await self.economy.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
+            await self.economy.update_one({"id": user.id}, {"$set": {"wallet": user_update}})
             return
         else:
             author_update = check1['wallet'] + amount
             user_update = check2['wallet'] - amount
-            await cursor.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
-            await cursor.update_one({"id": user.id}, {"$set": {"wallet": user_update}})
+            await self.economy.update_one({"id": ctx.author.id}, {"$set": {"wallet": author_update}})
+            await self.economy.update_one({"id": user.id}, {"$set": {"wallet": user_update}})
             await ctx.send(f"Successfully rob 💵 {amount} from {user.mention}")
 
-    @commands.Cog.listener()
-    async def on_member_remove(self, member):
-        if self.bot.get_user(member.id) is None:
-            if await cursor.find_one({"id": member.id}):
-                await cursor.delete_one({"id": member.id})
+    @tasks.loop(seconds=60)
+    async def save_data(self):
+        """To remove users I can't find"""
+        all_users = self.economy.find({})
+        async for x in all_users:
+            user = self.bot.get_user(x['id'])
+            if user is None:
+                await self.economy.delete_one(x)
