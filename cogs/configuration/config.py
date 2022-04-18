@@ -134,9 +134,9 @@ Valid Variables:
             await welcome_cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
             await ctx.send(f"Welcome channel updated to {channel.mention}")
 
-    @welcome.command(help="Remove welcome system", aliases=['disable'], name="remove")
+    @welcome.command(help="Disable welcome system", name="disable")
     @commands.has_permissions(manage_channels=True)
-    async def wremove(self, ctx):
+    async def wdisable(self, ctx):
         result = await welcome_cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             return await ctx.send("You don't have a welcome system")

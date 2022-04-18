@@ -62,7 +62,7 @@ class Utils(commands.Cog):
             return await ctx.send("You don't have any reminders")
         data = []
         async for x in all_timer:
-            data.append((f"{x['id']}", f"**End at:** <t:{int(datetime.datetime.timestamp(x['time']))}:R> **Reason:** {x['reason']}"))
+            data.append((f"ID - {x['id']}", f"**End at:** <t:{int(datetime.datetime.timestamp(x['time']))}:R> **Reason:** {x['reason']}"))
         page = MenuPages(DefaultPageSource(f"Your reminder list", data), ctx)
         await page.start()
 
@@ -81,6 +81,8 @@ class Utils(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        if message.guild is None:
+            return
         if await afk.find_one({"guild": message.guild.id, "member": message.author.id}) is not None:
             await afk.delete_one({"guild": message.guild.id, "member": message.author.id})
             await message.channel.send(f"{message.author.mention}, I have remove your afk")

@@ -101,7 +101,7 @@ class DangVietBot(commands.Bot):
                         value=f"[invite]({self.invite}) \n[Support Server](https://discord.gg/cnydBRnHU9)",
                         inline=False)
         embed.add_field(name="Some tips", value="Set up a modrole by using `d!modrole <role>`")
-        embed.set_thumbnail(url=self.bot.user.avatar.url)
+        embed.set_thumbnail(url=self.user.avatar.url)
         if guild.system_channel:
             await guild.system_channel.send(embed=embed)
 
