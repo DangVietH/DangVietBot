@@ -93,6 +93,12 @@ class Owner(commands.Cog):
             command.enabled = False
             await ctx.reply(F"Disabled {command.name} command.")
 
+    @commands.command(help="Shutdown the bot")
+    @commands.is_owner()
+    async def shutdown(self, ctx):
+        await ctx.send('Shutting down...')
+        await self.bot.close()
+
     @commands.command(help="Run code")
     @commands.is_owner()
     async def eval(self, ctx, *, code):

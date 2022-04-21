@@ -193,6 +193,46 @@ class Utils(commands.Cog):
         await tagCursor.update_one({"guild": ctx.guild.id, "tag.name": name}, {"$set": {"tag.value": user_choice}})
         await ctx.send("Tag edited successfully")
 
+    @tag.command(help="Claim a tag", name="claim")
+    async def tagclaim(self, ctx, *, name):
+        check = await tagCursor.find_one({"guild": ctx.guild.id})
+        if check is None:
+            return await ctx.send("No tags to claim")
+        tnname = None
+        owner = None
+        for thing in check['tag']:
+            if thing['name'] == name:
+                tnname = thing['name']
+                owner = thing['owner']
+                break
+        if tnname is None:
+            return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
+
+        is_owner_in_server = ctx.guild.get_member(owner)
+        if is_owner_in_server is not None:
+            return await ctx.send("Tag owner is still in server")
+        await tagCursor.update_one({"guild": ctx.guild.id, "tag.name": name}, {"$set": {"tag.owner": ctx.author.id}})
+        await ctx.send("Tag claimed successfully")
+
+    @tag.command(help="Give a tag to someone", name="trade")
+    async def tagtrade(self, ctx, member: discord.Member, *, name):
+        check = await tagCursor.find_one({"guild": ctx.guild.id})
+        if check is None:
+            return await ctx.send("No tags to claim")
+        tnname = None
+        owner = None
+        for thing in check['tag']:
+            if thing['name'] == name:
+                tnname = thing['name']
+                owner = thing['owner']
+                break
+        if tnname is None:
+            return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
+        if ctx.author != owner:
+            return await ctx.send("That tag needs to be owned by you.")
+        await tagCursor.update_one({"guild": ctx.guild.id, "tag.name": name}, {"$set": {"tag.owner": member.id}})
+        await ctx.send("Tag traded successfully")
+
     @tag.command(help="See a list of tags", name="list")
     async def taglist(self, ctx):
         check = await tagCursor.find_one({"guild": ctx.guild.id})
