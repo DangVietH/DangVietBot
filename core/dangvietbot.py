@@ -11,17 +11,18 @@ os.environ['JISHAKU_RETAIN'] = "True"
 os.environ['JISHAKU_FORCE_PAGINATOR'] = "True"
 
 coglist = [
-            'cogs.configuration',
-            'cogs.economy',
-            'cogs.entertainment',
-            'cogs.info',
-            'cogs.leveling',
-            'cogs.mod',
-            'cogs.owner',
-            'cogs.rtfm',
-            'cogs.utilities',
-            'events.config',
-            'jishaku'
+    'cogs.configuration',
+    'cogs.economy',
+    'cogs.entertainment',
+    'cogs.info',
+    'cogs.leveling',
+    'cogs.mod',
+    'cogs.owner',
+    'cogs.rtfm',
+    'cogs.utilities',
+    'events.config',
+    'events.moderation',
+    'jishaku'
 ]
 
 
@@ -54,7 +55,8 @@ class DangVietBot(commands.Bot):
     async def on_ready(self):
         if not hasattr(self, "uptime"):
             self.uptime = discord.utils.utcnow()
-        print(f"{self.user} is online! \nUsing discord.py {discord.__version__}\nServer {len(self.guilds)} | User: {len(self.users)}\nDevelop by DvH#9980")
+        print(
+            f"{self.user} is online! \nUsing discord.py {discord.__version__}\nServer {len(self.guilds)} | User: {len(self.users)}\nDevelop by DvH#9980")
 
     async def on_message(self, message):
         blacklist = self.mongo["custom_prefix"]["prefix"]

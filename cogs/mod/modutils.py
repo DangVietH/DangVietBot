@@ -58,7 +58,7 @@ class ModUtils(commands.Cog):
             await ctx.send(f"Modlog channel set to {channel.mention}")
             return
         await cursors.update_one({"guild": ctx.guild.id}, {"$set": {"channel": channel.id}})
-        await ctx.send(f"Modlog channel updated to {channel.mention}\n**Notice:** Until v1.0 is released, modlog will only work when any mod command from this bot is used.")
+        await ctx.send(f"Modlog channel updated to {channel.mention}")
 
     @commands.command(help="Set up custom mod role")
     @commands.has_permissions(manage_roles=True)

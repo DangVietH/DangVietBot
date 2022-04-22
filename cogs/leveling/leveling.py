@@ -199,10 +199,6 @@ class Leveling(commands.Cog):
         pages = MenuPages(DefaultPageSource(f"Global Leaderboard", data), ctx)
         await pages.start()
 
-    @commands.Cog.listener()
-    async def on_guild_join(self, guild):
-        await lvlConfig.insert_one({"guild": guild.id, "role": [], "level": [], "xp": 10})
-
     # remove data to save storage
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):

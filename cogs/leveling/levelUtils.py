@@ -16,12 +16,6 @@ class LevelUtils(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def add_to_db(self, guild):
-        results = await levelConfig.find_one({"guild": guild.id})
-        if results is None:
-            await levelConfig.insert_one({"guild": guild.id, "role": [], "level": [], "xp": 10,
-                                          "msg": "🎉 {mention} has reached level **{level}**!!🎉"})
-
     @commands.command(help="Set background for your server rank")
     async def setbackground(self, ctx, link):
         if await image_cursor.find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is not None:
@@ -40,7 +34,6 @@ class LevelUtils(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     @commands.command(help="Set xp for each msg")
     async def setXpPermessage(self, ctx, level: int):
-        await self.add_to_db(ctx.guild)
         await levelConfig.update_one({"guild": ctx.guild.id}, {"$set": {"xp": level}})
         await ctx.send(f"Xp per message set to {level}")
 
@@ -123,26 +116,30 @@ class LevelUtils(commands.Cog):
     async def lvldisable(self, ctx):
         check = await disable.find_one({"guild": ctx.guild.id})
         if check is not None:
-            await ctx.send("Bruh")
-        else:
-            insert = {"guild": ctx.guild.id}
-            await disable.insert_one(insert)
-            for member in ctx.guild.members:
-                if not member.bot:
-                    result = await levelling.find_one({"guild": ctx.guild.id, "user": member.id})
-                    if result is not None:
-                        await levelling.delete_one({"guild": ctx.guild.id, "user": member.id})
-            await ctx.send('Levelling disabled')
+            return await ctx.send("Leveling already disabled")
+        insert = {"guild": ctx.guild.id}
+        await disable.insert_one(insert)
+        for member in ctx.guild.members:
+            if not member.bot:
+                result = await levelling.find_one({"guild": ctx.guild.id, "user": member.id})
+                if result is not None:
+                    await levelling.delete_one({"guild": ctx.guild.id, "user": member.id})
+        await levelConfig.delete_one({"guild": ctx.guild.id})
+        await ctx.send('Levelling disabled')
 
     @lvl.command(help="Re-enable levelling", name="enable")
     @commands.has_permissions(manage_guild=True)
     async def lvlenable(self, ctx):
         check = await disable.find_one({"guild": ctx.guild.id})
-        if check is not None:
-            await disable.delete_one(check)
-            await ctx.send('Levelling enabled')
-        else:
-            await ctx.send('Leveling already enabled')
+        if check is None:
+            return await ctx.send('Leveling already enabled')
+        await disable.delete_one(check)
+        await ctx.send('Levelling enabled')
+
+        results = await levelConfig.find_one({"guild": ctx.guild.id})
+        if results is None:
+            await levelConfig.insert_one({"guild": ctx.guild.id, "role": [], "level": [], "xp": 10,
+                                          "msg": "🎉 {mention} has reached level **{level}**!!🎉"})
 
     @commands.command(help="Add xp to member")
     @commands.has_permissions(manage_channels=True)
