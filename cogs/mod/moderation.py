@@ -49,7 +49,7 @@ class Moderation(commands.Cog):
         self.bot = bot
         self.time_checker.start()
 
-    async def modlogUtils(self, ctx, target, type_off: str, reason: str):
+    async def modlogUtils(self, ctx, target, type_off: str, reason: str, logging=False):
         num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
 
         embed = discord.Embed(title=f"Case {num_of_case}",
@@ -58,29 +58,30 @@ class Moderation(commands.Cog):
                               timestamp=ctx.message.created_at)
         embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
         await ctx.send(embed=embed)
+        if logging is True:
+            await cases.update_one({"guild": ctx.guild.id}, {"$push": {
+                "cases": {"Number": int(num_of_case), "user": f"{target.id}", "type": type_off,
+                          "Mod": f"{ctx.author.id}",
+                          "reason": str(reason), "time": datetime.datetime.utcnow()}}})
+            await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
-        await cases.update_one({"guild": ctx.guild.id}, {"$push": {
-            "cases": {"Number": int(num_of_case), "user": f"{target.id}", "type": type_off, "Mod": f"{ctx.author.id}",
-                      "reason": str(reason), "time": datetime.datetime.utcnow()}}})
-        await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
+            result = await cursors.find_one({"guild": ctx.guild.id})
+            if result is not None:
+                channel = self.bot.get_channel(result["channel"])
+                embed = discord.Embed(title=f"Case #{num_of_case}: {type_off.title()}!",
+                                      description=f"**User:** {target} ({target.id}) \n**Mod:** {ctx.author} ({ctx.author.id})\n**Reason:** {reason}",
+                                      color=discord.Color.red(),
+                                      timestamp=ctx.message.created_at)
+                embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
+                await channel.send(embed=embed)
 
-        result = await cursors.find_one({"guild": ctx.guild.id})
-        if result is not None:
-            channel = self.bot.get_channel(result["channel"])
-            embed = discord.Embed(title=f"Case #{num_of_case}: {type_off.title()}!",
-                                  description=f"**User:** {target} ({target.id}) \n**Mod:** {ctx.author} ({ctx.author.id})\n**Reason:** {reason}",
-                                  color=discord.Color.red(),
-                                  timestamp=ctx.message.created_at)
-            embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
-            await channel.send(embed=embed)
-
-        if not target.bot:
-            if type_off in ["ban", "kick", "unban"]:
-                return
-            check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": target.id})
-            if check_user_case is None:
-                return await user_case.insert_one({"guild": ctx.guild.id, "user": target.id, "total_cases": 1})
-            await user_case.update_one({"guild": ctx.guild.id, "user": target.id}, {"$inc": {"total_cases": 1}})
+            if not target.bot:
+                if type_off in ["ban", "kick", "unban"]:
+                    return
+                check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": target.id})
+                if check_user_case is None:
+                    return await user_case.insert_one({"guild": ctx.guild.id, "user": target.id, "total_cases": 1})
+                await user_case.update_one({"guild": ctx.guild.id, "user": target.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Warn member")
     @commands.check_any(has_mod_role(), commands.has_permissions(moderate_members=True))
@@ -90,7 +91,7 @@ class Moderation(commands.Cog):
         emb = discord.Embed(description=f"You have been warned in **{ctx.guild.name}** for: **{reason}**",
                             color=discord.Color.red())
         await member.send(embed=emb)
-        await self.modlogUtils(ctx, member, "warn", reason)
+        await self.modlogUtils(ctx, member, "warn", reason, logging=True)
 
     @commands.command(help="Timeout a member")
     @commands.check_any(has_mod_role(), commands.has_permissions(moderate_members=True))
@@ -106,14 +107,14 @@ class Moderation(commands.Cog):
         await member.timeout(duration, reason=reason)
 
         await member.send(f"You were timeout in **{ctx.guild.name}** for **{reason}**")
-        await self.modlogUtils(ctx, member, "timeout", reason)
+        await self.modlogUtils(ctx, member, "timeout", reason, logging=True)
 
     @commands.command(help="Untimeout a member")
     @commands.check_any(has_mod_role(), commands.has_permissions(moderate_members=True))
     async def untimeout(self, ctx, member: discord.Member, *, reason=None):
         await member.edit(timed_out_until=None)
         await member.send(f"You were timeout in **{ctx.guild.name}** for **{reason}**")
-        await self.modlogUtils(ctx, member, "untimeout", reason)
+        await self.modlogUtils(ctx, member, "untimeout", reason, logging=True)
 
     @commands.command(help="Mute member")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
@@ -132,6 +133,7 @@ class Moderation(commands.Cog):
                                               read_message_history=True,
                                               read_messages=False)
         await member.add_roles(mutedRole, reason=reason)
+        await self.modlogUtils(ctx, member, "mute", reason, logging=True)
 
     @commands.command(help="Mute member but with a timer")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
@@ -160,6 +162,7 @@ class Moderation(commands.Cog):
         await member.send(
             f"You were temporarily muted for <t:{int(datetime.datetime.timestamp(final_time))}:R> in **{guild.name}** for **{reason}**")
         await timer.insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id})
+        await self.modlogUtils(ctx, member, "tempmute", reason, logging=True)
 
     @commands.command(help="Unmute member")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
@@ -169,6 +172,7 @@ class Moderation(commands.Cog):
 
         await member.remove_roles(mutedRole)
         await member.send(f"You were unmuted in the **{ctx.guild.name}**. Make sure you behave well 😉")
+        await self.modlogUtils(ctx, member, "unmute", reason, logging=True)
 
     @commands.command(help="Kick member")
     @commands.check_any(has_mod_role(), commands.has_permissions(kick_members=True))
@@ -178,6 +182,7 @@ class Moderation(commands.Cog):
         if not member.bot:
             await member.send(f"You've been kick from **{ctx.guild.name}** for **{reason}**")
         await member.kick(reason=reason)
+        await self.modlogUtils(ctx, member, "kick", reason)
 
     @commands.command(help="Ban member")
     @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
@@ -187,6 +192,7 @@ class Moderation(commands.Cog):
         if not member.bot:
             await member.send(f"You've been **BANNED** from **{ctx.guild.name}** for **{reason}**. What a shame 👎")
         await member.ban(reason=reason)
+        await self.modlogUtils(ctx, member, "ban", reason)
 
     @commands.command(help="Ban loads of people")
     @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
@@ -216,6 +222,7 @@ class Moderation(commands.Cog):
                 f"You've been banned for <t:{int(datetime.datetime.timestamp(final_time))}:R> from **{ctx.guild.name}** for **{reason}**!")
         await member.ban(reason=reason)
         await timer.insert_one({"guild": ctx.guild.id, "type": "ban", "time": final_time, "user": member.id})
+        await self.modlogUtils(ctx, member, "tempban", reason)
 
     @tasks.loop(seconds=10)
     async def time_checker(self):
@@ -246,7 +253,7 @@ class Moderation(commands.Cog):
     @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
     async def unban(self, ctx, user_id: int, *, reason=None):
         await ctx.guild.unban(discord.Object(id=user_id), reason=reason)
-        await ctx.send(f"User has been unbanned")
+        await self.modlogUtils(ctx, discord.Object(id=user_id), "kick", reason)
 
     @commands.command(help="Clear messages in a certain amount", aliases=['purge'])
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))

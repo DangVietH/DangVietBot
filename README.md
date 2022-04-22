@@ -1,6 +1,6 @@
 # DangVietBot
 
-A multi-purpose discord bot that has moderation, starboard, levelling, music, etc
+A multi-purpose discord bot that has moderation, starboard, levelling, etc
 
 ## Features
 - Level system with free role rewards

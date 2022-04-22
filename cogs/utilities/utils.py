@@ -197,7 +197,7 @@ class Utils(commands.Cog):
     async def tagclaim(self, ctx, *, name):
         check = await tagCursor.find_one({"guild": ctx.guild.id})
         if check is None:
-            return await ctx.send("No tags to claim")
+            return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
         tnname = None
         owner = None
         for thing in check['tag']:

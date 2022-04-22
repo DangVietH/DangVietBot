@@ -84,7 +84,7 @@ class Owner(commands.Cog):
     
     @commands.command(help="Toggles on and off a command")
     @commands.is_owner()
-    async def cmd_toggle(self, ctx, command: str):
+    async def cmd_toggle(self, ctx, *, command: str):
         command = self.bot.get_command(command)
         if not command.enabled:
             command.enabled = True
