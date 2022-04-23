@@ -113,7 +113,7 @@ class MenuPages(discord.ui.View):
     async def on_timeout(self) -> None:
         await self.message.edit(view=None)
 
-    async def on_error(self, error, item, interaction) -> None:
+    async def on_error(self, interaction, error, item) -> None:
         await interaction.response.send_message(f"**Error:** {error}", ephemeral=True)
 
     async def interaction_check(self, interaction) -> bool:

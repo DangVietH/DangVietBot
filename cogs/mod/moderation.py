@@ -253,7 +253,7 @@ class Moderation(commands.Cog):
     @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
     async def unban(self, ctx, user_id: int, *, reason=None):
         await ctx.guild.unban(discord.Object(id=user_id), reason=reason)
-        await self.modlogUtils(ctx, discord.Object(id=user_id), "kick", reason)
+        await ctx.send("User unbaned")
 
     @commands.command(help="Clear messages in a certain amount", aliases=['purge'])
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_messages=True))

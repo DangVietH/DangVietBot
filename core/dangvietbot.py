@@ -86,11 +86,12 @@ class DangVietBot(commands.Bot):
             await ctx.send("You are missing a required argument for this command to work")
         elif isinstance(error, commands.CommandOnCooldown):
             seconds = int(error.retry_after)
-            await ctx.send(f'⏱️ This command is on a cooldown. Use it after {str(datetime.timedelta(seconds=seconds))}')
+            wait_until_finish = datetime.datetime.now() + datetime.timedelta(seconds=seconds)
+            await ctx.send(f'⏱️ This command is on a cooldown. Use it after <t:{int(datetime.datetime.timestamp(wait_until_finish))}:R>')
         elif isinstance(error, commands.DisabledCommand):
             await ctx.send(f'{ctx.command} has been disabled.')
         else:
-            await ctx.send(error)
+            print(error)
 
     async def on_guild_join(self, guild):
         cursor = self.mongo["levelling"]["disable"]
