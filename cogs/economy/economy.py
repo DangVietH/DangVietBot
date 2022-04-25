@@ -4,7 +4,6 @@ import random
 from utils import DefaultPageSource, MenuPages
 import asyncio
 
-
 items_name = ["chicken", "parrot", "watch", "horse", "sword", "rifle", "laptop", "platinum", "silver", "gold",
               "diamonds",
               "robber-shield"]
@@ -25,7 +24,8 @@ class Economy(commands.Cog):
     async def open_account(self, user):
         users = await self.economy.find_one({"id": user.id})
         if users is None:
-            insert = {"id": user.id, "job": "None", "wallet": 0, "bank": 0, "inventory": [], "rank": "None", "stock": "None"}
+            insert = {"id": user.id, "job": "None", "wallet": 0, "bank": 0, "inventory": [], "rank": "None",
+                      "stock": "None"}
             await self.economy.insert_one(insert)
 
     @commands.command(help="See how much money you have", aliases=["bal"])
@@ -167,13 +167,14 @@ class Economy(commands.Cog):
                     inventory_check = await self.economy.find_one({"id": user.id, "inventory.name": str(item_name)})
                     if inventory_check is None:
                         await self.economy.update_one({"id": user.id},
-                                                {"$push": {"inventory": {"name": item_name,
-                                                                         "price": int(items_price[i]),
-                                                                         "amount": int(amount)}}})
+                                                      {"$push": {"inventory": {"name": item_name,
+                                                                               "price": int(items_price[i]),
+                                                                               "amount": int(amount)}}})
                     else:
                         await self.economy.update_one({"id": user.id, "inventory.name": str(item_name)},
-                                                {"$inc": {"inventory.$.amount": int(amount)}})
-                    await self.economy.update_one({"id": user.id}, {"$inc": {"wallet": -cost}})
+                                                      {"$inc": {"inventory.$.amount": int(amount)}})
+                    await self.economy.update_one({"id": user.id},
+                                                  {"$inc": {"wallet": -cost}})
                     await ctx.send(
                         f"You just brought {amount} {item_name} that cost 💵 {cost}")
 
@@ -202,7 +203,8 @@ class Economy(commands.Cog):
             return await ctx.send("Item not in inventory")
         if amounts < amount:
             return await ctx.send(f"You do not have enough {item_name} in the inventory")
-        await self.economy.update_one({"id": user.id, "inventory.name": str(item_name)}, {"$inc": {"inventory.$.amount": -amount}})
+        await self.economy.update_one({"id": user.id, "inventory.name": str(item_name)},
+                                      {"$inc": {"inventory.$.amount": -amount}})
 
         is_amount_zero = await self.economy.find_one(
             {"id": user.id, "inventory.name": str(item_name), "inventory.amount": 0})

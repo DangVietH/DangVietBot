@@ -57,7 +57,7 @@ class Leveling(commands.Cog):
                                     name=message.author.name,
                                     server=message.guild.name,
                                     username=message.author,
-                                    level=stats['level']
+                                    level=stats['level'] + 1
                                 ))
 
                             channel = self.bot.get_channel(lvl_channel["channel"])
@@ -66,7 +66,7 @@ class Leveling(commands.Cog):
                                 name=message.author.name,
                                 server=message.guild.name,
                                 username=message.author,
-                                level=stats['level']
+                                level=stats['level'] + 1
                             ))
 
                             levelrole = lconf['role']
