@@ -106,8 +106,8 @@ class Tags(commands.Cog):
             for thing in ta:
                 to_append = (thing['name'], f"**Owner:** {self.bot.get_user(thing['owner'])}")
                 data.append(to_append)
-            page = MenuPages(DefaultPageSource(f"Tags of {ctx.guild.name}", data))
-            await page.start(ctx)
+            page = MenuPages(DefaultPageSource(f"Tags of {ctx.guild.name}", data), ctx)
+            await page.start()
 
     @tag.command(help="Claim a tag", name="claim")
     async def tagclaim(self, ctx, *, name):
