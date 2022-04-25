@@ -34,7 +34,7 @@ class Utils(commands.Cog):
         self.bot = bot
         self.time_checker.start()
 
-    @commands.group(help="Remind your task", invoke_without_command=True, case_insensitive=True)
+    @commands.group(help="Remind a task you want to complete", invoke_without_command=True, case_insensitive=True, aliases=['reminder', 'remindme', 'notify'])
     async def remind(self, ctx, time, *, reason):
         converted_time = convert(time)
         if converted_time == -1:
@@ -74,7 +74,7 @@ class Utils(commands.Cog):
                 if current_time >= x['time']:
                     user = self.bot.get_user(x['user'])
                     await user.send(f"**Reminder:** {x['reason']}")
-                    await timer.delete_one({"user": user.id})
+                    await timer.delete_one(x)
         except Exception as e:
             print(e)
 
@@ -82,7 +82,7 @@ class Utils(commands.Cog):
     async def on_message(self, message):
         if message.guild is None:
             return
-        if await afk.find_one({"guild": message.guild.id, "member": message.author.id}) is not None:
+        if await afk.find_one({"guild": message.guild.id, "member": message.author.id}):
             await afk.delete_one({"guild": message.guild.id, "member": message.author.id})
             await message.channel.send(f"{message.author.mention}, I have remove your afk")
         if message.mentions:

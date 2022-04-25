@@ -16,9 +16,6 @@ class Games(commands.Cog):
         resp = await self.bot.session.get(f"https://opentdb.com/api.php?amount=1")
         data = await resp.json()
 
-        if data['response_code'] != 0:
-            return await ctx.send("There was an error fetching the question! Just rerun the command")
-
         embed = discord.Embed(color=self.bot.embed_color)
         ldt = data['results'][0]
         ques = ldt["incorrect_answers"]

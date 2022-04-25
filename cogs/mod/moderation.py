@@ -194,7 +194,7 @@ class Moderation(commands.Cog):
         await member.ban(reason=reason)
         await self.modlogUtils(ctx, member, "ban", reason)
 
-    @commands.command(help="Ban loads of people")
+    @commands.command(help="Fuck the raiders")
     @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
     async def massban(self, ctx, members: commands.Greedy[discord.Member], *, reason=None):
         for member in members:
@@ -237,13 +237,13 @@ class Moderation(commands.Cog):
                         mutedRole = server.get_role(int(x['role']))
                         await member.remove_roles(mutedRole)
 
-                        await timer.delete_one({"user": member.id})
+                        await timer.delete_one(x)
                     elif x['type'] == "ban":
                         server = self.bot.get_guild(int(x['guild']))
                         user = self.bot.get_user(int(x['user']))
-                        await server.unban(user)
+                        await server.unban(user, reason="Time up!")
 
-                        await timer.delete_one({"user": user.id})
+                        await timer.delete_one(x)
                 else:
                     pass
         except Exception as e:

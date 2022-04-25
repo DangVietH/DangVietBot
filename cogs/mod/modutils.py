@@ -50,9 +50,8 @@ class ModUtils(commands.Cog):
 
     @commands.command(help="Set up modlog channel")
     @commands.has_permissions(manage_channels=True)
+    @commands.bot_has_permissions(manage_channels=True, view_audit_log=True)
     async def modlog(self, ctx, channel: discord.TextChannel):
-        if not ctx.guild.me.guild_permissions.view_audit_log:
-            return await ctx.send("I don't have permission to view audit logs")
         result = await cursors.find_one({"guild": ctx.guild.id})
         if result is None:
             insert = {"guild": ctx.guild.id, "channel": channel.id}
@@ -64,6 +63,7 @@ class ModUtils(commands.Cog):
 
     @commands.command(help="Set up custom mod role")
     @commands.has_permissions(manage_roles=True)
+    @commands.bot_has_permissions(manage_roles=True)
     async def modrole(self, ctx, role: discord.Role):
         result = await modrole.find_one({"guild": ctx.guild.id})
         if result is None:

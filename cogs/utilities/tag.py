@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from utils import DefaultPageSource, MenuPages
+import datetime
 
 
 class Tags(commands.Cog):
@@ -45,7 +46,7 @@ class Tags(commands.Cog):
         check = await self.cursor.find_one({"guild": ctx.guild.id})
         if check is None:
             await self.cursor.insert_one({"guild": ctx.guild.id, "tag": [
-                {"name": answers[0], "value": answers[1], "owner": ctx.author.id}
+                {"name": answers[0], "value": answers[1], "owner": ctx.author.id, "created": datetime.datetime.utcnow()}
             ]})
             await ctx.send(f"Tag {answers[0]} successfully created")
         else:
@@ -54,7 +55,7 @@ class Tags(commands.Cog):
                 await ctx.send("Tag already exist. Remember that tag name are case SENSITIVE")
             else:
                 await self.cursor.update_one({"guild": ctx.guild.id}, {
-                    "$push": {"tag": {"name": answers[0], "value": answers[1], "owner": ctx.author.id}}})
+                    "$push": {"tag": {"name": answers[0], "value": answers[1], "owner": ctx.author.id, "created": datetime.datetime.utcnow()}}})
                 await ctx.send(f"Tag {answers[0]} successfully created")
 
     @tag.command(help="Remove a tag", aliases=['remove'])
@@ -130,7 +131,7 @@ class Tags(commands.Cog):
         await self.cursor.update_one({"guild": ctx.guild.id, "tag.name": name}, {"$set": {"tag.$.owner": ctx.author.id}})
         await ctx.send("Tag claimed successfully")
 
-    @tag.command(help="Give a tag to someone", name="trade")
+    @tag.command(help="Give a tag to someone", name="trade", aliases=["transfer", "give"])
     async def tagtrade(self, ctx, member: discord.Member, *, name):
         check = await self.cursor.find_one({"guild": ctx.guild.id})
         if check is None:

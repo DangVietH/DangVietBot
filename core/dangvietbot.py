@@ -87,8 +87,20 @@ class DangVietBot(commands.Bot):
             return None
         elif isinstance(error, commands.NoPrivateMessage):
             await ctx.author.send('This command cannot be used in private messages.')
+        elif isinstance(error, commands.BotMissingPermissions):
+            missing = [
+                perm.replace("_", " ").replace("guild", "server").title()
+                for perm in error.missing_permissions
+            ]
+            format_error = " and ".join(missing)
+            await ctx.send(f"I'm missing permission: {format_error}")
         elif isinstance(error, commands.MissingPermissions):
-            await ctx.send('You do not have permission to use this command')
+            missing = [
+                perm.replace("_", " ").replace("guild", "server").title()
+                for perm in error.missing_permissions
+            ]
+            format_error = " and ".join(missing)
+            await ctx.send(f'You need the following permission(s) to the run the command: {format_error}')
         elif isinstance(error, commands.NotOwner):
             await ctx.send("You're not the owner of this bot")
         elif isinstance(error, commands.MissingRequiredArgument):
@@ -100,7 +112,7 @@ class DangVietBot(commands.Bot):
         elif isinstance(error, commands.DisabledCommand):
             await ctx.send(f'{ctx.command} has been disabled.')
         else:
-            print(error)
+            await ctx.send(error)
 
     async def on_guild_join(self, guild):
         cursor = self.mongo["levelling"]["disable"]

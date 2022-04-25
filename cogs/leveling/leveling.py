@@ -22,67 +22,67 @@ class Leveling(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.guild:
-            if not message.author.bot:
-                is_disabled = await disable.find_one({"guild": message.guild.id})
-                if is_disabled is None:
-                    stats = await levelling.find_one({'guild': message.guild.id, "user": message.author.id})
-                    if stats is None:
-                        insert = {'guild': message.guild.id, "user": message.author.id, 'level': 0, 'xp': 5}
-                        await levelling.insert_one(insert)
-                    else:
-                        lconf = await lvlConfig.find_one({"guild": message.guild.id})
-                        await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
-                                                   {"$inc": {"xp": int(lconf['xp'])}})
+        if not message.guild:
+            return
+        if message.author.bot:
+            return
+        if await disable.find_one({"guild": message.guild.id}):
+            return
+        stats = await levelling.find_one({'guild': message.guild.id, "user": message.author.id})
+        if stats is None:
+            insert = {'guild': message.guild.id, "user": message.author.id, 'level': 0, 'xp': 5}
+            await levelling.insert_one(insert)
+        else:
+            lconf = await lvlConfig.find_one({"guild": message.guild.id})
+            await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
+                                       {"$inc": {"xp": int(lconf['xp'])}})
 
-                        xp = stats['xp']
-                        lvl = 0
-                        while True:
-                            if xp < ((100 / 2 * (lvl ** 2)) + (100 / 2 * lvl)):
-                                break
-                            lvl += 1
+            xp = stats['xp']
+            lvl = 0
+            while True:
+                if xp < ((100 / 2 * (lvl ** 2)) + (100 / 2 * lvl)):
+                    break
+                lvl += 1
 
-                        xp -= ((100 / 2 * ((lvl - 1) ** 2)) + (100 / 2 * (lvl - 1)))
-                        if stats["xp"] < 0:
-                            levelling.update_one({"guild": message.guild.id, "user": message.author.id},
-                                                 {"$set": {"xp": 0}})
-                        if stats['level'] < lvl:
-                            await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
-                                                       {"$inc": {"level": 1}})
+            xp -= ((100 / 2 * ((lvl - 1) ** 2)) + (100 / 2 * (lvl - 1)))
+            if stats["xp"] < 0:
+                levelling.update_one({"guild": message.guild.id, "user": message.author.id},
+                                     {"$set": {"xp": 0}})
+            if stats['level'] < lvl:
+                await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
+                                           {"$inc": {"level": 1}})
 
-                            lvl_channel = await upchannel.find_one({"guild": message.guild.id})
-                            if lvl_channel is None:
-                                return await message.channel.send(lconf['msg'].format(
-                                    mention=message.author.mention,
-                                    name=message.author.name,
-                                    server=message.guild.name,
-                                    username=message.author,
-                                    level=stats['level'] + 1
-                                ))
+                lvl_channel = await upchannel.find_one({"guild": message.guild.id})
+                if lvl_channel is None:
+                    return await message.channel.send(lconf['msg'].format(
+                        mention=message.author.mention,
+                        name=message.author.name,
+                        server=message.guild.name,
+                        username=message.author,
+                        level=stats['level'] + 1
+                    ))
 
-                            channel = self.bot.get_channel(lvl_channel["channel"])
-                            await channel.send(lconf['msg'].format(
-                                mention=message.author.mention,
-                                name=message.author.name,
-                                server=message.guild.name,
-                                username=message.author,
-                                level=stats['level'] + 1
-                            ))
+                channel = self.bot.get_channel(lvl_channel["channel"])
+                await channel.send(lconf['msg'].format(
+                    mention=message.author.mention,
+                    name=message.author.name,
+                    server=message.guild.name,
+                    username=message.author,
+                    level=stats['level'] + 1
+                ))
 
-                            levelrole = lconf['role']
-                            levelnum = lconf['level']
-                            for i in range(len(levelrole)):
-                                if lvl == int(levelnum[i]):
-                                    role = message.guild.get_role(int(levelrole[i]))
-                                    await message.author.add_roles(role)
-                                    lvl_channel = await upchannel.find_one({"guild": message.guild.id})
-                                    if lvl_channel is None:
-                                        return await message.channel.send(
-                                            f"{message.author}also receive {role.name} role")
-                                    channel = self.bot.get_channel(lvl_channel["channel"])
-                                    await channel.send(f"🎉 {message.author} also receive {role.name} role")
-                else:
-                    return None
+                levelrole = lconf['role']
+                levelnum = lconf['level']
+                for i in range(len(levelrole)):
+                    if lvl == int(levelnum[i]):
+                        role = message.guild.get_role(int(levelrole[i]))
+                        await message.author.add_roles(role)
+                        lvl_channel = await upchannel.find_one({"guild": message.guild.id})
+                        if lvl_channel is None:
+                            return await message.channel.send(
+                                f"{message.author}also receive {role.name} role")
+                        channel = self.bot.get_channel(lvl_channel["channel"])
+                        await channel.send(f"🎉 {message.author} also receive {role.name} role")
 
     @commands.command(help="See your exp")
     async def rank(self, ctx, user: discord.Member = None):

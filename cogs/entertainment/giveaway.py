@@ -144,7 +144,7 @@ class Giveaway(commands.Cog):
                                     inline=False)
                     embed.set_footer(text='Thanks for entering the giveaway!')
                     await msg.edit(embed=embed)
-                    await cursor.delete_one({'message_id': msg_id})
+                    await cursor.delete_one(x)
 
         except Exception as e:
             print(e)
