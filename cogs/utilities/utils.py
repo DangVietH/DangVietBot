@@ -230,7 +230,7 @@ class Utils(commands.Cog):
                 break
         if tnname is None:
             return await ctx.send("Tag not found. Remember that tag name are case SENSITIVE")
-        if ctx.author != owner:
+        if ctx.author.id != owner:
             return await ctx.send("That tag needs to be owned by you.")
         await tagCursor.update_one({"guild": ctx.guild.id, "tag.name": name}, {"$set": {"tag.owner": member.id}})
         await ctx.send("Tag traded successfully")
