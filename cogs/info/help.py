@@ -142,7 +142,7 @@ class CogPageSource(menus.ListPageSource):
         self.title = f'{self.cog.qualified_name} Commands'
 
     async def format_page(self, menu, entries):
-        embed = discord.Embed(title=self.title,
+        embed = discord.Embed(title=self.title.title(),
                               description=f'Use "{self.prefix}help command" for more info on a command.',
                               color=menu.ctx.bot.embed_color,
                               timestamp=datetime.datetime.utcnow())

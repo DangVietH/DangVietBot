@@ -38,23 +38,23 @@ class Info(commands.Cog):
         else:
             activity = None
 
-        voice_state = None if not user.voice else user.voice.channel
+        member_perm_list = []
 
-        hypesquad_class = str(user.public_flags.all()).replace('[<UserFlags.', '').replace('>]', '').replace('_', ' ').replace(':', '').title()
-
-        # Remove digits from string
-        hypesquad_class = ''.join([i for i in hypesquad_class if not i.isdigit()])
+        for name, value in ctx.channel.permissions_for(ctx.author):
+            name = name.replace('_', ' ').replace('guild', 'server').title()
+            if value:
+                member_perm_list.append(name)
 
         embed = discord.Embed(timestamp=ctx.message.created_at, color=user.color)
         embed.set_author(name=f"{user}", icon_url=user.display_avatar.url)
         embed.add_field(name="Nick", value=user.nick, inline=False)
         embed.add_field(name="ID", value=user.id)
         embed.add_field(name="Status", value=user.status)
-        embed.add_field(name="In voice", value=voice_state)
+        embed.add_field(name="In voice", value=None if not user.voice else user.voice.channel)
         embed.add_field(name="Activity", value=activity)
         embed.add_field(name="Top role", value=user.top_role.mention)
         embed.add_field(name="Bot", value=user.bot)
-        embed.add_field(name="Badges", value=hypesquad_class, inline=False)
+        embed.add_field(name="Guild Permission", value=", ".join(member_perm_list), inline=False)
         embed.add_field(name="Create at", value=f"<t:{int(user.created_at.timestamp())}:R>")
         embed.add_field(name="Join at", value=f"<t:{int(user.joined_at.timestamp())}:R>")
         embed.set_thumbnail(url=user.display_avatar.url)

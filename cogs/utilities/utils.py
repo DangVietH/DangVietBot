@@ -131,28 +131,30 @@ class Utils(commands.Cog):
         questions = ["What is the tag name: ",
                      "What is the tag value: "]
         answers = []
+        tmsg = await ctx.send("Starting wizard")
 
         def check(user):
             return user.author == ctx.author and user.channel == ctx.channel
 
         for question in questions:
-            await ctx.send(question)
+            await tmsg.edit(content=question)
             msg = await self.bot.wait_for('message', check=check)
             answers.append(msg.content)
+            await ctx.channel.purge(limit=1)
         check = await tagCursor.find_one({"guild": ctx.guild.id})
         if check is None:
             await tagCursor.insert_one({"guild": ctx.guild.id, "tag": [
                 {"name": answers[0], "value": answers[1], "owner": ctx.author.id}
             ]})
-            await ctx.send(f"Tag {answers[0]} successfully created")
+            await tmsg.edit(content=f"Tag {answers[0]} successfully created")
         else:
             is_exist = await tagCursor.find_one({"guild": ctx.guild.id, "tag.name": answers[0]})
             if is_exist is not None:
-                await ctx.send("Tag already exist. Remember that tag name are case SENSITIVE")
+                await tmsg.edit(content="Tag already exist. Remember that tag name are case SENSITIVE")
             else:
                 await tagCursor.update_one({"guild": ctx.guild.id}, {
                     "$push": {"tag": {"name": answers[0], "value": answers[1], "owner": ctx.author.id}}})
-                await ctx.send(f"Tag {answers[0]} successfully created")
+                await tmsg.edit(content=f"Tag {answers[0]} successfully created")
 
     @tag.command(help="Remove a tag", aliases=['remove'], name="delete")
     @commands.has_permissions(manage_guild=True)
