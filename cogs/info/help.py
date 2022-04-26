@@ -165,6 +165,7 @@ class CustomHelp(commands.HelpCommand):
             await ctx.send("Sorry but that command does not exist.")
 
     async def send_bot_help(self, mapping):
+        await self.context.trigger_typing()
         bot = self.context.bot
 
         def key(command) -> str:
@@ -186,18 +187,21 @@ class CustomHelp(commands.HelpCommand):
         await menu.start()
 
     async def send_cog_help(self, cog_):
+        await self.context.trigger_typing()
         filtered = await self.filter_commands(cog_.get_commands(), sort=True)
 
         page = MenuPages(CogPageSource(cog_, filtered, prefix=self.context.clean_prefix), self.context)
         await page.start()
 
     async def send_group_help(self, group):
+        await self.context.trigger_typing()
         filtered = await self.filter_commands(group.commands, sort=True)
 
         page = MenuPages(CogPageSource(group, filtered, prefix=self.context.clean_prefix), self.context)
         await page.start()
 
     async def send_command_help(self, command):
+        await self.context.trigger_typing()
         embed = discord.Embed(title=command.name, color=discord.Color.from_rgb(225, 0, 92),
                               description=f'Use {self.context.clean_prefix}help [something] for more info on a command or category. \nExample: {self.context.clean_prefix}help Economy')
         if command.help:

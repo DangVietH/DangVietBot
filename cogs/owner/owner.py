@@ -1,19 +1,10 @@
 import discord
 from discord.ext import commands, menus
-from utils import MenuPages, config_var
-from motor.motor_asyncio import AsyncIOMotorClient
+from utils import MenuPages
 import contextlib
 import io
 import textwrap
 from traceback import format_exception
-
-cluster = AsyncIOMotorClient(config_var['mango_link'])
-
-cursor = cluster['bot']['blacklist']
-
-ecursor = cluster["economy"]["users"]
-
-levelling = cluster["levelling"]['member']
 
 
 class EvalPageSource(menus.ListPageSource):
@@ -41,7 +32,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     async def load(self, ctx, *, cog=None):
         try:
-            await self.bot.load_extension(f"cogs.{cog}")
+            await self.bot.load_extension(cog)
         except Exception as e:
             await ctx.send(f'**ERROR:** {type(e).__name__} - {e}')
         else:
@@ -51,7 +42,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     async def unload(self, ctx, *, cog=None):
         try:
-            await self.bot.unload_extension(f"cogs.{cog}")
+            await self.bot.unload_extension(cog)
         except Exception as e:
             await ctx.send(f'**ERROR:** {type(e).__name__} - {e}')
         else:
@@ -61,7 +52,7 @@ class Owner(commands.Cog):
     @commands.is_owner()
     async def reload(self, ctx, *, cog=None):
         try:
-            await self.bot.reload_extension(f"cogs.{cog}")
+            await self.bot.reload_extension(cog)
         except Exception as e:
             await ctx.send(f'**ERROR:** {type(e).__name__} - {e}')
         else:
@@ -129,11 +120,15 @@ class Owner(commands.Cog):
     @commands.group(help="Blacklist ppls")
     @commands.is_owner()
     async def blacklist(self, ctx, user: discord.User, *, reason):
-        check = await cursor.find_one({"id": user.id})
+        check = await self.bot.mongo['bot']['blacklist'].find_one({"id": user.id})
         if check is not None:
             return await ctx.send("User is already blacklisted")
         await user.send(f"You have been **BLACKLISTED** from DangVietBot for: **{reason}**")
-        await cursor.insert_one({"id": user.id})
+        await self.bot.mongo['bot']['blacklist'].insert_one({"id": user.id})
+        if await self.bot.mongo["economy"]["users"].insert_one({"id": user.id}):
+            await self.bot.mongo["economy"]["users"].delete_one({"id": user.id})
+        async for x in self.bot.mongo["levelling"]['member'].find({"user": user.id}):
+            await self.bot.mongo["levelling"]['member'].delete_one(x)
         for guild in self.bot.guilds:
             if guild.owner.id == user.id:
                 await guild.system_channel.send("Leave this server because the owner is blacklisted")
@@ -144,6 +139,6 @@ class Owner(commands.Cog):
     @commands.command(help="unBlacklist user")
     @commands.is_owner()
     async def unblacklist(self, ctx, user: discord.User):
-        await cursor.delete_one({"id": user.id})
+        await self.bot.mongo['bot']['blacklist'].delete_one({"id": user.id})
         await ctx.send("Unblacklist user successfully")
         await user.send(f"You have been unblacklisted")

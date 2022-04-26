@@ -1,12 +1,8 @@
 import discord
 from discord.ext import commands
-from motor.motor_asyncio import AsyncIOMotorClient
-from utils import config_var, get_image_from_url
+from utils import get_image_from_url
 from PIL import Image, ImageDraw, ImageFont
 import io
-
-cluster = AsyncIOMotorClient(config_var['mango_link'])
-cursors = cluster["welcome"]["channel"]
 
 
 class Welcome(commands.Cog):
@@ -15,7 +11,7 @@ class Welcome(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        result = await cursors.find_one({"guild": member.guild.id})
+        result = await self.bot.mongo["welcome"]["channel"].find_one({"guild": member.guild.id})
         if result is None:
             return
         else:
@@ -90,6 +86,5 @@ class Welcome(commands.Cog):
     # remove data to save storage
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        result = await cursors.find_one({"guild": guild.id})
-        if result is not None:
-            await cursors.delete_one({"guild": guild.id})
+        if await self.bot.mongo["welcome"]["channel"].find_one({"guild": guild.id}):
+            await self.bot.mongo["welcome"]["channel"].delete_one({"guild": guild.id})

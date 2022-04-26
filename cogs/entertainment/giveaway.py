@@ -34,6 +34,9 @@ class Giveaway(commands.Cog):
         self.bot = bot
         self.time_checker.start()
 
+    async def cog_unload(self):
+        self.time_checker.cancel()
+
     @commands.command(help="start Giveaway")
     @commands.has_permissions(manage_guild=True)
     async def gstart(self, ctx):

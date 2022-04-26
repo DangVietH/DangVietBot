@@ -7,18 +7,15 @@ import asyncio
 class ModLog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.modlogChannel = self.bot.mongo["moderation"]['modlog']
-        self.cases = self.bot.mongo["moderation"]['cases']
-        self.userCase = self.bot.mongo["moderation"]['user']
 
     async def run_modlog(self, guild, type_off, target, mod, reason):
-        num_of_case = (await self.cases.find_one({"guild": guild.id}))['num']
-        await self.cases.update_one({"guild": guild.id}, {"$push": {
+        num_of_case = (await self.bot.mongo["moderation"]['cases'].find_one({"guild": guild.id}))['num']
+        await self.bot.mongo["moderation"]['cases'].update_one({"guild": guild.id}, {"$push": {
             "cases": {"Number": int(num_of_case), "user": f"{target.id}", "type": type_off, "Mod": f"{mod.id}",
                       "reason": str(reason), "time": datetime.datetime.utcnow()}}})
-        await self.cases.update_one({"guild": guild.id}, {"$inc": {"num": 1}})
+        await self.bot.mongo["moderation"]['cases'].update_one({"guild": guild.id}, {"$inc": {"num": 1}})
 
-        result = await self.modlogChannel.find_one({"guild": guild.id})
+        result = await self.bot.mongo["moderation"]['modlog'].find_one({"guild": guild.id})
         if result is not None:
             channel = self.bot.get_channel(result["channel"])
             embed = discord.Embed(title=f"Case #{num_of_case}: {type_off.title()}!",
@@ -27,14 +24,6 @@ class ModLog(commands.Cog):
                                   timestamp=datetime.datetime.utcnow())
             embed.set_footer(text=f"Moderator: {mod}", icon_url=mod.avatar.url)
             await channel.send(embed=embed)
-
-        if not target.bot:
-            if type_off in ["ban", "kick", "unban"]:
-                return
-            check_user_case = await target.find_one({"guild": guild.id, "user": target.id})
-            if check_user_case is None:
-                return await self.userCase.insert_one({"guild": guild.id, "user": target.id, "total_cases": 1})
-            await self.userCase.update_one({"guild": guild.id, "user": target.id}, {"$inc": {"total_cases": 1}})
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild, user):

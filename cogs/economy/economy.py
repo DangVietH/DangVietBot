@@ -24,6 +24,8 @@ class Economy(commands.Cog):
     async def open_account(self, user):
         users = await self.economy.find_one({"id": user.id})
         if users is None:
+            if await self.bot.mongo['bot']['blacklist'].find_one({"id": user.id}):
+                return
             insert = {"id": user.id, "job": "None", "wallet": 0, "bank": 0, "inventory": [], "rank": "None",
                       "stock": "None"}
             await self.economy.insert_one(insert)

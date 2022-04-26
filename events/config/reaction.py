@@ -1,9 +1,4 @@
 from discord.ext import commands
-from motor.motor_asyncio import AsyncIOMotorClient
-from utils import config_var
-
-cluster = AsyncIOMotorClient(config_var['mango_link'])
-cursor = cluster["react_role"]['reaction_roles']
 
 
 # code base on https://github.com/AdvicSaha443/Discord.py-Self-Role-Bot/blob/main/main.py, which is unlicensed
@@ -17,33 +12,32 @@ class Reaction(commands.Cog):
     async def on_raw_reaction_add(self, payload):
         if payload.member.bot:
             return
-        else:
-            check = await cursor.find_one({"id": payload.message_id})
-            if check is not None:
-                emojis = []
-                roles = []
+        check = await self.bot.mongo["react_role"]['reaction_roles'].find_one({"id": payload.message_id})
+        if check:
+            emojis = []
+            roles = []
 
-                for emoji in check['emojis']:
-                    emojis.append(emoji)
+            for emoji in check['emojis']:
+                emojis.append(emoji)
 
-                for role in check['roles']:
-                    roles.append(role)
+            for role in check['roles']:
+                roles.append(role)
 
-                guild = self.bot.get_guild(payload.guild_id)
+            guild = self.bot.get_guild(payload.guild_id)
 
-                for i in range(len(emojis)):
-                    chose_emoji = str(payload.emoji)
-                    if chose_emoji == emojis[i]:
-                        selected_role = roles[i]
+            for i in range(len(emojis)):
+                chose_emoji = str(payload.emoji)
+                if chose_emoji == emojis[i]:
+                    selected_role = roles[i]
 
-                        role = guild.get_role(int(selected_role))
+                    role = guild.get_role(int(selected_role))
 
-                        await payload.member.add_roles(role)
+                    await payload.member.add_roles(role)
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        check = await cursor.find_one({"id": payload.message_id})
-        if check is not None:
+        check = await self.bot.mongo["react_role"]['reaction_roles'].find_one({"id": payload.message_id})
+        if check:
             emojis = []
             roles = []
 
@@ -67,12 +61,12 @@ class Reaction(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):
-        check = await cursor.find_one({"id": payload.message_id})
+        check = await self.bot.mongo["react_role"]['reaction_roles'].find_one({"id": payload.message_id})
         if check is not None:
-            await cursor.delete_one(check)
+            await self.bot.mongo["react_role"]['reaction_roles'].delete_one(check)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        result = await cursor.find_one({"guild": guild.id})
+        result = await self.bot.mongo["react_role"]['reaction_roles'].find_one({"guild": guild.id})
         if result is not None:
-            await cursor.delete_one({"guild": guild.id})
+            await self.bot.mongo["react_role"]['reaction_roles'].delete_one({"guild": guild.id})

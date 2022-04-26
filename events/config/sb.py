@@ -17,13 +17,6 @@ https://github.com/MenuDocs/Pyro/blob/master/cogs/starboard.py
 """
 import discord
 from discord.ext import commands
-from motor.motor_asyncio import AsyncIOMotorClient
-from utils import config_var
-
-cluster = AsyncIOMotorClient(config_var['mango_link'])
-
-cursor = cluster['sb']['config']
-msg_cursor = cluster['sb']['msg']
 
 
 class Star(commands.Cog):
@@ -56,7 +49,7 @@ class Star(commands.Cog):
         if not self.bot.get_guild(payload.guild_id):
             return
 
-        guildstats = await cursor.find_one({'guild': payload.guild_id})
+        guildstats = await self.bot.mongo['sb']['config'].find_one({'guild': payload.guild_id})
         if not guildstats:
             return
 
@@ -79,22 +72,22 @@ class Star(commands.Cog):
                 if msg.author.id in react and guildstats['selfStar'] is False:
                     react.pop(react.index(msg.author.id))
                 if len(react) >= guildstats['threshold']:
-                    msgstats = await msg_cursor.find_one({'message': payload.message_id})
+                    msgstats = await self.bot.mongo['sb']['msg'].find_one({'message': payload.message_id})
 
                     if msgstats is None:
                         starmsg = await star_channel.send(f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
-                        await msg_cursor.insert_one({'message': payload.message_id, 'star_msg': starmsg.id, 'amount': len(react), 'guild': payload.guild_id, 'channel': payload.channel_id})
+                        await self.bot.mongo['sb']['msg'].insert_one({'message': payload.message_id, 'star_msg': starmsg.id, 'amount': len(react), 'guild': payload.guild_id, 'channel': payload.channel_id})
                     else:
                         starbordMessage = await star_channel.fetch_message(msgstats['star_msg'])
                         await starbordMessage.edit(f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
-                        await msg_cursor.update_one({'message': payload.message_id}, {'$inc': {'amount': 1}})
+                        await self.bot.mongo['sb']['msg'].update_one({'message': payload.message_id}, {'$inc': {'amount': 1}})
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
         if not self.bot.get_guild(payload.guild_id):
             return
 
-        guildstats = await cursor.find_one({'guild': payload.guild_id})
+        guildstats = await self.bot.mongo['sb']['config'].find_one({'guild': payload.guild_id})
         if not guildstats:
             return
 
@@ -114,37 +107,37 @@ class Star(commands.Cog):
             reacts = list(filter(lambda r: str(r.emoji) == emoji, msg.reactions))
             if reacts:
                 react = [user async for user in msg.reactions[0].users()]
-                msgstats = await msg_cursor.find_one({'message': payload.message_id})
+                msgstats = await self.bot.mongo['sb']['msg'].find_one({'message': payload.message_id})
                 if msgstats is not None:
                     starmsg = await star_channel.fetch_message(msgstats['star_msg'])
                     if not react or len(react) >= guildstats['threshold']:
                         await starmsg.edit(f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
-                        await msg_cursor.update_one({'message': payload.message_id}, {'$inc': {'amount': -1}})
+                        await self.bot.mongo['sb']['msg'].update_one({'message': payload.message_id}, {'$inc': {'amount': -1}})
                     else:
-                        await msg_cursor.delete_one({"message": payload.message_id})
+                        await self.bot.mongo['sb']['msg'].delete_one({"message": payload.message_id})
                         await starmsg.delete()
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
-        check = await msg_cursor.find_one({"message": after.id})
+        check = await self.bot.mongo['sb']['msg'].find_one({"message": after.id})
         if check is not None:
-            guildstats = await cursor.find_one({'guild': after.guild.id})
+            guildstats = await self.bot.mongo['sb']['config'].find_one({'guild': after.guild.id})
             star_channel = self.bot.get_channel(guildstats['channel'])
             starmsg = await star_channel.fetch_message(check['star_msg'])
             await starmsg.edit(f"{guildstats['emoji']} **{check['amount']} |** {self.bot.get_channel(check['channel']).mention}", embed=self.embedGenerator(after))
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):
-        check = await msg_cursor.find_one({"message": payload.message_id})
+        check = await self.bot.mongo['sb']['msg'].find_one({"message": payload.message_id})
         if check is not None:
-            guildData = await cursor.find_one({"guild": payload.guild_id})
+            guildData = await self.bot.mongo['sb']['config'].find_one({"guild": payload.guild_id})
             starChannel = self.bot.get_channel(guildData['channel'])
             starMsg = await starChannel.fetch_message(check['star_msg'])
-            await msg_cursor.delete_one(check)
+            await self.bot.mongo['sb']['msg'].delete_one(check)
             await starMsg.delete()
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        if await cursor.find_one({"guild": guild.id}) and await msg_cursor.find_one({'guild': guild.id}) is not None:
-            await cursor.delete_one({"guild": guild.id})
-            await msg_cursor.delete_one({'guild': guild.id})
+        if await self.bot.mongo['sb']['config'].find_one({"guild": guild.id}) and await self.bot.mongo['sb']['msg'].find_one({'guild': guild.id}) is not None:
+            await self.bot.mongo['sb']['config'].delete_one({"guild": guild.id})
+            await self.bot.mongo['sb']['msg'].delete_one({'guild': guild.id})

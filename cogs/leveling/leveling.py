@@ -1,17 +1,8 @@
 import discord
 from discord.ext import commands
-from motor.motor_asyncio import AsyncIOMotorClient
 from PIL import Image, ImageDraw, ImageFont
 import io
-from utils import get_image_from_url, DefaultPageSource, MenuPages, config_var
-
-cluster = AsyncIOMotorClient(config_var['mango_link'])
-db = cluster["levelling"]
-levelling = db['member']
-disable = db['disable']
-lvlConfig = db['roles']
-upchannel = db['channel']
-image_cursor = db['image']
+from utils import get_image_from_url, DefaultPageSource, MenuPages
 
 
 class Leveling(commands.Cog):
@@ -20,76 +11,12 @@ class Leveling(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.Cog.listener()
-    async def on_message(self, message):
-        if not message.guild:
-            return
-        if message.author.bot:
-            return
-        if await disable.find_one({"guild": message.guild.id}):
-            return
-        stats = await levelling.find_one({'guild': message.guild.id, "user": message.author.id})
-        if stats is None:
-            insert = {'guild': message.guild.id, "user": message.author.id, 'level': 0, 'xp': 5}
-            await levelling.insert_one(insert)
-        else:
-            lconf = await lvlConfig.find_one({"guild": message.guild.id})
-            await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
-                                       {"$inc": {"xp": int(lconf['xp'])}})
-
-            xp = stats['xp']
-            lvl = 0
-            while True:
-                if xp < ((100 / 2 * (lvl ** 2)) + (100 / 2 * lvl)):
-                    break
-                lvl += 1
-
-            xp -= ((100 / 2 * ((lvl - 1) ** 2)) + (100 / 2 * (lvl - 1)))
-            if stats["xp"] < 0:
-                levelling.update_one({"guild": message.guild.id, "user": message.author.id},
-                                     {"$set": {"xp": 0}})
-            if stats['level'] < lvl:
-                await levelling.update_one({"guild": message.guild.id, "user": message.author.id},
-                                           {"$inc": {"level": 1}})
-
-                lvl_channel = await upchannel.find_one({"guild": message.guild.id})
-                if lvl_channel is None:
-                    return await message.channel.send(lconf['msg'].format(
-                        mention=message.author.mention,
-                        name=message.author.name,
-                        server=message.guild.name,
-                        username=message.author,
-                        level=stats['level'] + 1
-                    ))
-
-                channel = self.bot.get_channel(lvl_channel["channel"])
-                await channel.send(lconf['msg'].format(
-                    mention=message.author.mention,
-                    name=message.author.name,
-                    server=message.guild.name,
-                    username=message.author,
-                    level=stats['level'] + 1
-                ))
-
-                levelrole = lconf['role']
-                levelnum = lconf['level']
-                for i in range(len(levelrole)):
-                    if lvl == int(levelnum[i]):
-                        role = message.guild.get_role(int(levelrole[i]))
-                        await message.author.add_roles(role)
-                        lvl_channel = await upchannel.find_one({"guild": message.guild.id})
-                        if lvl_channel is None:
-                            return await message.channel.send(
-                                f"{message.author}also receive {role.name} role")
-                        channel = self.bot.get_channel(lvl_channel["channel"])
-                        await channel.send(f"🎉 {message.author} also receive {role.name} role")
-
     @commands.command(help="See your exp")
     async def rank(self, ctx, user: discord.Member = None):
-        if await disable.find_one({"guild": ctx.guild.id}):
+        if await self.bot.mongo["levelling"]['disable'].find_one({"guild": ctx.guild.id}):
             return await ctx.send("Level system is disabled in this server")
         user = user or ctx.author
-        stats = await levelling.find_one({'guild': ctx.guild.id, "user": user.id})
+        stats = await self.bot.mongo["levelling"]['member'].find_one({'guild': ctx.guild.id, "user": user.id})
         if stats is None:
             return await ctx.send("The specified member haven't send a message in this server!!")
         lvl = 0
@@ -100,7 +27,7 @@ class Leveling(commands.Cog):
                 break
             lvl += 1
         xp -= ((100 / 2 * (lvl - 1) ** 2) + (100 / 2 * (lvl - 1)))
-        ranking = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
+        ranking = self.bot.mongo["levelling"]['member'].find({'guild': ctx.guild.id}).sort("xp", -1)
         async for x in ranking:
             rank += 1
             if stats['user'] == x['user']:
@@ -110,7 +37,7 @@ class Leveling(commands.Cog):
         IMAGE_HEIGHT = 250
 
         img_link = "https://cdn.discordapp.com/attachments/875886792035946496/953533593207062588/2159517.jpeg"
-        CustomImg = await image_cursor.find_one({"guild": ctx.guild.id, "member": user.id})
+        CustomImg = await self.bot.mongo["levelling"]['image'].find_one({"guild": ctx.guild.id, "member": user.id})
         if CustomImg is not None:
             img_link = CustomImg["image"]
         image = Image.open(get_image_from_url(
@@ -171,9 +98,9 @@ class Leveling(commands.Cog):
 
     @commands.command(help="See server ranks")
     async def top(self, ctx):
-        if await disable.find_one({"guild": ctx.guild.id}):
+        if await self.bot.mongo["levelling"]['disable'].find_one({"guild": ctx.guild.id}):
             return await ctx.send("Level system is disabled in this server")
-        stats = levelling.find({'guild': ctx.guild.id}).sort("xp", -1)
+        stats = self.bot.mongo["levelling"]['member'].find({'guild': ctx.guild.id}).sort("xp", -1)
         data = []
         num = 0
         async for x in stats:
@@ -187,7 +114,7 @@ class Leveling(commands.Cog):
     @commands.command(help="See global rank")
     @commands.is_owner()
     async def gtop(self, ctx):
-        stats = levelling.find().sort("xp", -1)
+        stats = self.bot.mongo["levelling"]['member'].find().sort("xp", -1)
         data = []
         num = 0
         async for x in stats:
@@ -199,27 +126,64 @@ class Leveling(commands.Cog):
         pages = MenuPages(DefaultPageSource(f"Global Leaderboard", data), ctx)
         await pages.start()
 
+    @commands.command(help="Set background for your server rank")
+    async def setbackground(self, ctx, *, link):
+        if await self.bot.mongo["levelling"]['image'].find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is not None:
+            await self.bot.mongo["levelling"]['image'].update_one({"guild": ctx.guild.id, "member": ctx.author.id}, {"$set": {"image": link}})
+        else:
+            await self.bot.mongo["levelling"]['image'].insert_one({"guild": ctx.guild.id, "member": ctx.author.id, "image": link})
+        await ctx.send("New Background set")
+
+    @commands.command(help="Set background back to default")
+    async def resetbackground(self, ctx):
+        if await self.bot.mongo["levelling"]['image'].find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is None:
+            await ctx.send("You don't have a custom background")
+        await self.bot.mongo["levelling"]['image'].delete_one({"guild": ctx.guild.id, "member": ctx.author.id})
+        await ctx.send("👍")
+
+    @commands.command(help="Add xp to member")
+    @commands.has_permissions(manage_channels=True)
+    async def add_xp(self, ctx, member: discord.Member, amount: int):
+        if await self.bot.mongo["levelling"]['member'].find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
+            return await ctx.send("User has no account")
+        await self.bot.mongo["levelling"]['member'].update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": amount}})
+        await ctx.send(f"Successfully added {amount} xp to {member}")
+
+    @commands.command(help="Remove xp from member")
+    @commands.has_permissions(manage_channels=True)
+    async def remove_xp(self, ctx, member: discord.Member, amount: int):
+        if await self.bot.mongo["levelling"]['member'].find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
+            return await ctx.send("User has no account")
+
+        await self.bot.mongo["levelling"]['member'].update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": -amount}})
+        await ctx.send(f"Successfully remove {amount} xp from {member}")
+
+    @commands.has_permissions(manage_messages=True)
+    @commands.command(help="Set xp for each msg")
+    async def setXpPermessage(self, ctx, level: int):
+        await self.bot.mongo["levelling"]['roles'].update_one({"guild": ctx.guild.id}, {"$set": {"xp": level}})
+        await ctx.send(f"Xp per message set to {level}")
+
     # remove data to save storage
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         for member in guild.members:
             if not member.bot:
-                result = await levelling.find_one({"guild": guild.id, "user": member.id})
-                if result is not None:
-                    await levelling.delete_one({"guild": guild.id, "user": member.id})
-        await lvlConfig.delete_one({"guild": guild.id})
-        if await disable.find_one({"guild": guild.id}) is not None:
-            await disable.delete_one({"guild": guild.id})
-        if await upchannel.find_one({"guild": guild.id}) is not None:
-            await lvlConfig.delete_one({"guild": guild.id})
-        if await image_cursor.find_one({"guild": guild.id}) is True:
-            await image_cursor.delete_one({"guild": guild.id})
+                if await self.bot.mongo["levelling"]['member'].find_one({"guild": guild.id, "user": member.id}):
+                    await self.bot.mongo["levelling"]['member'].delete_one({"guild": guild.id, "user": member.id})
+                if await self.bot.mongo["levelling"]['image'].find_one({"guild": guild.id, "user": member.id}):
+                    await self.bot.mongo["levelling"]['image'].delete_one({"guild": guild.id, "user": member.id})
+        await self.bot.mongo["levelling"]['roles'].delete_one({"guild": guild.id})
+        if await self.bot.mongo["levelling"]['disable'].find_one({"guild": guild.id}):
+            await self.bot.mongo["levelling"]['disable'].delete_one({"guild": guild.id})
+        if await self.bot.mongo["levelling"]['channel'].find_one({"guild": guild.id}):
+            await self.bot.mongo["levelling"]['roles'].delete_one({"guild": guild.id})
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
         if not member.bot:
-            result = await levelling.find_one({"guild": member.guild.id, "user": member.id})
+            result = await self.bot.mongo["levelling"]['member'].find_one({"guild": member.guild.id, "user": member.id})
             if result is not None:
-                await levelling.delete_one({"guild": member.guild.id, "user": member.id})
-            if await image_cursor.find_one({"guild": member.guild.id, "member": member.id}) is True:
-                await image_cursor.delete_one({"guild": member.guild.id, "member": member.id})
+                await self.bot.mongo["levelling"]['member'].delete_one({"guild": member.guild.id, "user": member.id})
+            if await self.bot.mongo["levelling"]['image'].find_one({"guild": member.guild.id, "member": member.id}):
+                await self.bot.mongo["levelling"]['image'].delete_one({"guild": member.guild.id, "member": member.id})

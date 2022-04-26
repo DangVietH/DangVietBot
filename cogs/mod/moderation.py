@@ -1,16 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-from motor.motor_asyncio import AsyncIOMotorClient
 import datetime
-from utils import config_var
-
-cluster = AsyncIOMotorClient(config_var['mango_link'])
-modb = cluster["moderation"]
-cursors = modb['modlog']
-cases = modb['cases']
-user_case = modb['user']
-timer = cluster["timer"]['mod']
-cursor = cluster["moderation"]['automod']
 
 
 def convert(time):
@@ -49,8 +39,11 @@ class Moderation(commands.Cog):
         self.bot = bot
         self.time_checker.start()
 
+    async def cog_unload(self):
+        self.time_checker.cancel()
+
     async def modlogUtils(self, ctx, target, type_off: str, reason: str, logging=False):
-        num_of_case = (await cases.find_one({"guild": ctx.guild.id}))['num'] + 1
+        num_of_case = (await self.bot.mongo["moderation"]['cases'].find_one({"guild": ctx.guild.id}))['num'] + 1
 
         embed = discord.Embed(title=f"Case {num_of_case}",
                               description=f"{target.mention} has been {type_off.title()}ed for: {reason}",
@@ -59,13 +52,13 @@ class Moderation(commands.Cog):
         embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
         await ctx.send(embed=embed)
         if logging is True:
-            await cases.update_one({"guild": ctx.guild.id}, {"$push": {
+            await self.bot.mongo["moderation"]['cases'].update_one({"guild": ctx.guild.id}, {"$push": {
                 "cases": {"Number": int(num_of_case), "user": f"{target.id}", "type": type_off,
                           "Mod": f"{ctx.author.id}",
                           "reason": str(reason), "time": datetime.datetime.utcnow()}}})
-            await cases.update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
+            await self.bot.mongo["moderation"]['cases'].update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
-            result = await cursors.find_one({"guild": ctx.guild.id})
+            result = await self.bot.mongo["moderation"]['modlog'].find_one({"guild": ctx.guild.id})
             if result is not None:
                 channel = self.bot.get_channel(result["channel"])
                 embed = discord.Embed(title=f"Case #{num_of_case}: {type_off.title()}!",
@@ -78,10 +71,10 @@ class Moderation(commands.Cog):
             if not target.bot:
                 if type_off in ["ban", "kick", "unban"]:
                     return
-                check_user_case = await user_case.find_one({"guild": ctx.guild.id, "user": target.id})
+                check_user_case = await self.bot.mongo["moderation"]['user'].find_one({"guild": ctx.guild.id, "user": target.id})
                 if check_user_case is None:
-                    return await user_case.insert_one({"guild": ctx.guild.id, "user": target.id, "total_cases": 1})
-                await user_case.update_one({"guild": ctx.guild.id, "user": target.id}, {"$inc": {"total_cases": 1}})
+                    return await self.bot.mongo["moderation"]['user'].insert_one({"guild": ctx.guild.id, "user": target.id, "total_cases": 1})
+                await self.bot.mongo["moderation"]['user'].update_one({"guild": ctx.guild.id, "user": target.id}, {"$inc": {"total_cases": 1}})
 
     @commands.command(help="Warn member")
     @commands.check_any(has_mod_role(), commands.has_permissions(moderate_members=True))
@@ -161,7 +154,7 @@ class Moderation(commands.Cog):
         final_time = datetime.datetime.now() + datetime.timedelta(seconds=converted_time)
         await member.send(
             f"You were temporarily muted for <t:{int(datetime.datetime.timestamp(final_time))}:R> in **{guild.name}** for **{reason}**")
-        await timer.insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id})
+        await self.bot.mongo["timer"]['mod'].insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id})
         await self.modlogUtils(ctx, member, "tempmute", reason, logging=True)
 
     @commands.command(help="Unmute member")
@@ -194,6 +187,15 @@ class Moderation(commands.Cog):
         await member.ban(reason=reason)
         await self.modlogUtils(ctx, member, "ban", reason)
 
+    @commands.command(help="Ban member but to clear chat")
+    @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
+    async def softban(self, ctx, member: discord.Member, *, reason=None):
+        if ctx.author.top_role.position < member.top_role.position:
+            return await ctx.send("You can't ban someone with a higher role than you")
+        await member.ban(reason=reason)
+        await ctx.guild.unban(member, reason=reason)
+        await self.modlogUtils(ctx, member, "softban", reason)
+
     @commands.command(help="Fuck the raiders")
     @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
     async def massban(self, ctx, members: commands.Greedy[discord.Member], *, reason=None):
@@ -221,13 +223,13 @@ class Moderation(commands.Cog):
             await member.send(
                 f"You've been banned for <t:{int(datetime.datetime.timestamp(final_time))}:R> from **{ctx.guild.name}** for **{reason}**!")
         await member.ban(reason=reason)
-        await timer.insert_one({"guild": ctx.guild.id, "type": "ban", "time": final_time, "user": member.id})
+        await self.bot.mongo["timer"]['mod'].insert_one({"guild": ctx.guild.id, "type": "ban", "time": final_time, "user": member.id})
         await self.modlogUtils(ctx, member, "tempban", reason)
 
     @tasks.loop(seconds=10)
     async def time_checker(self):
         try:
-            all_timer = timer.find({})
+            all_timer = self.bot.mongo["timer"]['mod'].find({})
             current_time = datetime.datetime.now()
             async for x in all_timer:
                 if current_time >= x['time']:
@@ -237,13 +239,13 @@ class Moderation(commands.Cog):
                         mutedRole = server.get_role(int(x['role']))
                         await member.remove_roles(mutedRole)
 
-                        await timer.delete_one(x)
+                        await self.bot.mongo["timer"]['mod'].delete_one(x)
                     elif x['type'] == "ban":
                         server = self.bot.get_guild(int(x['guild']))
                         user = self.bot.get_user(int(x['user']))
                         await server.unban(user, reason="Time up!")
 
-                        await timer.delete_one(x)
+                        await self.bot.mongo["timer"]['mod'].delete_one(x)
                 else:
                     pass
         except Exception as e:
@@ -291,25 +293,23 @@ class Moderation(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         insert = {"guild": guild.id, "num": 0, "cases": []}
-        await cases.insert_one(insert)
+        await self.bot.mongo["moderation"]['cases'].insert_one(insert)
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        await cases.delete_one({"guild": guild.id})
-        channel_check = await cursors.find_one({"guild": guild.id})
+        await self.bot.mongo["moderation"]['cases'].delete_one({"guild": guild.id})
+        channel_check = await self.bot.mongo["moderation"]['modlog'].find_one({"guild": guild.id})
         if channel_check is not None:
-            await cursors.delete_one(channel_check)
+            await self.bot.mongo["moderation"]['modlog'].delete_one(channel_check)
         for member in guild.members:
             if not member.bot:
-                result = await user_case.find_one({"guild": guild.id, "user": member.id})
+                result = await self.bot.mongo["moderation"]['user'].find_one({"guild": guild.id, "user": member.id})
                 if result is not None:
-                    await user_case.delete_one(result)
-        if await cursor.find_one({"guild": guild.id}) is not None:
-            await cursor.delete_one({"guild": guild.id})
+                    await self.bot.mongo["moderation"]['user'].delete_one(result)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
         if not member.bot:
-            result = await user_case.find_one({"guild": member.guild.id, "user": member.id})
+            result = await self.bot.mongo["moderation"]['user'].find_one({"guild": member.guild.id, "user": member.id})
             if result is not None:
-                await user_case.delete_one(result)
+                await self.bot.mongo["moderation"]['user'].delete_one(result)
