@@ -87,7 +87,7 @@ class DangVietBot(commands.Bot):
         else:
             self._auto_spam_count.pop(author_id, None)
 
-        if await self.bot.mongo['bot']['blacklist'].find_one({"id": message.author.id}):
+        if await self.mongo['bot']['blacklist'].find_one({"id": message.author.id}):
             return
 
         await self.invoke(ctx)
