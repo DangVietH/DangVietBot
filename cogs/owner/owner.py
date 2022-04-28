@@ -104,10 +104,9 @@ class Owner(commands.Cog):
                 exec(f"async def func():\n{textwrap.indent(code, '  ')}", variables)
                 result = f"{stdout.getvalue()}"
         except Exception as e:
-            value = stdout.getvalue()
-            await ctx.send(f'```py\n{value}{traceback.format_exc()}\n```')
-        else:
-            await ctx.send(result)
+            result = f'```py\n{stdout.getvalue()}{traceback.format_exc()}\n```'
+
+        await ctx.send(result)
 
     @commands.group(help="Blacklist ppls")
     @commands.is_owner()

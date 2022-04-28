@@ -40,6 +40,33 @@ class Configuration(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command(help="Set up modlog channel")
+    @commands.has_permissions(manage_channels=True)
+    @commands.bot_has_permissions(manage_channels=True, view_audit_log=True)
+    async def modlog(self, ctx, channel: discord.TextChannel):
+        result = await self.bot.mongo["moderation"]['modlog'].find_one({"guild": ctx.guild.id})
+        if result is None:
+            insert = {"guild": ctx.guild.id, "channel": channel.id}
+            await self.bot.mongo["moderation"]['modlog'].insert_one(insert)
+            await ctx.send(f"Modlog channel set to {channel.mention}")
+            return
+        await self.bot.mongo["moderation"]['modlog'].update_one({"guild": ctx.guild.id},
+                                                                {"$set": {"channel": channel.id}})
+        await ctx.send(f"Modlog channel updated to {channel.mention}")
+
+    @commands.command(help="Set up custom mod role")
+    @commands.has_permissions(manage_roles=True)
+    @commands.bot_has_permissions(manage_roles=True)
+    async def modrole(self, ctx, role: discord.Role):
+        result = await self.bot.mongo["moderation"]['modrole'].find_one({"guild": ctx.guild.id})
+        if result is None:
+            insert = {"guild": ctx.guild.id, "role": role.id}
+            await self.bot.mongo["moderation"]['modrole'].insert_one(insert)
+            await ctx.send(f"Mod role set to {role.name}")
+            return
+        await self.bot.mongo["moderation"]['modrole'].update_one({"guild": ctx.guild.id}, {"$set": {"role": role.id}})
+        await ctx.send(f"Mod role updated to {role.name}")
+
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Welcome system setup")
     async def welcome(self, ctx):
         await ctx.send_help(ctx.command)

@@ -1,5 +1,6 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands, tasks, menus
+from utils import MenuPages
 import datetime
 from utils import DefaultPageSource, MenuPages
 
@@ -21,6 +22,33 @@ def convert(time):
     return val * time_dict[unit]
 
 
+class GuildCasePageSource(menus.ListPageSource):
+    def __init__(self, casenum, data):
+        self.casenum = casenum
+        super().__init__(data, per_page=4)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.red(), title=f"List of cases in {menu.ctx.author.guild.name}", description=f"**Total case:** {self.casenum}")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
+class UserCasePageSource(menus.ListPageSource):
+    def __init__(self, member, casenum, data):
+        self.member = member
+        self.casenum = casenum
+        super().__init__(data, per_page=4)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.red(), title=f"List of {self.member} cases", description=f"**Total case:** {self.casenum}")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
 class Utils(commands.Cog):
     emoji = "📝"
 
@@ -30,6 +58,34 @@ class Utils(commands.Cog):
 
     async def cog_unload(self):
         self.time_checker.cancel()
+
+    @commands.command(help="Look at server moderation cases", aliases=["case"])
+    async def caselist(self, ctx):
+        results = await self.bot.mongo["moderation"]['cases'].find_one({"guild": ctx.guild.id})
+        gdata = []
+        if len(results['cases']) < 1:
+            return await ctx.send("Looks like all your server members are good people! Good job!")
+        for case in results['cases']:
+            gdata.append((f"Case {case['Number']}",
+                          f"**Type:** {case['type']}\n **User:** {self.bot.get_user(int(case['user']))}\n**Mod:** {self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
+        page = MenuPages(GuildCasePageSource(results['num'], gdata), ctx)
+        await page.start()
+
+    @commands.command(help="Look at user moderation cases")
+    async def casesfor(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        udata = []
+        user_check = await self.bot.mongo["moderation"]['user'].find_one({"guild": ctx.guild.id, "user": member.id})
+        results = await self.bot.mongo["moderation"]['cases'].find_one({"guild": ctx.guild.id})
+        if user_check is None:
+            return await ctx.send("Looks like a good person 🥰")
+        for case in results['cases']:
+            if member.id == int(case['user']):
+                udata.append((f"Case {case['Number']}",
+                              f"**Type:** {case['type']}\n**Mod:** {self.bot.get_user(int(case['Mod']))}\n**Reason:** {case['reason']}"))
+
+        page = MenuPages(UserCasePageSource(member, user_check['total_cases'], udata), ctx)
+        await page.start()
 
     @commands.group(help="Remind a task you want to complete", invoke_without_command=True, case_insensitive=True, aliases=['reminder', 'remindme', 'notify'])
     async def remind(self, ctx, time, *, reason):

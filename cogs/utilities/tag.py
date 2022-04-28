@@ -46,7 +46,7 @@ class Tags(commands.Cog):
         check = await self.cursor.find_one({"guild": ctx.guild.id})
         if check is None:
             await self.cursor.insert_one({"guild": ctx.guild.id, "tag": [
-                {"name": answers[0], "value": answers[1], "owner": ctx.author.id, "created": datetime.datetime.utcnow()}
+                {"name": answers[0], "value": answers[1], "owner": ctx.author.id}
             ]})
             await ctx.send(f"Tag {answers[0]} successfully created")
         else:

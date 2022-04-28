@@ -298,9 +298,10 @@ class Moderation(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
         await self.bot.mongo["moderation"]['cases'].delete_one({"guild": guild.id})
-        channel_check = await self.bot.mongo["moderation"]['modlog'].find_one({"guild": guild.id})
-        if channel_check is not None:
-            await self.bot.mongo["moderation"]['modlog'].delete_one(channel_check)
+        if await self.bot.mongo["moderation"]['modlog'].find_one({"guild": guild.id}):
+            await self.bot.mongo["moderation"]['modlog'].delete_one({"guild": guild.id})
+        if await self.bot.mongo["moderation"]['modrole'].find_one({"guild": guild.id}):
+            await self.bot.mongo["moderation"]['modrole'].delete_one({"guild": guild.id})
         for member in guild.members:
             if not member.bot:
                 result = await self.bot.mongo["moderation"]['user'].find_one({"guild": guild.id, "user": member.id})
