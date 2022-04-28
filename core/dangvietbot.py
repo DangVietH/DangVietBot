@@ -3,6 +3,7 @@ from discord.ext import commands
 import os
 import datetime
 import re
+from collections import Counter
 
 os.environ["JISHAKU_HIDE"] = "True"
 os.environ["JISHAKU_NO_UNDERSCORE"] = "True"
@@ -39,6 +40,8 @@ class DangVietBot(commands.Bot):
             activity=discord.Game(name="d!help"),
             **kwargs
         )
+        self.spam_control = commands.CooldownMapping.from_cooldown(10, 12.0, commands.BucketType.user)
+        self._auto_spam_count = Counter()
 
     @property
     def invite(self):
@@ -67,11 +70,30 @@ class DangVietBot(commands.Bot):
         print(
             f"{self.user} is online! \nUsing discord.py {discord.__version__}\nServer {len(self.guilds)} | User: {len(self.users)}\nDevelop by DvH#9980")
 
-    async def on_message(self, message):
-        blacklist = self.mongo["custom_prefix"]["prefix"]
-        if message.guild is None or message.author.bot:
+    async def process_commands(self, message):
+        ctx = await self.get_context(message)
+
+        if ctx.command is None:
             return
-        if await blacklist.find_one({"id": message.author.id}):
+
+        bucket = self.spam_control.get_bucket(message)
+        current = message.created_at.timestamp()
+        retry_after = bucket.update_rate_limit(current)
+        author_id = message.author.id
+        if retry_after:
+            self._auto_spam_count[author_id] += 1
+            if self._auto_spam_count[author_id] >= 3:
+                return
+        else:
+            self._auto_spam_count.pop(author_id, None)
+
+        if await self.bot.mongo['bot']['blacklist'].find_one({"id": message.author.id}):
+            return
+
+        await self.invoke(ctx)
+
+    async def on_message(self, message):
+        if message.guild is None or message.author.bot:
             return
         if re.fullmatch(rf"<@!?{self.user.id}>", message.content):
             cursor = self.mongo["custom_prefix"]["prefix"]
@@ -83,9 +105,11 @@ class DangVietBot(commands.Bot):
         await self.process_commands(message)
 
     async def on_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandNotFound):
-            return None
-        elif isinstance(error, commands.NoPrivateMessage):
+        ignore = (commands.CommandNotFound, discord.NotFound, discord.Forbidden)
+
+        if isinstance(error, ignore):
+            return
+        if isinstance(error, commands.NoPrivateMessage):
             await ctx.author.send('This command cannot be used in private messages.')
         elif isinstance(error, commands.BotMissingPermissions):
             missing = [

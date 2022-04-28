@@ -54,6 +54,7 @@ class Info(commands.Cog):
         embed.add_field(name="Activity", value=activity)
         embed.add_field(name="Top role", value=user.top_role.mention)
         embed.add_field(name="Bot", value=user.bot)
+        embed.add_field(name="Roles", value=", ".join([r.mention for r in user.roles if r != ctx.guild.default_role]), inline=False)
         embed.add_field(name="Guild Permission", value=", ".join(member_perm_list), inline=False)
         embed.add_field(name="Create at", value=f"<t:{int(user.created_at.timestamp())}:R>")
         embed.add_field(name="Join at", value=f"<t:{int(user.joined_at.timestamp())}:R>")

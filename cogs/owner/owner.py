@@ -1,18 +1,10 @@
-import discord
-from discord.ext import commands, menus
-from utils import MenuPages
 import contextlib
 import io
 import textwrap
-from traceback import format_exception
+import traceback
 
-
-class EvalPageSource(menus.ListPageSource):
-    def __init__(self, data):
-        super().__init__(data, per_page=1)
-
-    async def format_page(self, menu, entries):
-        return f"```py\n{entries}\n```\nPage {menu.current_page + 1}/{self.get_max_pages()}"
+import discord
+from discord.ext import commands
 
 
 class Owner(commands.Cog):
@@ -90,7 +82,7 @@ class Owner(commands.Cog):
         await ctx.send('Shutting down...')
         await self.bot.close()
 
-    @commands.command(help="Run code")
+    @commands.command(help="Run code", aliases=['e'])
     @commands.is_owner()
     async def eval(self, ctx, *, code):
         code = self.clean_code(code)
@@ -109,13 +101,13 @@ class Owner(commands.Cog):
 
         try:
             with contextlib.redirect_stdout(stdout):
-                exec(f"async def func():\n{textwrap.indent(code, '    ')}", variables)
+                exec(f"async def func():\n{textwrap.indent(code, '  ')}", variables)
                 result = f"{stdout.getvalue()}"
         except Exception as e:
-            result = "".join(format_exception(type(e), e, e.__traceback__))
-
-        page = MenuPages(EvalPageSource([result[i: i + 2000] for i in range(0, len(result), 2000)]), ctx)
-        await page.start()
+            value = stdout.getvalue()
+            await ctx.send(f'```py\n{value}{traceback.format_exc()}\n```')
+        else:
+            await ctx.send(result)
 
     @commands.group(help="Blacklist ppls")
     @commands.is_owner()

@@ -33,7 +33,7 @@ def has_mod_role():
 
 
 class Moderation(commands.Cog):
-    emoji = "🔨"
+    emoji = "<:mod:968445248252551178>"
 
     def __init__(self, bot):
         self.bot = bot
