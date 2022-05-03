@@ -187,7 +187,7 @@ class CustomHelp(commands.HelpCommand):
         await menu.start()
 
     async def send_cog_help(self, cog_):
-        await self.context.trigger_typing()
+        await self.context.channel.typing()
         filtered = await self.filter_commands(cog_.get_commands(), sort=True)
 
         page = MenuPages(CogPageSource(cog_, filtered, prefix=self.context.clean_prefix), self.context)
@@ -201,7 +201,7 @@ class CustomHelp(commands.HelpCommand):
         await page.start()
 
     async def send_command_help(self, command):
-        await self.context.trigger_typing()
+        await self.context.channel.typing()
         embed = discord.Embed(title=command.name, color=discord.Color.from_rgb(225, 0, 92),
                               description=f'Use {self.context.clean_prefix}help [something] for more info on a command or category. \nExample: {self.context.clean_prefix}help Economy')
         if command.help:
