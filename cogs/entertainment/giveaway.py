@@ -91,9 +91,9 @@ class Giveaway(commands.Cog):
     @commands.command(help="Reroll the giveaway")
     @commands.has_permissions(manage_guild=True)
     async def gend(self, ctx, msg_id):
-        if await self.bot.mongo["timer"]["giveaway"]..find_one({'message_id': msg_id}) is None:
+        if await self.bot.mongo["timer"]["giveaway"].find_one({'message_id': msg_id}) is None:
             return await ctx.send("Invalid Message ID.")
-        await self.bot.mongo["timer"]["giveaway"]..delete_one({'message_id': msg_id})
+        await self.bot.mongo["timer"]["giveaway"].delete_one({'message_id': msg_id})
         gmsg = await ctx.fetch_message(msg_id)
         users = [user async for user in gmsg.reactions[0].users()]
         users.pop(users.index(self.bot.user))
@@ -121,7 +121,7 @@ class Giveaway(commands.Cog):
     @tasks.loop(seconds=10)
     async def time_checker(self):
         try:
-            all_timer = cursor.find({})
+            all_timer = self.bot.mongo["timer"]["giveaway"].find({})
             current_time = datetime.datetime.now()
             async for x in all_timer:
                 if current_time >= x['time']:
@@ -134,7 +134,7 @@ class Giveaway(commands.Cog):
                     winner = random.choice(users)
                     if len(users) < 1:
                         await channel.send("No one has entered the giveaway. Maybe next time")
-                        await self.bot.mongo["timer"]["giveaway"]..delete_one({'message_id': msg_id})
+                        await self.bot.mongo["timer"]["giveaway"].delete_one({'message_id': msg_id})
                         return
                     embed = discord.Embed(color=discord.Color.red(), title="🥳 THE GIVEAWAY HAS ENDED!")
                     embed.add_field(name=f"🎉 Prize: {x['prize']}",
@@ -142,7 +142,7 @@ class Giveaway(commands.Cog):
                                     inline=False)
                     embed.set_footer(text='Thanks for entering the giveaway!')
                     await msg.edit(embed=embed)
-                    await self.bot.mongo["timer"]["giveaway"]..delete_one(x)
+                    await self.bot.mongo["timer"]["giveaway"].delete_one(x)
 
         except Exception as e:
             print(e)
