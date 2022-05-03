@@ -357,6 +357,5 @@ class Economy(commands.Cog):
         """To remove users I can't find"""
         all_users = self.economy.find({})
         async for x in all_users:
-            user = self.bot.get_user(x['id'])
-            if user is None:
+            if self.bot.get_user(x['id']) is None:
                 await self.economy.delete_one(x)

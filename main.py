@@ -6,12 +6,14 @@ import aiohttp
 
 bot = DangVietBot()
 
+mongo_connection = f"mongodb+srv://dhbbruh:{config_var['mongo_pass']}@dhb.tabp2.mongodb.net/welcome?retryWrites=true&w=majority"
+
 
 async def main():
     async with aiohttp.ClientSession() as session:
         async with bot:
             bot.session = session
-            bot.mongo = AsyncIOMotorClient(config_var['mango_link'])
+            bot.mongo = AsyncIOMotorClient(mongo_connection)
             await bot.start(config_var['token'])
 
 asyncio.run(main())

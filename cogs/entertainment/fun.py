@@ -1,12 +1,10 @@
+import asyncio
+import random
+import asyncpraw
 import discord
 from discord.ext import commands, menus
-from utils import MenuPages
-import asyncpraw
-import random
-import asyncio
-from utils import config_var
 from googletrans import Translator
-
+from utils import MenuPages, config_var
 
 reddit = asyncpraw.Reddit(client_id=config_var['reddit_id'],
                           client_secret=config_var['reddit_secret'],

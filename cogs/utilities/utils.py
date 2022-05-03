@@ -87,8 +87,8 @@ class Utils(commands.Cog):
         page = MenuPages(UserCasePageSource(member, user_check['total_cases'], udata), ctx)
         await page.start()
 
-    @commands.group(help="Remind a task you want to complete", invoke_without_command=True, case_insensitive=True, aliases=['reminder', 'remindme', 'notify'])
-    async def remind(self, ctx, time, *, reason):
+    @commands.group(help="Remind a task you want to complete", invoke_without_command=True, case_insensitive=True, aliases=['reminder', 'remind', 'notify'])
+    async def remindme(self, ctx, time, *, reason):
         converted_time = convert(time)
         if converted_time == -1:
             return await ctx.send("You didn't answer the time correctly")
@@ -100,15 +100,15 @@ class Utils(commands.Cog):
         await self.bot.mongo["timer"]['remind'].insert_one({"id": ctx.message.id, "user": ctx.author.id, "time": final_time, "reason": reason})
         await ctx.send("⏰ Reminder set")
 
-    @remind.command(name="delete", help="Delete an unwanted reminder")
-    async def remind_delete(self, ctx, remind_id: int):
+    @remindme.command(name="delete", help="Delete an unwanted reminder")
+    async def remindme_delete(self, ctx, remind_id: int):
         if await self.bot.mongo["timer"]['remind'].find_one({"id": remind_id}) is None:
             return await ctx.send("You don't have that reminder")
         await self.bot.mongo["timer"]['remind'].delete_one({"id": remind_id})
         await ctx.send("Reminder deleted!")
 
-    @remind.command(name="list", help="See your remind list")
-    async def remind_list(self, ctx):
+    @remindme.command(name="list", help="See your remind list")
+    async def remindme_list(self, ctx):
         all_timer = self.bot.mongo["timer"]['remind'].find({'user': ctx.author.id})
         if all_timer is None:
             return await ctx.send("You don't have any reminders")

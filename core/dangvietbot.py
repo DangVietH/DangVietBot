@@ -139,8 +139,7 @@ class DangVietBot(commands.Bot):
             await ctx.send(error)
 
     async def on_guild_join(self, guild):
-        cursor = self.mongo["levelling"]["disable"]
-        await cursor.insert_one({"guild": guild.id})
+        await self.mongo["levelling"]["disable"].insert_one({"guild": guild.id})
         embed = discord.Embed(title=f"Greetings {guild.name}",
                               description=f"Thanks for adding {self.user.name} into your server! To get started type d!help!",
                               color=discord.Color.from_rgb(225, 0, 92))
