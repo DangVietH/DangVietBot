@@ -194,7 +194,7 @@ class CustomHelp(commands.HelpCommand):
         await page.start()
 
     async def send_group_help(self, group):
-        await self.context.trigger_typing()
+        await self.context.channel.typing()
         filtered = await self.filter_commands(group.commands, sort=True)
 
         page = MenuPages(CogPageSource(group, filtered, prefix=self.context.clean_prefix), self.context)
