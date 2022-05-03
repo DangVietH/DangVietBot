@@ -104,7 +104,7 @@ class RTFM(commands.Cog):
 
         cache = self.cache.get(target)
         if not cache:
-            await ctx.trigger_typing()
+            await ctx.channel.typing()
             await self.build(target)
             cache = self.cache.get(target)
 

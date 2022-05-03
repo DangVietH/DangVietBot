@@ -165,7 +165,7 @@ class CustomHelp(commands.HelpCommand):
             await ctx.send("Sorry but that command does not exist.")
 
     async def send_bot_help(self, mapping):
-        await self.context.trigger_typing()
+        await self.context.channel.typing()
         bot = self.context.bot
 
         def key(command) -> str:

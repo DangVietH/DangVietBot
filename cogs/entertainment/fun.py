@@ -218,7 +218,7 @@ class Fun(commands.Cog):
 
     @commands.command(aliases=['lyrc', 'lyric'], help="Shows the lyrics of a song")
     async def lyrics(self, ctx, *, song):
-        await ctx.trigger_typing()
+        await ctx.channel.typing()
         resp = await self.bot.session.get(
             f"https://some-random-api.ml/lyrics", params={"title": song}
         )
@@ -229,6 +229,7 @@ class Fun(commands.Cog):
         pagData = []
         for chunk in data['lyrics'].split('\n'):
             pagData.append(chunk)
-        page = MenuPages(LyricPageSource(data['title'], data['links']['genius'], data['thumbnail']['genius'], pagData),
-                         ctx)
+        page = MenuPages(
+            LyricPageSource(data['title'], data['links']['genius'], data['thumbnail']['genius'], pagData),
+            ctx)
         await page.start()
