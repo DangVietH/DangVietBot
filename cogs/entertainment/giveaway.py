@@ -3,11 +3,6 @@ from discord.ext import commands, tasks
 import datetime
 import asyncio
 import random
-from motor.motor_asyncio import AsyncIOMotorClient
-from utils import config_var
-
-cluster = AsyncIOMotorClient(config_var['mango_link'])
-cursor = cluster["timer"]["giveaway"]
 
 
 def convert(time):
@@ -91,14 +86,14 @@ class Giveaway(commands.Cog):
 
         current_time = datetime.datetime.now()
         final_time = current_time + datetime.timedelta(seconds=converted_time)
-        await cursor.insert_one({'message_id': message.id, 'time': final_time, "channel": channel.id, "prize": prize})
+        await self.bot.mongo["timer"]["giveaway"].insert_one({'message_id': message.id, 'time': final_time, "channel": channel.id, "prize": prize})
 
     @commands.command(help="Reroll the giveaway")
     @commands.has_permissions(manage_guild=True)
     async def gend(self, ctx, msg_id):
-        if await cursor.find_one({'message_id': msg_id}) is None:
+        if await self.bot.mongo["timer"]["giveaway"]..find_one({'message_id': msg_id}) is None:
             return await ctx.send("Invalid Message ID.")
-        await cursor.delete_one({'message_id': msg_id})
+        await self.bot.mongo["timer"]["giveaway"]..delete_one({'message_id': msg_id})
         gmsg = await ctx.fetch_message(msg_id)
         users = [user async for user in gmsg.reactions[0].users()]
         users.pop(users.index(self.bot.user))
@@ -139,7 +134,7 @@ class Giveaway(commands.Cog):
                     winner = random.choice(users)
                     if len(users) < 1:
                         await channel.send("No one has entered the giveaway. Maybe next time")
-                        await cursor.delete_one({'message_id': msg_id})
+                        await self.bot.mongo["timer"]["giveaway"]..delete_one({'message_id': msg_id})
                         return
                     embed = discord.Embed(color=discord.Color.red(), title="🥳 THE GIVEAWAY HAS ENDED!")
                     embed.add_field(name=f"🎉 Prize: {x['prize']}",
@@ -147,7 +142,7 @@ class Giveaway(commands.Cog):
                                     inline=False)
                     embed.set_footer(text='Thanks for entering the giveaway!')
                     await msg.edit(embed=embed)
-                    await cursor.delete_one(x)
+                    await self.bot.mongo["timer"]["giveaway"]..delete_one(x)
 
         except Exception as e:
             print(e)
