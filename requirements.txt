@@ -1,6 +1,6 @@
 requests==2.27.1
 asyncpraw==7.5.0
-motor==2.5.1
+motor==3.0.0
 DateTime==4.4
 git+https://github.com/Rapptz/discord.py
 git+https://github.com/Rapptz/discord-ext-menus
