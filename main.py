@@ -3,10 +3,11 @@ import asyncio
 from utils import config_var
 from motor.motor_asyncio import AsyncIOMotorClient
 import aiohttp
+import urllib.parse
 
 bot = DangVietBot()
 
-mongo_connection = f"mongodb+srv://dhbbruh:{config_var['mongo_pass']}@dhb.tabp2.mongodb.net/welcome?retryWrites=true&w=majority"
+mongo_connection = f"mongodb+srv://dhbbruh:{urllib.parse.quote_plus(config_var['mongo_pass'])}@dhb.tabp2.mongodb.net/welcome?retryWrites=true&w=majority"
 
 
 async def main():
