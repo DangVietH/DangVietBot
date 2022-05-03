@@ -2,7 +2,7 @@ import os
 
 config_var = {
     "token": os.environ.get("token"),
-    "mango_link": os.environ.get("mango_link"),
+    "mongo_pass": os.environ.get("mongo_pass"),
     "reddit_pass": os.environ.get("reddit_pass"),
     "reddit_secret": os.environ.get("reddit_secret"),
     "reddit_id": os.environ.get("reddit_id"),
