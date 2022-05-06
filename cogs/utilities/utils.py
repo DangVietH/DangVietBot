@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands, tasks, menus
-from utils import MenuPages
 import datetime
 from utils import DefaultPageSource, MenuPages
 

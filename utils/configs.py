@@ -6,5 +6,6 @@ config_var = {
     "reddit_pass": os.environ.get("reddit_pass"),
     "reddit_secret": os.environ.get("reddit_secret"),
     "reddit_id": os.environ.get("reddit_id"),
-    "statcord": os.environ.get("statcord")
+    "statcord": os.environ.get("statcord"),
+    "weather": os.environ.get("weather")
 }
