@@ -12,15 +12,15 @@ class Reaction(commands.Cog):
     async def on_raw_reaction_add(self, payload):
         if payload.member.bot:
             return
-        check = await self.bot.mongo["react_role"]['reaction_roles'].find_one({"id": payload.message_id})
-        if check:
+        data = await self.bot.mongo["react_role"]['reaction_roles'].find_one({"id": payload.message_id})
+        if data:
             emojis = []
             roles = []
 
-            for emoji in check['emojis']:
+            for emoji in data['emojis']:
                 emojis.append(emoji)
 
-            for role in check['roles']:
+            for role in data['roles']:
                 roles.append(role)
 
             guild = self.bot.get_guild(payload.guild_id)
@@ -36,16 +36,10 @@ class Reaction(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        check = await self.bot.mongo["react_role"]['reaction_roles'].find_one({"id": payload.message_id})
-        if check:
-            emojis = []
-            roles = []
-
-            for emoji in check['emojis']:
-                emojis.append(emoji)
-
-            for role in check['roles']:
-                roles.append(role)
+        data = await self.bot.mongo["react_role"]['reaction_roles'].find_one({"id": payload.message_id})
+        if data:
+            emojis = data['emojis']
+            roles = data['roles']
 
             guild = self.bot.get_guild(payload.guild_id)
 
@@ -61,12 +55,10 @@ class Reaction(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):
-        check = await self.bot.mongo["react_role"]['reaction_roles'].find_one({"id": payload.message_id})
-        if check is not None:
-            await self.bot.mongo["react_role"]['reaction_roles'].delete_one(check)
+        if await self.bot.mongo["react_role"]['reaction_roles'].find_one({"id": payload.message_id}) is not None:
+            await self.bot.mongo["react_role"]['reaction_roles'].delete_one({"id": payload.message_id})
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        result = await self.bot.mongo["react_role"]['reaction_roles'].find_one({"guild": guild.id})
-        if result is not None:
+        if await self.bot.mongo["react_role"]['reaction_roles'].find_one({"guild": guild.id}) is not None:
             await self.bot.mongo["react_role"]['reaction_roles'].delete_one({"guild": guild.id})

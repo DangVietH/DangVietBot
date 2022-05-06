@@ -86,6 +86,10 @@ class Info(commands.Cog):
 
     @commands.command(help="Bot information", aliases=['botinfo', 'stats'])
     async def about(self, ctx):
+        lob = []
+        for x in self.bot.users:
+            if x.bot:
+                lob.append(x)
         embed = discord.Embed(title="Bot Information", color=self.bot.embed_color)
         embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar.url)
         embed.add_field(name="Developer", value=f"DvH#9980")
@@ -96,7 +100,7 @@ class Info(commands.Cog):
         embed.add_field(name="Create at", value=f"<t:{int(self.bot.user.created_at.timestamp())}:R>")
         embed.add_field(name="Command's", value=f"{len(self.bot.commands)}")
         embed.add_field(name="Server's", value=f"{len(self.bot.guilds)}")
-        embed.add_field(name="User's", value=f"{len(self.bot.users)}")
+        embed.add_field(name="User's", value=f"{len(self.bot.users)} total\n{len(lob)} bots")
         view = discord.ui.View()
         view.add_item(discord.ui.Button(label='Invite', url=self.bot.invite))
         view.add_item(discord.ui.Button(label='Support server', url='https://discord.gg/cnydBRnHU9'))

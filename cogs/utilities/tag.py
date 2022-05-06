@@ -35,28 +35,30 @@ class Tags(commands.Cog):
         questions = ["What is the tag name: ",
                      "What is the tag value: "]
         answers = []
+        msg = await ctx.send("Please answer the following questions:")
 
         def check(user):
             return user.author == ctx.author and user.channel == ctx.channel
 
         for question in questions:
-            await ctx.send(question)
-            msg = await self.bot.wait_for('message', check=check)
-            answers.append(msg.content)
+            await msg.edit(content=question)
+            user_msg = await self.bot.wait_for('message', check=check)
+            answers.append(user_msg.content)
+            await ctx.channel.purge(limit=1)
         check = await self.cursor.find_one({"guild": ctx.guild.id})
         if check is None:
             await self.cursor.insert_one({"guild": ctx.guild.id, "tag": [
                 {"name": answers[0], "value": answers[1], "owner": ctx.author.id}
             ]})
-            await ctx.send(f"Tag {answers[0]} successfully created")
+            await msg.edit(content=f"Tag {answers[0]} successfully created")
         else:
             is_exist = await self.cursor.find_one({"guild": ctx.guild.id, "tag.name": answers[0]})
             if is_exist is not None:
-                await ctx.send("Tag already exist. Remember that tag name are case SENSITIVE")
+                await msg.edit(content="Tag already exist. Remember that tag name are case SENSITIVE")
             else:
                 await self.cursor.update_one({"guild": ctx.guild.id}, {
                     "$push": {"tag": {"name": answers[0], "value": answers[1], "owner": ctx.author.id, "created": datetime.datetime.utcnow()}}})
-                await ctx.send(f"Tag {answers[0]} successfully created")
+                await msg.edit(content=f"Tag {answers[0]} successfully created")
 
     @tag.command(help="Remove a tag", aliases=['remove'])
     @commands.has_permissions(manage_guild=True)

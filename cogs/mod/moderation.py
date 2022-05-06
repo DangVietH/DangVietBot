@@ -49,7 +49,7 @@ class Moderation(commands.Cog):
                               description=f"{target.mention} has been {type_off.title()}ed for: {reason}",
                               color=discord.Color.red(),
                               timestamp=ctx.message.created_at)
-        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
+        embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=embed)
         if logging is True:
             await self.bot.mongo["moderation"]['cases'].update_one({"guild": ctx.guild.id}, {"$push": {
@@ -65,7 +65,7 @@ class Moderation(commands.Cog):
                                       description=f"**User:** {target} ({target.id}) \n**Mod:** {ctx.author} ({ctx.author.id})\n**Reason:** {reason}",
                                       color=discord.Color.red(),
                                       timestamp=ctx.message.created_at)
-                embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.avatar.url)
+                embed.set_footer(text=f"Moderator: {ctx.author}", icon_url=ctx.author.display_avatar.url)
                 await channel.send(embed=embed)
 
             if not target.bot:

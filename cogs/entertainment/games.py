@@ -37,7 +37,7 @@ class Games(commands.Cog):
             await ctx.send(f"Time's out! The correct answer was {corret_ans}")
         else:
             if msg.content.lower() not in opList:
-                return await ctx.send("Trivia crash because you enter invalid option! It's needs to be like `1`, `2`, `3` or `4`")
+                await ctx.send("Invalid option! It's needs to be like `1`, `2`, `3` or `4`")
             emb2 = discord.Embed(timestamp=ctx.message.created_at)
             for i in range(len(opList)):
                 if msg.content.lower() == opList[i]:

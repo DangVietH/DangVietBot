@@ -22,7 +22,7 @@ class ModLog(commands.Cog):
                                   description=f"**User:** {target} ({target.id}) \n**Mod:** {mod} ({mod.id})\n**Reason:** {reason}",
                                   color=discord.Color.red(),
                                   timestamp=datetime.datetime.utcnow())
-            embed.set_footer(text=f"Moderator: {mod}", icon_url=mod.avatar.url)
+            embed.set_footer(text=f"Moderator: {mod}", icon_url=mod.display_avatar.url)
             await channel.send(embed=embed)
 
     @commands.Cog.listener()

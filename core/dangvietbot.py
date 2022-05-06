@@ -109,34 +109,45 @@ class DangVietBot(commands.Bot):
 
         if isinstance(error, ignore):
             return
+
+        embed = discord.Embed(color=self.embed_color)
+
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.author.send('This command cannot be used in private messages.')
+
         elif isinstance(error, commands.BotMissingPermissions):
-            missing = [
-                perm.replace("_", " ").replace("guild", "server").title()
-                for perm in error.missing_permissions
-            ]
-            format_error = " and ".join(missing)
-            await ctx.send(f"I'm missing permission: {format_error}")
+            perms = ", ".join([f"{x}" for x in error.missing_permissions])
+            embed.title = "Bot Missing Permissions"
+            embed.description = f"I am missing the following permissions: {perms}"
+            await ctx.send(embed=embed)
+
         elif isinstance(error, commands.MissingPermissions):
-            missing = [
-                perm.replace("_", " ").replace("guild", "server").title()
-                for perm in error.missing_permissions
-            ]
-            format_error = " and ".join(missing)
-            await ctx.send(f'You need the following permission(s) to the run the command: {format_error}')
+            perms = ", ".join([f"{x}" for x in error.missing_permissions])
+            embed.title = "Missing Permissions"
+            embed.description = f"You are missing the following permissions: {perms}"
+            await ctx.send(embed=embed)
+
         elif isinstance(error, commands.NotOwner):
-            await ctx.send("You're not the owner of this bot")
+            embed.title = "Error"
+            embed.description = f"You're not the owner of the bot"
+            await ctx.send(embed=embed)
+
         elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("You are missing a required argument for this command to work")
+            embed.title = "Bot Missing Permissions"
+            embed.description = f"You are missing a required argument for this command to work"
+            await ctx.send(embed=embed)
+
         elif isinstance(error, commands.CommandOnCooldown):
             seconds = int(error.retry_after)
             wait_until_finish = datetime.datetime.now() + datetime.timedelta(seconds=seconds)
             await ctx.send(f'⏱️ This command is on a cooldown. Use it after <t:{int(datetime.datetime.timestamp(wait_until_finish))}:R>')
+
         elif isinstance(error, commands.DisabledCommand):
             await ctx.send(f'{ctx.command} has been disabled.')
         else:
-            await ctx.send(error)
+            embed.title = "Error"
+            embed.description = error
+            await ctx.send(embed=embed)
 
     async def on_guild_join(self, guild):
         await self.mongo["levelling"]["disable"].insert_one({"guild": guild.id})
