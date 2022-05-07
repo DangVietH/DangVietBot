@@ -58,9 +58,9 @@ class Misc(commands.Cog):
             name="Current Conditions",
             value=(
                 f"**Temperature**: {data['current']['temp_c']}°C\n"
-                f"**Humidity**: {data['current']['humidity']}°C\n"
-                f"**Wind speed**: {data['current']['wind_mph']}°C\n"
-                f"**Cloud**: {data['current']['cloud']}°C\n"
+                f"**Humidity**: {data['current']['humidity']}%\n"
+                f"**Wind speed**: {data['current']['wind_mph']}mph\n"
+                f"**Cloud**: {data['current']['cloud']}%\n"
             )
         )
         embed.set_thumbnail(url=f"https:{data['current']['condition']['icon']}")
