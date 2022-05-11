@@ -117,24 +117,24 @@ class DangVietBot(commands.Bot):
             await ctx.author.send('This command cannot be used in private messages.')
 
         elif isinstance(error, commands.BotMissingPermissions):
-            perms = ", ".join([f"{x}" for x in error.missing_permissions])
+            # perms = ", ".join([f"{x}" for x in error.missing_permissions])
             embed.title = "Bot Missing Permissions"
-            embed.description = f"I am missing the following permissions: {perms}"
+            # embed.description = f"I am missing the following permissions: {perms}"
             await ctx.send(embed=embed)
 
         elif isinstance(error, commands.MissingPermissions):
-            perms = ", ".join([f"{x}" for x in error.missing_permissions])
+            # perms = ", ".join([f"{x}" for x in error.missing_permissions])
             embed.title = "Missing Permissions"
-            embed.description = f"You are missing the following permissions: {perms}"
+            # embed.description = f"You are missing the following permissions: {perms}"
             await ctx.send(embed=embed)
 
         elif isinstance(error, commands.NotOwner):
-            embed.title = "Error"
+            embed.title = "What's up with ye brain?"
             embed.description = f"You're not the owner of the bot"
             await ctx.send(embed=embed)
 
         elif isinstance(error, commands.MissingRequiredArgument):
-            embed.title = "Bot Missing Permissions"
+            embed.title = "Missing Argument"
             embed.description = f"You are missing a required argument for this command to work"
             await ctx.send(embed=embed)
 
