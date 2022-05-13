@@ -13,7 +13,7 @@ class OnError(commands.Cog):
         if isinstance(error, ignore):
             return
 
-        embed = discord.Embed(color=self.embed_color)
+        embed = discord.Embed(color=self.bot.embed_color)
 
         if isinstance(error, commands.BotMissingPermissions):
             perms = ", ".join([f"{x.replace('_', ' ').replace('guild', 'server').title()}" for x in error.missing_permissions])
