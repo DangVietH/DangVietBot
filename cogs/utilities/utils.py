@@ -117,7 +117,7 @@ class Utils(commands.Cog):
         page = MenuPages(DefaultPageSource(f"Your reminder list", data), ctx)
         await page.start()
 
-    @tasks.loop(seconds=10)
+    @tasks.loop(seconds=5)
     async def time_checker(self):
         try:
             all_timer = self.bot.mongo["timer"]['remind'].find({})

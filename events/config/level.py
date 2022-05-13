@@ -2,8 +2,6 @@ from discord.ext import commands
 
 
 class Level(commands.Cog):
-    emoji = "📊"
-
     def __init__(self, bot):
         self.bot = bot
 
