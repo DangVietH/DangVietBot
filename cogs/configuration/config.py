@@ -44,6 +44,7 @@ def has_automod():
 
     return commands.check(predicate)
 
+
 class Configuration(commands.Cog):
     emoji = "⚙️"
 
@@ -76,72 +77,6 @@ class Configuration(commands.Cog):
             return
         await self.bot.mongo["moderation"]['modrole'].update_one({"guild": ctx.guild.id}, {"$set": {"role": role.id}})
         await ctx.send(f"Mod role updated to {role.name}")
-
-    """@commands.group(invoke_without_command=True, case_insensitive=True, help="Use this if you're lazy")
-    async def automod(self, ctx):
-        await ctx.send_help(ctx.command)
-
-    @automod.command(help="Toggle on automod", name="toggle")
-    @has_automod()
-    async def automod_toggle(self, ctx):
-        if await self.bot.mongo["moderation"]['automod'].find_one({"guild": ctx.guild.id}):
-            await ctx.send(f"Automod is already enabled")
-        await self.bot.mongo["moderation"]['automod'].insert_one({
-            "guild": ctx.guild.id,
-            "spam": False,
-            "invite": False,
-            "link": False,
-            "mass_mentions": False,
-            "blacklist-words": [],
-            "spam-ignore": []
-        })
-        await ctx.send("Automod set. Now use the subcommands to configure it")
-
-    @automod.command(help="Show automod stats", name="spam")
-    @has_automod()
-    async def automod_stats(self, ctx):
-        data = await self.bot.mongo["moderation"]['automod'].find_one({"guild": ctx.guild.id})
-        embed = discord.Embed(title="Automod Stats", color=self.bot.embed_color)
-        embed.add_field(name="Anti Spam", value=data["spam"])
-        embed.add_field(name="Anti Invite", value=data["invite"])
-        embed.add_field(name="Anti Link", value=data["link"])
-        embed.add_field(name="Anti Mass Mention", value=data["mass_mentions"])
-        await ctx.send(embed=embed)
-
-    @automod.command(help="Anti spam toggle", name="spam")
-    @has_automod()
-    async def automod_spam(self, ctx):
-        data = await self.bot.mongo["moderation"]['automod'].find_one({"guild": ctx.guild.id})
-        if data["spam"] is True:
-            await self.bot.mongo["moderation"]['automod'].update_one({"guild": ctx.guild.id}, {"$set": {"spam": False}})
-            await ctx.send("Anti spam disabled")
-        else:
-            await self.bot.mongo["moderation"]['automod'].update_one({"guild": ctx.guild.id}, {"$set": {"spam": True}})
-            await ctx.send("Anti spam enabled")
-
-    @automod.command(help="Anti invite toggle", name="invite")
-    @has_automod()
-    async def automod_invite(self, ctx):
-        data = await self.bot.mongo["moderation"]['automod'].find_one({"guild": ctx.guild.id})
-        if data["spam"] is True:
-            await self.bot.mongo["moderation"]['automod'].update_one({"guild": ctx.guild.id}, {"$set": {"invite": False}})
-            await ctx.send("Anti invite disabled")
-        else:
-            await self.bot.mongo["moderation"]['automod'].update_one({"guild": ctx.guild.id}, {"$set": {"invite": True}})
-            await ctx.send("Anti invite enabled")
-
-    @automod.command(help="Anti link toggle", name="link")
-    @has_automod()
-    async def automod_link(self, ctx):
-        data = await self.bot.mongo["moderation"]['automod'].find_one({"guild": ctx.guild.id})
-        if data["spam"] is True:
-            await self.bot.mongo["moderation"]['automod'].update_one({"guild": ctx.guild.id},
-                                                                     {"$set": {"link": False}})
-            await ctx.send("Anti link disabled")
-        else:
-            await self.bot.mongo["moderation"]['automod'].update_one({"guild": ctx.guild.id},
-                                                                     {"$set": {"link": True}})
-            await ctx.send("Anti link enabled")"""
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Welcome system setup")
     async def welcome(self, ctx):

@@ -43,6 +43,7 @@ class Misc(commands.Cog):
         await page.start()
 
     @commands.command(help="Show weather info for a city")
+    @commands.cooldown(1, 10, commands.BucketType.user)
     async def weather(self, ctx, *, city):
         resp = await self.bot.session.get(
             "http://api.weatherapi.com/v1/current.json", params={"key": config_var['weather'], "q": city}
