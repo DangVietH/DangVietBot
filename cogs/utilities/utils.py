@@ -86,37 +86,6 @@ class Utils(commands.Cog):
         page = MenuPages(UserCasePageSource(member, user_check['total_cases'], udata), ctx)
         await page.start()
 
-    @commands.group(help="Remind a task you want to complete", invoke_without_command=True, case_insensitive=True, aliases=['reminder', 'remind', 'notify'])
-    async def remindme(self, ctx, time, *, reason):
-        converted_time = convert(time)
-        if converted_time == -1:
-            return await ctx.send("You didn't answer the time correctly")
-
-        if converted_time == -2:
-            return await ctx.send("Time must be an integer")
-        current_time = datetime.datetime.now()
-        final_time = current_time + datetime.timedelta(seconds=converted_time)
-        await self.bot.mongo["timer"]['remind'].insert_one({"id": ctx.message.id, "user": ctx.author.id, "time": final_time, "reason": reason})
-        await ctx.send("⏰ Reminder set")
-
-    @remindme.command(name="delete", help="Delete an unwanted reminder")
-    async def remindme_delete(self, ctx, remind_id: int):
-        if await self.bot.mongo["timer"]['remind'].find_one({"id": remind_id}) is None:
-            return await ctx.send("You don't have that reminder")
-        await self.bot.mongo["timer"]['remind'].delete_one({"id": remind_id})
-        await ctx.send("Reminder deleted!")
-
-    @remindme.command(name="list", help="See your remind list")
-    async def remindme_list(self, ctx):
-        all_timer = self.bot.mongo["timer"]['remind'].find({'user': ctx.author.id})
-        if all_timer is None:
-            return await ctx.send("You don't have any reminders")
-        data = []
-        async for x in all_timer:
-            data.append((f"ID - {x['id']}", f"**End at:** <t:{int(datetime.datetime.timestamp(x['time']))}:R> **Reason:** {x['reason']}"))
-        page = MenuPages(DefaultPageSource(f"Your reminder list", data), ctx)
-        await page.start()
-
     @tasks.loop(seconds=5)
     async def time_checker(self):
         try:
@@ -150,16 +119,75 @@ class Utils(commands.Cog):
         await self.bot.mongo["timer"]['afk'].insert_one({"guild": ctx.guild.id, "member": ctx.author.id, "reason": reason})
         await ctx.send(f"You're now afk for: **{reason}**")
 
-    @commands.command(aliases=['math'], help="Do math stuff")
-    async def calculate(self, ctx, num1: float, op: str, num2: float):
-        if op == "+":
-            await ctx.send(num1 + num2)
-        elif op == "-":
-            await ctx.send(num1 - num2)
-        elif op == "*":
-            await ctx.send(num1 * num2)
-        elif op == "/":
-            await ctx.send(num1 / num2)
+    @commands.group(help="Remind a task you want to complete", invoke_without_command=True, case_insensitive=True,
+                    aliases=['reminder', 'remind', 'notify'])
+    async def remindme(self, ctx, time, *, reason):
+        converted_time = convert(time)
+        if converted_time == -1:
+            return await ctx.send("You didn't answer the time correctly")
+
+        if converted_time == -2:
+            return await ctx.send("Time must be an integer")
+        current_time = datetime.datetime.now()
+        final_time = current_time + datetime.timedelta(seconds=converted_time)
+        await self.bot.mongo["timer"]['remind'].insert_one(
+            {"id": ctx.message.id, "user": ctx.author.id, "time": final_time, "reason": reason})
+        await ctx.send("⏰ Reminder set")
+
+    @remindme.command(name="delete", help="Delete an unwanted reminder")
+    async def remindme_delete(self, ctx, remind_id: int):
+        if await self.bot.mongo["timer"]['remind'].find_one({"id": remind_id}) is None:
+            return await ctx.send("You don't have that reminder")
+        await self.bot.mongo["timer"]['remind'].delete_one({"id": remind_id})
+        await ctx.send("Reminder deleted!")
+
+    @remindme.command(name="list", help="See your remind list")
+    async def remindme_list(self, ctx):
+        all_timer = self.bot.mongo["timer"]['remind'].find({'user': ctx.author.id})
+        if all_timer is None:
+            return await ctx.send("You don't have any reminders")
+        data = []
+        async for x in all_timer:
+            data.append((f"ID - {x['id']}",
+                         f"**End at:** <t:{int(datetime.datetime.timestamp(x['time']))}:R> **Reason:** {x['reason']}"))
+        page = MenuPages(DefaultPageSource(f"Your reminder list", data), ctx)
+        await page.start()
+
+    @commands.group(help="List all the stuff you need to do", invoke_without_command=True, case_insensitive=True)
+    async def todo(self, ctx):
+        await ctx.send_help(ctx.command)
+
+    @todo.command(help="Add a task to your todo list", aliases=['create'], name="add")
+    async def todo_add(self, ctx, *, task):
+        await self.bot.mongo["bot"]['todo'].insert_one(
+            {"id": ctx.message.id, "user": ctx.author.id, "task": task})
+        await ctx.send(f"TODO added! TODO id: `{ctx.message.id}`")
+
+    @todo.command(name="delete", help="Delete a todo you complete")
+    async def todo_delete(self, ctx, todo_id: int):
+        if await self.bot.mongo["bot"]['todo'].find_one({"id": todo_id}) is None:
+            return await ctx.send("You don't have that TODO")
+        await self.bot.mongo["bot"]['todo'].delete_one({"id": todo_id})
+        await ctx.send("Todo deleted!")
+
+    @todo.command(name="edit", help="Edit a todo")
+    async def todo_edit(self, ctx, todo_id: int, *, task):
+        if await self.bot.mongo["bot"]['todo'].find_one({"id": todo_id}) is None:
+            return await ctx.send("You don't have that TODO")
+        await self.bot.mongo["bot"]['todo'].update_one({"id": todo_id}, {"$set": {"task": task}})
+        await ctx.send("TODO edited!")
+
+    @todo.command(name="list", help="See your todo list")
+    async def todo_list(self, ctx):
+        all_timer = self.bot.mongo["bot"]['todo'].find({'user': ctx.author.id})
+        if all_timer is None:
+            return await ctx.send("You don't have any TODO")
+        data = []
+        async for x in all_timer:
+            data.append((f"ID - {x['id']}",
+                         f"**Task:** {x['task']}"))
+        page = MenuPages(DefaultPageSource(f"Your TODO list", data), ctx)
+        await page.start()
 
     @commands.command(help="Suggest something to this bot")
     async def suggest(self, ctx, *, text):
