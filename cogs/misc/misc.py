@@ -32,9 +32,6 @@ class Misc(commands.Cog):
         if command is None:
             return await ctx.send(source_url)
 
-        if command == 'help'.lower():
-            return await ctx.send("<https://github.com/DangVietH/DangVietBot/blob/master/cogs/info/help.py#L159-L212>")
-
         command = self.bot.get_command(command)
         if not command:
             return await ctx.send("That command doesn't exist!'")
@@ -46,8 +43,7 @@ class Misc(commands.Cog):
 
         location = os.path.relpath(filename).replace("\\", "/")
 
-        final_url = f"<{source_url}/blob/master/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>"
-        await ctx.send(final_url)
+        await ctx.send(f"<{source_url}/blob/master/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>")
 
     @commands.command(aliases=['lyrc', 'lyric'], help="Shows the lyrics of a song")
     async def lyrics(self, ctx, *, song):
