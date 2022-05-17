@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands, menus
 from utils import config_var, MenuPages
+import os
+import inspect
 
 
 class LyricPageSource(menus.ListPageSource):
@@ -23,6 +25,30 @@ class Misc(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command(aliases=['src'], help="Shows the source code for a command")
+    async def source(self, ctx, *, command=None):
+        source_url = "https://github.com/DangVietH/DangVietBot"
+        if command is None:
+            return await ctx.send(source_url)
+
+        command = self.bot.get_command(command)
+        if not command:
+            return await ctx.send("Couldn't find that command.")
+
+        src = command.callback.__code__
+        filename = src.co_filename
+
+        if command == 'help':
+            src = type(self.bot.help_command)
+            filename = src.co_filename
+
+        lines, firstlineno = inspect.getsourcelines(src)
+
+        location = os.path.relpath(filename).replace("\\", "/")
+
+        final_url = f"<{source_url}/blob/main/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>"
+        await ctx.send(final_url)
 
     @commands.command(aliases=['lyrc', 'lyric'], help="Shows the lyrics of a song")
     async def lyrics(self, ctx, *, song):
