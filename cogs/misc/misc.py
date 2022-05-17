@@ -28,20 +28,19 @@ class Misc(commands.Cog):
 
     @commands.command(aliases=['src'], help="Shows the source code for a command")
     async def source(self, ctx, *, command=None):
-        source_url = "https://github.com/DangVietH/DangVietBot"
+        source_url = "<https://github.com/DangVietH/DangVietBot>"
         if command is None:
             return await ctx.send(source_url)
 
+        if command == 'help'.lower():
+            return await ctx.send("You can't go to the .venv files!")
+
         command = self.bot.get_command(command)
         if not command:
-            return await ctx.send("Couldn't find that command.")
+            return await ctx.send("<https://github.com/DangVietH/DangVietBot/blob/master/cogs/info/help.py#L159-L212>")
 
         src = command.callback.__code__
         filename = src.co_filename
-
-        if command == 'help':
-            src = type(self.bot.help_command)
-            filename = src.co_filename
 
         lines, firstlineno = inspect.getsourcelines(src)
 
