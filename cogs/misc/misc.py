@@ -47,7 +47,7 @@ class Misc(commands.Cog):
 
         location = os.path.relpath(filename).replace("\\", "/")
 
-        final_url = f"<{source_url}/blob/main/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>"
+        final_url = f"<{source_url}/blob/master/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>"
         await ctx.send(final_url)
 
     @commands.command(aliases=['lyrc', 'lyric'], help="Shows the lyrics of a song")

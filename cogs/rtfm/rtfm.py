@@ -39,11 +39,7 @@ class RTFM(commands.Cog):
         self.bot = bot
         self.targets = {
             "python": "https://docs.python.org/3",
-            "discord.py": "https://discordpy.readthedocs.io/en/master/",
-            "pycord": "https://pycord.readthedocs.io/en/master/",
-            "nextcord": "https://nextcord.readthedocs.io/en/latest/",
-            "disnake": "https://disnake.readthedocs.io/en/latest/",
-            "lavalink.py": "https://lavalink.readthedocs.io/en/master/",
+            "discord.py": "https://discordpy.readthedocs.io/en/latest/",
             "praw": "https://praw.readthedocs.io/en/latest",
             "asyncpraw": "https://apraw.readthedocs.io/en/latest",
             "pymongo": "https://pymongo.readthedocs.io/en/stable/",
@@ -55,12 +51,7 @@ class RTFM(commands.Cog):
         self.aliases = {
             ("py", "py3", "python3", "python"): "python",
             ("dpy", "discord.py", "d.py"): "discord.py",
-            ("pycord", "pyc", "py-cord"): "pycord",
-            ("nextcord", "nxc", "next-cord"): "nextcord",
-            ("disnake", "dnk"): "disnake",
-            ("lavalink.py", "lpy"): "lavalink.py",
-            ("reddit", "praw", "pr"): "praw",
-            ("asyncpraw", "apraw", "apr"): "asyncpraw",
+            ("asyncpraw", "apraw"): "asyncpraw",
             ("pmongo", "pmg", "pymongo"): "pymongo",
             ("mt", "motor"): "motor",
             ("django", "dj"): "django",
