@@ -33,11 +33,11 @@ class Misc(commands.Cog):
             return await ctx.send(source_url)
 
         if command == 'help'.lower():
-            return await ctx.send("You can't go to the .venv files!")
+            return await ctx.send("<https://github.com/DangVietH/DangVietBot/blob/master/cogs/info/help.py#L159-L212>")
 
         command = self.bot.get_command(command)
         if not command:
-            return await ctx.send("<https://github.com/DangVietH/DangVietBot/blob/master/cogs/info/help.py#L159-L212>")
+            return await ctx.send("That command doesn't exist!'")
 
         src = command.callback.__code__
         filename = src.co_filename
