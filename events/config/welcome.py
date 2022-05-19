@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from utils import get_image_from_url
 from PIL import Image, ImageDraw, ImageFont
 import io
 
@@ -16,9 +15,8 @@ class Welcome(commands.Cog):
             return
         channel = self.bot.get_channel(result["channel"])
 
-        image = Image.open(get_image_from_url(
-            result['img'])).convert(
-            "RGBA")
+        resp = await self.bot.session.get(result['img'])
+        image = Image.open(io.BytesIO(await resp.read())).convert("RGBA")
 
         image = image.resize((1024, 500))
 

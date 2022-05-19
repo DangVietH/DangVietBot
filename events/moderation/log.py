@@ -10,9 +10,18 @@ class ModLog(commands.Cog):
 
     async def run_modlog(self, guild, type_off, target, mod, reason):
         num_of_case = (await self.bot.mongo["moderation"]['cases'].find_one({"guild": guild.id}))['num']
-        await self.bot.mongo["moderation"]['cases'].update_one({"guild": guild.id}, {"$push": {
-            "cases": {"Number": int(num_of_case), "user": f"{target.id}", "type": type_off, "Mod": f"{mod.id}",
-                      "reason": str(reason), "time": datetime.datetime.utcnow()}}})
+        await self.bot.mongo["moderation"]['cases'].update_one(
+            {"guild": guild.id},
+            {"$push": {
+                "cases":
+                    {"Number": int(num_of_case),
+                     "user": f"{target}",
+                     "user_id": target.id,
+                     "type": type_off,
+                     "Mod": f"{mod}",
+                     "reason": str(reason),
+                     "time": datetime.datetime.utcnow()}}}
+        )
         await self.bot.mongo["moderation"]['cases'].update_one({"guild": guild.id}, {"$inc": {"num": 1}})
 
         result = await self.bot.mongo["moderation"]['modlog'].find_one({"guild": guild.id})

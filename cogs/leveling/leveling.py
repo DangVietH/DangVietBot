@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 import io
-from utils import get_image_from_url, DefaultPageSource, MenuPages
+from utils import DefaultPageSource, MenuPages
 
 
 class Leveling(commands.Cog):
@@ -40,8 +40,9 @@ class Leveling(commands.Cog):
         CustomImg = await self.bot.mongo["levelling"]['image'].find_one({"guild": ctx.guild.id, "member": user.id})
         if CustomImg is not None:
             img_link = CustomImg["image"]
-        image = Image.open(get_image_from_url(
-            img_link)).convert("RGBA")
+
+        resp = await self.bot.session.get(img_link)
+        image = Image.open(io.BytesIO(await resp.read())).convert("RGBA")
 
         image = image.resize((IMAGE_WIDTH, IMAGE_HEIGHT))
 

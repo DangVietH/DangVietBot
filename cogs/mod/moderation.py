@@ -22,8 +22,7 @@ def convert(time):
 
 def has_mod_role():
     async def predicate(ctx):
-        modrole = ctx.bot.mongo["moderation"]['modrole']
-        result = await modrole.find_one({"guild": ctx.guild.id})
+        result = await ctx.bot.mongo["moderation"]['modrole'].find_one({"guild": ctx.guild.id})
         if result is None:
             return False
         if ctx.guild.get_role(result['role']) in ctx.author.roles:
@@ -53,9 +52,14 @@ class Moderation(commands.Cog):
         await ctx.send(embed=embed)
         if logging is True:
             await self.bot.mongo["moderation"]['cases'].update_one({"guild": ctx.guild.id}, {"$push": {
-                "cases": {"Number": int(num_of_case), "user": f"{target.id}", "type": type_off,
-                          "Mod": f"{ctx.author.id}",
-                          "reason": str(reason), "time": datetime.datetime.utcnow()}}})
+                "cases": {
+                    "Number": int(num_of_case),
+                    "user": f"{target}",
+                    "user_id": target.id,
+                    "type": type_off,
+                    "Mod": f"{ctx.author.id}",
+                    "reason": str(reason),
+                    "time": datetime.datetime.utcnow()}}})
             await self.bot.mongo["moderation"]['cases'].update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
 
             result = await self.bot.mongo["moderation"]['modlog'].find_one({"guild": ctx.guild.id})

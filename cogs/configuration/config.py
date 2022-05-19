@@ -45,14 +45,37 @@ def has_automod():
     return commands.check(predicate)
 
 
+def has_config_role():
+    """Anyone with the config role can use the config commands."""
+    async def predicate(ctx):
+        result = await ctx.bot.mongo["bot"]['config'].find_one({"guild": ctx.guild.id})
+        if result is None:
+            return False
+        if ctx.guild.get_role(result['role']) in ctx.author.roles:
+            return True
+
+    return commands.check(predicate)
+
+
 class Configuration(commands.Cog):
     emoji = "⚙️"
 
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.command(help="Anyone with this role can use the commands in the Configuration category")
+    @commands.has_permissions(manage_roles=True)
+    async def configrole(self, ctx, role: discord.Role):
+        data = await self.bot.mongo["bot"]['config'].find_one({"guild": ctx.guild.id})
+        if data is None:
+            await self.bot.mongo["bot"]['config'].insert_one({"guild": ctx.guild.id, "role": role.id})
+        else:
+            await self.bot.mongo["bot"]['config'].update_one({"guild": ctx.guild.id},
+                                                             {"$set": {"role": role.id}})
+        await ctx.send(f"Config role set to {role.mention}! Anyone with this role can use the commands in the Configuration category.")
+
     @commands.command(help="Set up modlog channel")
-    @commands.has_permissions(manage_channels=True)
+    @commands.check_any(commands.has_permissions(manage_channels=True), has_config_role())
     @commands.bot_has_permissions(manage_channels=True, view_audit_log=True)
     async def modlog(self, ctx, channel: discord.TextChannel):
         result = await self.bot.mongo["moderation"]['modlog'].find_one({"guild": ctx.guild.id})
@@ -66,7 +89,7 @@ class Configuration(commands.Cog):
         await ctx.send(f"Modlog channel updated to {channel.mention}")
 
     @commands.command(help="Set up custom mod role")
-    @commands.has_permissions(manage_roles=True)
+    @commands.check_any(commands.has_permissions(manage_roles=True), has_config_role())
     @commands.bot_has_permissions(manage_roles=True)
     async def modrole(self, ctx, role: discord.Role):
         result = await self.bot.mongo["moderation"]['modrole'].find_one({"guild": ctx.guild.id})
@@ -83,7 +106,7 @@ class Configuration(commands.Cog):
         await ctx.send_help(ctx.command)
 
     @welcome.command(name="wizard", help="Use wizard if you want to save time")
-    @commands.has_permissions(manage_guild=True)
+    @commands.check_any(commands.has_permissions(manage_guild=True), has_config_role())
     async def welcome_wizard(self, ctx):
         if await self.bot.mongo["welcome"]["channel"].find_one({"guild": ctx.guild.id}):
             await self.bot.mongo["welcome"]["channel"].delete_one({"guild": ctx.guild.id})
@@ -146,7 +169,7 @@ Valid Variables:
         await msg.edit(content="Wizard complete!")
 
     @welcome.command(name="welcome", help="Setup welcome channel")
-    @commands.has_permissions(manage_channels=True)
+    @commands.check_any(commands.has_permissions(manage_channels=True), has_config_role())
     async def welcome_channel(self, ctx, channel: discord.TextChannel):
         result = await self.bot.mongo["welcome"]["channel"].find_one({"guild": ctx.guild.id})
         if result is None:
@@ -162,7 +185,7 @@ Valid Variables:
             await ctx.send(f"Welcome channel updated to {channel.mention}")
 
     @welcome.command(help="Disable welcome system", name="disable")
-    @commands.has_permissions(manage_channels=True)
+    @commands.check_any(commands.has_permissions(manage_channels=True), has_config_role())
     async def wdisable(self, ctx):
         result = await self.bot.mongo["welcome"]["channel"].find_one({"guild": ctx.guild.id})
         if result is None:
@@ -171,7 +194,7 @@ Valid Variables:
         await ctx.send("Welcome system has been remove")
 
     @welcome.command(help="Create your welcome message. Use welcome text var to see the list of variables", name="text")
-    @commands.has_permissions(manage_messages=True)
+    @commands.check_any(commands.has_permissions(manage_messages=True), has_config_role())
     async def wtext(self, ctx, *, text):
         result = await self.bot.mongo["welcome"]["channel"].find_one({"guild": ctx.guild.id})
         if result is None:

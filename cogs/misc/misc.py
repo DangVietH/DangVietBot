@@ -3,6 +3,7 @@ from discord.ext import commands, menus
 from utils import config_var, MenuPages
 import os
 import inspect
+import datetime
 
 
 class LyricPageSource(menus.ListPageSource):
@@ -20,11 +21,74 @@ class LyricPageSource(menus.ListPageSource):
         return embed
 
 
+class GuildCasePageSource(menus.ListPageSource):
+    def __init__(self, casenum, data):
+        self.casenum = casenum
+        super().__init__(data, per_page=4)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.red(), title=f"List of cases in {menu.ctx.author.guild.name}",
+                              description=f"**Total case:** {self.casenum}")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
+class UserCasePageSource(menus.ListPageSource):
+    def __init__(self, member, casenum, data):
+        self.member = member
+        self.casenum = casenum
+        super().__init__(data, per_page=4)
+
+    async def format_page(self, menu, entries):
+        embed = discord.Embed(color=discord.Color.red(), title=f"List of {self.member} cases",
+                              description=f"**Total case:** {self.casenum}")
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        embed.set_footer(text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
 class Misc(commands.Cog):
     emoji = "🛠"
 
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command(help="Look at server moderation cases", aliases=["case"])
+    async def caselist(self, ctx):
+        results = await self.bot.mongo["moderation"]['cases'].find_one({"guild": ctx.guild.id})
+        gdata = []
+        if len(results['cases']) < 1:
+            return await ctx.send("Looks like all your server members are good people! Good job!")
+        for case in results['cases']:
+            gdata.append(
+                (
+                    f"Case {case['Number']}",
+                    f"**Type:** {case['type']}\n **User:** {case['user']} ({case['user_id']})\n**Mod:** {case['Mod']}\n**Reason:** {case['reason']}\n**Date:** <t:{int(datetime.datetime.timestamp(case['time']))}>"
+                )
+            )
+        page = MenuPages(GuildCasePageSource(results['num'], gdata), ctx)
+        await page.start()
+
+    @commands.command(help="Look at user moderation cases")
+    async def casesfor(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        udata = []
+        user_check = await self.bot.mongo["moderation"]['user'].find_one({"guild": ctx.guild.id, "user_id": member.id})
+        results = await self.bot.mongo["moderation"]['cases'].find_one({"guild": ctx.guild.id})
+        if user_check is None:
+            return await ctx.send("Looks like a good person 🥰")
+        for case in results['cases']:
+            if member.id == int(case['user_id']):
+                udata.append(
+                    (f"Case {case['Number']}",
+                     f"**Type:** {case['type']}\n**Mod:** {case['Mod']}\n**Reason:** {case['reason']}\n**Date:** <t:{int(datetime.datetime.timestamp(case['time']))}"
+                     ))
+
+        page = MenuPages(UserCasePageSource(member, user_check['total_cases'], udata), ctx)
+        await page.start()
 
     @commands.command(aliases=['src'], help="Shows the source code for a command")
     async def source(self, ctx, *, command=None):
