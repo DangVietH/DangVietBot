@@ -57,7 +57,7 @@ class Moderation(commands.Cog):
                     "user": f"{target}",
                     "user_id": target.id,
                     "type": type_off,
-                    "Mod": f"{ctx.author.id}",
+                    "Mod": f"{ctx.author}",
                     "reason": str(reason),
                     "time": datetime.datetime.utcnow()}}})
             await self.bot.mongo["moderation"]['cases'].update_one({"guild": ctx.guild.id}, {"$inc": {"num": 1}})
