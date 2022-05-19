@@ -9,7 +9,7 @@ class ModLog(commands.Cog):
         self.bot = bot
 
     async def run_modlog(self, guild, type_off, target, mod, reason):
-        num_of_case = (await self.bot.mongo["moderation"]['cases'].find_one({"guild": guild.id}))['num']
+        num_of_case = (await self.bot.mongo["moderation"]['cases'].find_one({"guild": guild.id}))['num'] + 1
         await self.bot.mongo["moderation"]['cases'].update_one(
             {"guild": guild.id},
             {"$push": {
