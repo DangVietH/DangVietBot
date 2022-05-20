@@ -74,7 +74,7 @@ class Configuration(commands.Cog):
             await self.bot.mongo["bot"]['config'].update_one({"guild": ctx.guild.id},
                                                              {"$set": {"role": role.id}})
         await ctx.send(
-            f"Config role set to {role.mention}! Anyone with this role can use the commands in the Configuration category.")
+            f"Config role set to **{role.name}**! Anyone with this role can use the commands in the Configuration category.")
 
     @commands.command(help="Set up modlog channel")
     @commands.check_any(commands.has_permissions(manage_channels=True), has_config_role())

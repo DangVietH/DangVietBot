@@ -40,8 +40,6 @@ class RTFM(commands.Cog):
         self.targets = {
             "python": "https://docs.python.org/3",
             "discord.py": "https://discordpy.readthedocs.io/en/latest/",
-            "praw": "https://praw.readthedocs.io/en/latest",
-            "asyncpraw": "https://apraw.readthedocs.io/en/latest",
             "pymongo": "https://pymongo.readthedocs.io/en/stable/",
             "motor": "https://motor.readthedocs.io/en/stable/",
             "django": "https://django.readthedocs.io/en/stable",
@@ -51,7 +49,6 @@ class RTFM(commands.Cog):
         self.aliases = {
             ("py", "py3", "python3", "python"): "python",
             ("dpy", "discord.py", "d.py"): "discord.py",
-            ("asyncpraw", "apraw"): "asyncpraw",
             ("pmongo", "pmg", "pymongo"): "pymongo",
             ("mt", "motor"): "motor",
             ("django", "dj"): "django",
