@@ -169,9 +169,9 @@ class Economy(commands.Cog):
                     inventory_check = await self.economy.find_one({"id": user.id, "inventory.name": str(item_name)})
                     if inventory_check is None:
                         await self.economy.update_one({"id": user.id},
-                                                      {"$push": {"inventory": {"name": item_name,
-                                                                               "price": int(items_price[i]),
-                                                                               "amount": int(amount)}}})
+                                                      {"$addToSet": {"inventory": {"name": item_name,
+                                                                                   "price": int(items_price[i]),
+                                                                                   "amount": int(amount)}}})
                     else:
                         await self.economy.update_one({"id": user.id, "inventory.name": str(item_name)},
                                                       {"$inc": {"inventory.$.amount": int(amount)}})

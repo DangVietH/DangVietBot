@@ -12,7 +12,7 @@ class ModLog(commands.Cog):
         num_of_case = (await self.bot.mongo["moderation"]['cases'].find_one({"guild": guild.id}))['num'] + 1
         await self.bot.mongo["moderation"]['cases'].update_one(
             {"guild": guild.id},
-            {"$push": {
+            {"$addToSet": {
                 "cases":
                     {"Number": int(num_of_case),
                      "user": f"{target}",

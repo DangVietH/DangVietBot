@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 import os
-import datetime
 import re
 from collections import Counter
 

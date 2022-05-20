@@ -57,7 +57,7 @@ class Tags(commands.Cog):
                 await msg.edit(content="Tag already exist. Remember that tag name are case SENSITIVE")
             else:
                 await self.cursor.update_one({"guild": ctx.guild.id}, {
-                    "$push": {"tag": {"name": answers[0], "value": answers[1], "owner": ctx.author.id, "created": datetime.datetime.utcnow()}}})
+                    "$addToSet": {"tag": {"name": answers[0], "value": answers[1], "owner": ctx.author.id, "created": datetime.datetime.utcnow()}}})
                 await msg.edit(content=f"Tag {answers[0]} successfully created")
 
     @tag.command(help="Remove a tag", aliases=['remove'])

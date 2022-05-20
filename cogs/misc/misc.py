@@ -24,7 +24,7 @@ class LyricPageSource(menus.ListPageSource):
 class GuildCasePageSource(menus.ListPageSource):
     def __init__(self, casenum, data):
         self.casenum = casenum
-        super().__init__(data, per_page=4)
+        super().__init__(data, per_page=2)
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(color=discord.Color.red(), title=f"List of cases in {menu.ctx.author.guild.name}",
@@ -39,7 +39,7 @@ class UserCasePageSource(menus.ListPageSource):
     def __init__(self, member, casenum, data):
         self.member = member
         self.casenum = casenum
-        super().__init__(data, per_page=4)
+        super().__init__(data, per_page=2)
 
     async def format_page(self, menu, entries):
         embed = discord.Embed(color=discord.Color.red(), title=f"List of {self.member} cases",
