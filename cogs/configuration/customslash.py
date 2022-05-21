@@ -21,7 +21,7 @@ class CustomSlash(commands.Cog):
                                        callback=value,
                                        guild_ids=[ctx.guild.id])
         self.bot.tree.add_command(command)
-        await ctx.send(f"Command created. To complete the process, do `{ctx.clean_prefix}customslash sync`")
+        await ctx.send(f"Command created. To complete the process, do `{ctx.clean_prefix}customslash sync` so they can appear!")
 
     @customslash.command(name="sync", description="Sync the commands you created to your server")
     async def cslash_sync(self, ctx):
