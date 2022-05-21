@@ -39,6 +39,7 @@ class DangVietBot(commands.Bot):
             owner_id=860876181036335104,
             enable_debug_events=True,
             activity=discord.Game(name="d!help"),
+            application_id=875589545532485682,
             **kwargs
         )
         self.spam_control = commands.CooldownMapping.from_cooldown(10, 12.0, commands.BucketType.user)

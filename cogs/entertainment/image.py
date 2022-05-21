@@ -196,6 +196,20 @@ class Image(commands.Cog):
             io.BytesIO(await resp.read()), f"balls.gif"
         ))
 
+    @commands.command(help="Make a fake youtube video", aliases=['ytvideo'])
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def ytvid(self, ctx, member: discord.Member = None, *, title="Sus"):
+        resp = await self.bot.session.get(
+            f"https://api.jeyy.xyz/image/youtube", params={
+                "avatar_url": member.display_avatar.url,
+                "title": title,
+                "author": member.display_name
+            }
+        )
+        await ctx.send(file=discord.File(
+            io.BytesIO(await resp.read()), f"ytvid.gif"
+        ))
+
     @commands.command(help="Oh no")
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def wasted(self, ctx, member: discord.Member = None):
