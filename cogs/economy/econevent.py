@@ -7,7 +7,8 @@ class EconEvent(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        await self.bot.mongo["economy"]["member"].insert_one({"guild": member.guild.id, "user": member.id, "wallet": 0, "bank": 0, "inventory": []})
+        if not member.bot:
+            await self.bot.mongo["economy"]["member"].insert_one({"guild": member.guild.id, "user": member.id, "wallet": 0, "bank": 0, "inventory": []})
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):

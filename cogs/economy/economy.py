@@ -24,7 +24,6 @@ class Economy(commands.Cog):
     async def balance(self, ctx, user: discord.Member = None):
         user = user or ctx.author
         if not user.bot:
-            await self.open_account(user)
 
             stats = await self.economy.find_one({"guild": user.guild.id, "user": user.id})
             balance = stats['wallet'] + stats['bank']
@@ -40,11 +39,8 @@ class Economy(commands.Cog):
     @commands.command(help="Claim your daily money")
     @commands.cooldown(1, 60 * 60 * 24, commands.BucketType.user)
     async def daily(self, ctx):
-        await self.open_account(ctx.author)
         await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.author.id}, {"$inc": {"wallet": (await self.serverdata.find_one({"guild": ctx.guild.id}))['daily']}})
-        await ctx.send(
-            embed=discord.Embed(title="Daily Claimed", description=f"You just got {(await self.serverdata.find_one({'guild': ctx.guild.id}))['econ_symbol']} {await self.serverdata.find_one({'guild': ctx.guild.id})['daily']}",
-                                color=discord.Color.green()))
+        await ctx.send("You claimed your daily money! You now have {} {}.".format((await self.serverdata.find_one({"guild": ctx.guild.id}))['econ_symbol'], (await self.economy.find_one({"guild": ctx.guild.id, "user": ctx.author.id}))['wallet']))
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Check the shop")
     async def shop(self, ctx):
@@ -78,7 +74,6 @@ class Economy(commands.Cog):
     @commands.command(help="Buy some items")
     async def buy(self, ctx, item_name: str, amount=1):
         item_name = item_name.lower()
-        await self.open_account(ctx.author)
         check = await self.economy.find_one({"guild": ctx.guild.id, "user": ctx.author.id})
 
         name = None
@@ -111,7 +106,6 @@ class Economy(commands.Cog):
     @commands.command(help="Sell your items")
     async def sell(self, ctx, item_name: str, amount=1):
         item_name = item_name.lower()
-        await self.open_account(ctx.author)
         check = await self.economy.find_one({"guild": ctx.guild.id, "user": ctx.author.id})
 
         name = None
@@ -142,7 +136,6 @@ class Economy(commands.Cog):
 
     @commands.command(help="See your items")
     async def inventory(self, ctx):
-        await self.open_account(ctx.author)
         check = await self.economy.find_one({"guild": ctx.guild.id, "user": ctx.author.id})
 
         data = []
@@ -160,7 +153,6 @@ class Economy(commands.Cog):
     @commands.command(help="we work for the right to work")
     @commands.cooldown(1, 60 * 60, commands.BucketType.user)
     async def work(self, ctx):
-        await self.open_account(ctx.author)
 
         name = ['tim', 'bill', 'jack', 'jim']
         verb = ['ate', 'kicked', 'drank', 'paid']
@@ -226,11 +218,10 @@ class Economy(commands.Cog):
 
     @commands.command(help="Deposit your money into the bank", aliases=['dep'])
     async def deposit(self, ctx, amount=None):
-        await self.open_account(ctx.author)
-        stats = await self.economy.find_one({"guild": ctx.guild.id, "user": ctx.id})
+        stats = await self.economy.find_one({"guild": ctx.guild.id, "user": ctx.author.id})
         if amount.lower() == "all":
-            await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.id}, {"$inc": {"bank": stats['wallet']}})
-            await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.id}, {"$set": {"wallet": 0}})
+            await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.author.id}, {"$inc": {"bank": stats['wallet']}})
+            await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.author.id}, {"$set": {"wallet": 0}})
             await ctx.message.add_reaction("✅")
             return
         amount = int(amount)
@@ -238,17 +229,16 @@ class Economy(commands.Cog):
             return await ctx.send("You can't deposit more money than your wallet")
         elif amount <= 0:
             return await ctx.send("You can't send negative")
-        await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.id}, {"$inc": {"wallet": -amount}})
-        await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.id}, {"$inc": {"bank": amount}})
+        await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.author.id}, {"$inc": {"wallet": -amount}})
+        await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.author.id}, {"$inc": {"bank": amount}})
         await ctx.message.add_reaction("✅")
 
     @commands.command(help="Withdraw your money from the bank")
     async def withdraw(self, ctx, amount=None):
-        await self.open_account(ctx.author)
-        stats = await self.economy.find_one({"guild": ctx.guild.id, "user": ctx.id})
+        stats = await self.economy.find_one({"guild": ctx.guild.id, "user": ctx.author.id})
         if amount.lower() == "all":
-            await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.id}, {"$set": {"bank": 0}})
-            await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.id}, {"$inc": {"wallet": stats['bank']}})
+            await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.author.id}, {"$set": {"bank": 0}})
+            await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.author.id}, {"$inc": {"wallet": stats['bank']}})
             await ctx.message.add_reaction("✅")
             return
         amount = int(amount)
@@ -256,6 +246,6 @@ class Economy(commands.Cog):
             return await ctx.send("You can't deposit more money than what's in your bank")
         elif amount <= 0:
             return await ctx.send("You can't send negative")
-        await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.id}, {"$inc": {"wallet": amount}})
-        await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.id}, {"$inc": {"bank": -amount}})
+        await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.author.id}, {"$inc": {"wallet": amount}})
+        await self.economy.update_one({"guild": ctx.guild.id, "user": ctx.author.id}, {"$inc": {"bank": -amount}})
         await ctx.message.add_reaction("✅")
