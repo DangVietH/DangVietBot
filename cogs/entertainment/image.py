@@ -196,6 +196,17 @@ class Image(commands.Cog):
             io.BytesIO(await resp.read()), f"balls.gif"
         ))
 
+    @commands.command(help="Yall be drippin")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def drip(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        resp = await self.bot.session.get(
+            f"https://api.popcat.xyz/drip", params={"image": member.display_avatar.url}
+        )
+        await ctx.send(file=discord.File(
+            io.BytesIO(await resp.read()), f"drip.png"
+        ))
+
     @commands.command(help="Make a fake youtube video", aliases=['ytvideo'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def ytvid(self, ctx, member: discord.Member = None, *, title="Sus"):

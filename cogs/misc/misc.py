@@ -118,7 +118,7 @@ class Misc(commands.Cog):
         data = await resp.json()
 
         if data.get('error'):
-            return await ctx.send(f"Received unexpected error: {data['error']}")
+            return await ctx.send(f"Error: {data['error']}")
         pagData = []
         for chunk in data['lyrics'].split('\n'):
             pagData.append(chunk)
