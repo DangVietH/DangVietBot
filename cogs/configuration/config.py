@@ -497,6 +497,34 @@ Valid Variables:
         await self.bot.mongo['sb']['config'].delete_one({"guild": ctx.guild.id})
         await ctx.send("Starboard system disabled")
 
+    @commands.group(invoke_without_command=True, case_insensitive=True, help="Economy Configuration")
+    async def econfig(self, ctx):
+        await ctx.send_help(ctx.command)
+
+    @econfig.command(help="Set the currency symbol", name="symbol")
+    @commands.check_any(commands.has_permissions(manage_guild=True), has_config_role())
+    async def econfig_symbol(self, ctx, symbol):
+        if len(symbol) < 1:
+            return await ctx.send("Symbol should only be 1 character")
+        await self.bot.mongo["economy"]["server"].update_one({"guild": ctx.guild.id},
+                                                             {"$set": {"econ_symbol": symbol}})
+        await ctx.send("Economy symbol set to `{}`".format(symbol))
+
+    @econfig.command(name="shop_add", help="Add item to the shop")
+    @commands.check_any(commands.has_permissions(manage_guild=True), has_config_role())
+    async def econfig_shop_add(self, ctx, name: str, price: int):
+        await self.bot.mongo["economy"]["server"].update_one({"guild": ctx.guild.id},
+                                         {"$addToSet": {"shop": {"name": name, "price": price}}})
+        await ctx.send(f"Added {name} to the shop!")
+
+    @econfig.command(name="shop_remove", help="Remove an item from the shop")
+    @commands.check_any(commands.has_permissions(manage_guild=True), has_config_role())
+    async def econfig_shop_remove(self, ctx, name: str):
+        if await self.bot.mongo["economy"]["server"].find_one({"guild": ctx.guild.id, "shop.name": name}) is None:
+            return await ctx.send("That item isn't in the shop!")
+        await self.bot.mongo["economy"]["server"].update_one({"guild": ctx.guild.id}, {"$pull": {"shop": {"name": name}}})
+        await ctx.send(f"Removed {name} from the shop!")
+
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Level Configuration")
     async def lvl(self, ctx):
         await ctx.send_help(ctx.command)

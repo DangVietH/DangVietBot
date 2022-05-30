@@ -276,3 +276,13 @@ class Image(commands.Cog):
             }
         )
         await ctx.send(file=discord.File(io.BytesIO(await resp.read()), 'tweet.png'))
+
+    @commands.command(help="Surprised pikachu")
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    async def pikachu(self, ctx, *, text="Nothing"):
+        resp = await self.bot.session.get(
+            f"https://api.popcat.xyz/pikachu", params={"text": text}
+        )
+        await ctx.send(file=discord.File(
+            io.BytesIO(await resp.read()), f"pikachu.png"
+        ))

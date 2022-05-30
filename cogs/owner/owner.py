@@ -14,14 +14,10 @@ class Owner(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    def clean_code(self, code):
-        if code.startswith('```') and code.endswith('```'):
-            return '\n'.join(code.split('\n')[1:-3])
-        else:
-            return code
+    async def cog_check(self, ctx):
+        return await self.bot.is_owner(ctx.author)
 
     @commands.command(help="Load a cog")
-    @commands.is_owner()
     async def load(self, ctx, *, cog=None):
         try:
             await self.bot.load_extension(cog)
@@ -31,7 +27,6 @@ class Owner(commands.Cog):
             await ctx.send(f'⬆️`{cog}`')
 
     @commands.command(help="Unload a cog")
-    @commands.is_owner()
     async def unload(self, ctx, *, cog=None):
         try:
             await self.bot.unload_extension(cog)
@@ -41,7 +36,6 @@ class Owner(commands.Cog):
             await ctx.send(f'⬇️`{cog}`')
 
     @commands.command(help="Reload a cog")
-    @commands.is_owner()
     async def reload(self, ctx, *, cog=None):
         try:
             await self.bot.reload_extension(cog)
@@ -50,7 +44,6 @@ class Owner(commands.Cog):
         else:
             await ctx.send(f'🔁`{cog}`')
 
-    @commands.is_owner()
     @commands.command(help="Change the bot status")
     async def setstatus(self, ctx, presence, *, msg):
         if presence == "game":
@@ -66,7 +59,6 @@ class Owner(commands.Cog):
         await ctx.message.add_reaction('👌')
     
     @commands.command(help="Toggles on and off a command")
-    @commands.is_owner()
     async def cmd_toggle(self, ctx, *, command: str):
         command = self.bot.get_command(command)
         if not command.enabled:
@@ -77,39 +69,11 @@ class Owner(commands.Cog):
             await ctx.reply(F"Disabled {command.name} command.")
 
     @commands.command(help="Shutdown the bot")
-    @commands.is_owner()
     async def shutdown(self, ctx):
         await ctx.send('Shutting down...')
         await self.bot.close()
 
-    @commands.command(help="Run code", aliases=['e'])
-    @commands.is_owner()
-    async def eval(self, ctx, *, code):
-        code = self.clean_code(code)
-        variables = {
-            'discord': discord,
-            'bot': self.bot,
-            'commands': commands,
-            'ctx': ctx,
-            'channel': ctx.channel,
-            'author': ctx.author,
-            'guild': ctx.guild,
-            'message': ctx.message
-        }
-
-        stdout = io.StringIO()
-
-        try:
-            with contextlib.redirect_stdout(stdout):
-                exec(f"async def func():\n{textwrap.indent(code, '  ')}", variables)
-                result = f"{stdout.getvalue()}"
-        except Exception as e:
-            result = f'```py\n{stdout.getvalue()}{traceback.format_exc()}\n```'
-
-        await ctx.send(result)
-
     @commands.group(help="Blacklist ppls")
-    @commands.is_owner()
     async def blacklist(self, ctx, user: discord.User, *, reason):
         check = await self.bot.mongo['bot']['blacklist'].find_one({"id": user.id})
         if check is not None:
@@ -128,7 +92,6 @@ class Owner(commands.Cog):
         await ctx.send("Blacklist user successfully")
 
     @commands.command(help="unBlacklist user")
-    @commands.is_owner()
     async def unblacklist(self, ctx, user: discord.User):
         await self.bot.mongo['bot']['blacklist'].delete_one({"id": user.id})
         await ctx.send("Unblacklist user successfully")

@@ -129,15 +129,19 @@ class Leveling(commands.Cog):
 
     @commands.command(help="Set background for your server rank")
     async def setbackground(self, ctx, *, link):
-        if await self.bot.mongo["levelling"]['image'].find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is not None:
-            await self.bot.mongo["levelling"]['image'].update_one({"guild": ctx.guild.id, "member": ctx.author.id}, {"$set": {"image": link}})
+        if await self.bot.mongo["levelling"]['image'].find_one(
+                {"guild": ctx.guild.id, "member": ctx.author.id}) is not None:
+            await self.bot.mongo["levelling"]['image'].update_one({"guild": ctx.guild.id, "member": ctx.author.id},
+                                                                  {"$set": {"image": link}})
         else:
-            await self.bot.mongo["levelling"]['image'].insert_one({"guild": ctx.guild.id, "member": ctx.author.id, "image": link})
+            await self.bot.mongo["levelling"]['image'].insert_one(
+                {"guild": ctx.guild.id, "member": ctx.author.id, "image": link})
         await ctx.send("New Background set")
 
     @commands.command(help="Set background back to default")
     async def resetbackground(self, ctx):
-        if await self.bot.mongo["levelling"]['image'].find_one({"guild": ctx.guild.id, "member": ctx.author.id}) is None:
+        if await self.bot.mongo["levelling"]['image'].find_one(
+                {"guild": ctx.guild.id, "member": ctx.author.id}) is None:
             await ctx.send("You don't have a custom background")
         await self.bot.mongo["levelling"]['image'].delete_one({"guild": ctx.guild.id, "member": ctx.author.id})
         await ctx.send("👍")
@@ -147,7 +151,8 @@ class Leveling(commands.Cog):
     async def add_xp(self, ctx, member: discord.Member, amount: int):
         if await self.bot.mongo["levelling"]['member'].find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
             return await ctx.send("User has no account")
-        await self.bot.mongo["levelling"]['member'].update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": amount}})
+        await self.bot.mongo["levelling"]['member'].update_one({'guild': ctx.guild.id, "user": ctx.author.id},
+                                                               {"$inc": {"xp": amount}})
         await ctx.send(f"Successfully added {amount} xp to {member}")
 
     @commands.command(help="Remove xp from member")
@@ -156,7 +161,8 @@ class Leveling(commands.Cog):
         if await self.bot.mongo["levelling"]['member'].find_one({'guild': ctx.guild.id, "user": ctx.author.id}) is None:
             return await ctx.send("User has no account")
 
-        await self.bot.mongo["levelling"]['member'].update_one({'guild': ctx.guild.id, "user": ctx.author.id}, {"$inc": {"xp": -amount}})
+        await self.bot.mongo["levelling"]['member'].update_one({'guild': ctx.guild.id, "user": ctx.author.id},
+                                                               {"$inc": {"xp": -amount}})
         await ctx.send(f"Successfully remove {amount} xp from {member}")
 
     @commands.has_permissions(manage_messages=True)

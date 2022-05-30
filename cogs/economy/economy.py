@@ -47,7 +47,7 @@ class Economy(commands.Cog):
         data = await self.serverdata.find_one({"guild": ctx.guild.id})
         items = data['shop']
         if len(items) < 1:
-            return await ctx.send("There's nothing in the shop! If you have the manage_guild permission, use `{}shop add` to add items.".format(ctx.prefix))
+            return await ctx.send("There's nothing in the shop! Use `{}econfig shop_add` to add items.".format(ctx.prefix))
         data = []
         for item in items:
             name = item['name']
@@ -55,21 +55,6 @@ class Economy(commands.Cog):
             data.append((f"{name}", f"**Price** {amount}"))
         pages = MenuPages(DefaultPageSource(f"{ctx.guild} Shop!", data), ctx)
         await pages.start()
-
-    @shop.command(name="add", help="Add item to the shop")
-    @commands.has_permissions(manage_guild=True)
-    async def shop_add(self, ctx, name: str, price: int):
-        await self.serverdata.update_one({"guild": ctx.guild.id}, {"$addToSet": {"shop": {"name": name, "price": price}}})
-        await ctx.send(f"Added {name} to the shop!")
-
-    @shop.command(name="remove", help="Remove an item from the shop")
-    @commands.has_permissions(manage_guild=True)
-    async def shop_remove(self, ctx, name: str):
-        data = await self.serverdata.find_one({"guild": ctx.guild.id, "shop.name": name})
-        if data is None:
-            return await ctx.send("That item isn't in the shop!")
-        await self.serverdata.update_one({"guild": ctx.guild.id}, {"$pull": {"shop": {"name": name}}})
-        await ctx.send(f"Removed {name} from the shop!")
 
     @commands.command(help="Buy some items")
     async def buy(self, ctx, item_name: str, amount=1):
@@ -210,7 +195,7 @@ class Economy(commands.Cog):
         num = 0
         async for x in stats:
             num += 1
-            to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Wallet:** {x['wallet']}")
+            to_append = (f"{num}: {ctx.guild.get_member(x['user'])}", f"**Wallet:** {(await self.serverdata.find_one({'guild': ctx.guild.id}))['econ_symbol']} {x['wallet']}")
             data.append(to_append)
 
         pages = MenuPages(DefaultPageSource(f"Richest user in {ctx.guild.name}", data), ctx)
