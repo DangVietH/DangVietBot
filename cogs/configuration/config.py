@@ -380,10 +380,13 @@ Valid Variables:
         if result is None:
             return await ctx.send("You don't have a starboard system")
         embed = discord.Embed(title="Starboard Stats", color=discord.Color.random())
-        embed.add_field(name="Starboard Channel", value=f"{self.bot.get_channel(result['channel']).mention}")
-        embed.add_field(name="Starboard Emoji", value=f"{result['emoji']}")
-        embed.add_field(name="Starboard Amount", value=f"{result['threshold']}")
-        embed.add_field(name="Starboard Ignored Channels",
+        embed.add_field(name="Channel", value=f"{self.bot.get_channel(result['channel']).mention}")
+        embed.add_field(name="Is Lock", value=f"{result['lock']}")
+        embed.add_field(name="Emoji", value=f"{result['emoji']}")
+        embed.add_field(name="Amount", value=f"{result['threshold']}")
+        embed.add_field(name="Allow NSFW", value=f"{result['nsfw']}")
+        embed.add_field(name="Allow Self Star", value=f"{result['selfStar']}")
+        embed.add_field(name="Ignored Channels",
                         value=f"{[self.bot.get_channel(channel).mention for channel in result['ignoreChannel']]}")
         await ctx.send(embed=embed)
 

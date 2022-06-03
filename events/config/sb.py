@@ -79,7 +79,7 @@ class Star(commands.Cog):
                         await self.bot.mongo['sb']['msg'].insert_one({'message': payload.message_id, 'star_msg': starmsg.id, 'amount': len(react), 'guild': payload.guild_id, 'channel': payload.channel_id})
                     else:
                         starbordMessage = await star_channel.fetch_message(msgstats['star_msg'])
-                        await starbordMessage.edit(f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
+                        await starbordMessage.edit(content=f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
                         await self.bot.mongo['sb']['msg'].update_one({'message': payload.message_id}, {'$inc': {'amount': 1}})
 
     @commands.Cog.listener()
@@ -111,7 +111,7 @@ class Star(commands.Cog):
                 if msgstats is not None:
                     starmsg = await star_channel.fetch_message(msgstats['star_msg'])
                     if not react or len(react) >= guildstats['threshold']:
-                        await starmsg.edit(f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
+                        await starmsg.edit(content=f"{emoji} **{len(react)} |** {channel.mention}", embed=self.embedGenerator(msg))
                         await self.bot.mongo['sb']['msg'].update_one({'message': payload.message_id}, {'$inc': {'amount': -1}})
                     else:
                         await self.bot.mongo['sb']['msg'].delete_one({"message": payload.message_id})
@@ -124,7 +124,7 @@ class Star(commands.Cog):
             guildstats = await self.bot.mongo['sb']['config'].find_one({'guild': after.guild.id})
             star_channel = self.bot.get_channel(guildstats['channel'])
             starmsg = await star_channel.fetch_message(check['star_msg'])
-            await starmsg.edit(f"{guildstats['emoji']} **{check['amount']} |** {self.bot.get_channel(check['channel']).mention}", embed=self.embedGenerator(after))
+            await starmsg.edit(content=f"{guildstats['emoji']} **{check['amount']} |** {self.bot.get_channel(check['channel']).mention}", embed=self.embedGenerator(after))
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):
@@ -138,6 +138,6 @@ class Star(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild):
-        if await self.bot.mongo['sb']['config'].find_one({"guild": guild.id}) and await self.bot.mongo['sb']['msg'].find_one({'guild': guild.id}) is not None:
+        if await self.bot.mongo['sb']['config'].find_one({"guild": guild.id}) and await self.bot.mongo['sb']['msg'].find_one({'guild': guild.id}):
             await self.bot.mongo['sb']['config'].delete_one({"guild": guild.id})
             await self.bot.mongo['sb']['msg'].delete_one({'guild': guild.id})

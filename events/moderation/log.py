@@ -20,7 +20,10 @@ class ModLog(commands.Cog):
                      "type": type_off,
                      "Mod": f"{mod}",
                      "reason": str(reason),
-                     "time": datetime.datetime.utcnow()}}}
+                     "time": datetime.datetime.utcnow()
+                     }
+            }
+            }
         )
         await self.bot.mongo["moderation"]['cases'].update_one({"guild": guild.id}, {"$inc": {"num": 1}})
 
@@ -41,7 +44,12 @@ class ModLog(commands.Cog):
         await asyncio.sleep(2)
         async for entry in guild.audit_logs(action=discord.AuditLogAction.ban, limit=10):
             if entry.target == user:
-                return await self.run_modlog(guild, "ban", user, entry.user, entry.reason)
+                await self.run_modlog(guild, "ban", user, entry.user, entry.reason)
+                await self.bot.mongo["moderation"]['cases'].update_one(
+                    {"guild": guild.id},
+                    {"$addToSet": {"ban": user.id}}
+                )
+                return
 
     @commands.Cog.listener()
     async def on_member_unban(self, guild, user):
@@ -50,7 +58,17 @@ class ModLog(commands.Cog):
         await asyncio.sleep(2)
         async for entry in guild.audit_logs(action=discord.AuditLogAction.unban, limit=10):
             if entry.target == user:
-                return await self.run_modlog(guild, "unban", user, entry.user, entry.reason)
+                await self.run_modlog(guild, "unban", user, entry.user, entry.reason)
+                await self.bot.mongo["moderation"]['cases'].update_one(
+                    {"guild": guild.id},
+                    {"$pull": {"ban": user.id}}
+                )
+                return
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        if member.id in (await self.bot.mongo["moderation"]['cases'].find_one({"guild": member.guild.id}))["ban"]:
+            await member.ban(reason="User seems to evade IP ban")
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
