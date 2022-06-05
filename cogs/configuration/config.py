@@ -383,7 +383,7 @@ Valid Variables:
         embed.add_field(name="Channel", value=f"{self.bot.get_channel(result['channel']).mention}")
         embed.add_field(name="Is Lock", value=f"{result['lock']}")
         embed.add_field(name="Emoji", value=f"{result['emoji']}")
-        embed.add_field(name="Amount", value=f"{result['threshold']}")
+        embed.add_field(name="Required Star Amount", value=f"{result['threshold']}")
         embed.add_field(name="Allow NSFW", value=f"{result['nsfw']}")
         embed.add_field(name="Allow Self Star", value=f"{result['selfStar']}")
         embed.add_field(name="Ignored Channels",

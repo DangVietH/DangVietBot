@@ -4,6 +4,8 @@ from utils.menuUtils import MenuPages, DefaultPageSource
 from cogs.info.help import CustomHelp
 import datetime
 import io
+import os
+import inspect
 
 
 class Info(commands.Cog):
@@ -17,6 +19,25 @@ class Info(commands.Cog):
     @commands.command(help="See bot latency")
     async def ping(self, ctx):
         await ctx.send(f"🏓**Pong!** My latency is {round(self.bot.latency * 1000)}ms")
+
+    @commands.command(aliases=['src'], help="Shows the source code for a command")
+    async def source(self, ctx, *, command=None):
+        source_url = "https://github.com/DangVietH/DangVietBot"
+        if command is None:
+            return await ctx.send(f"<{source_url}>")
+
+        command = self.bot.get_command(command)
+        if not command:
+            return await ctx.send("That command doesn't exist!'")
+
+        src = command.callback.__code__
+        filename = src.co_filename
+
+        lines, firstlineno = inspect.getsourcelines(src)
+
+        location = os.path.relpath(filename).replace("\\", "/")
+
+        await ctx.send(f"<{source_url}/blob/master/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>")
 
     @commands.command(help="See user info", aliases=['userinfo', 'ui'])
     async def whois(self, ctx, user: discord.Member = None):
@@ -83,7 +104,7 @@ class Info(commands.Cog):
         embed.add_field(name="Developer", value=f"DvH#9980")
         embed.add_field(name="Version", value="v0.9.5-alpha")
         embed.add_field(name="Written in", value="Python 3.10.1")
-        embed.add_field(name="Library", value="[discord.py 2.0](https://github.com/Rapptz/discord.py)")
+        embed.add_field(name="Library", value=f"[discord.py {discord.__version__}](https://github.com/Rapptz/discord.py)")
         embed.add_field(name="Uptime", value=f"<t:{int(datetime.datetime.timestamp(self.bot.uptime))}:R>")
         embed.add_field(name="Create at", value=f"<t:{int(self.bot.user.created_at.timestamp())}:R>")
         embed.add_field(name="Command's", value=f"{len(self.bot.commands)}")

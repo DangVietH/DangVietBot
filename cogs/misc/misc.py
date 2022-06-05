@@ -1,8 +1,6 @@
 import discord
 from discord.ext import commands, menus
 from utils import config_var, MenuPages
-import os
-import inspect
 import datetime
 
 
@@ -89,25 +87,6 @@ class Misc(commands.Cog):
 
         page = MenuPages(UserCasePageSource(member, user_check['total_cases'], udata), ctx)
         await page.start()
-
-    @commands.command(aliases=['src'], help="Shows the source code for a command")
-    async def source(self, ctx, *, command=None):
-        source_url = "<https://github.com/DangVietH/DangVietBot>"
-        if command is None:
-            return await ctx.send(source_url)
-
-        command = self.bot.get_command(command)
-        if not command:
-            return await ctx.send("That command doesn't exist!'")
-
-        src = command.callback.__code__
-        filename = src.co_filename
-
-        lines, firstlineno = inspect.getsourcelines(src)
-
-        location = os.path.relpath(filename).replace("\\", "/")
-
-        await ctx.send(f"<{source_url}/blob/master/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>")
 
     @commands.command(aliases=['lyrc', 'lyric'], help="Shows the lyrics of a song")
     async def lyrics(self, ctx, *, song):

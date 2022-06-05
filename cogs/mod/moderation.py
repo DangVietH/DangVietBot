@@ -296,7 +296,7 @@ class Moderation(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
-        insert = {"guild": guild.id, "num": 0, "cases": [], "ban": []}
+        insert = {"guild": guild.id, "num": 0, "cases": []}
         await self.bot.mongo["moderation"]['cases'].insert_one(insert)
 
     @commands.Cog.listener()
