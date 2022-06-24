@@ -1,25 +1,8 @@
 import asyncio
 import random
-import asyncpraw
 import discord
 from discord.ext import commands
 from googletrans import Translator
-from utils import config_var
-
-reddit = asyncpraw.Reddit(client_id=config_var['reddit_id'],
-                          client_secret=config_var['reddit_secret'],
-                          username='DangVietHoang',
-                          password=config_var['reddit_pass'],
-                          user_agent='')
-
-all_sub = []
-
-
-async def gen_meme():
-    subreddit = await reddit.subreddit("memes")
-    hot = subreddit.hot()
-    async for submission in hot:
-        all_sub.append(submission)
 
 
 class Fun(commands.Cog):
@@ -27,10 +10,6 @@ class Fun(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-
-    @commands.Cog.listener()
-    async def on_ready(self):
-        await gen_meme()
 
     @commands.command(aliases=["iqrate"], help="Accurately rate your IQ without taking a test")
     async def iq(self, ctx):
@@ -43,26 +22,6 @@ class Fun(commands.Cog):
         resp = await self.bot.session.get(f"https://zenquotes.io/api/random")
         data = await resp.json()
         await ctx.send(f"**{data[0]['q']}**\n          -{data[0]['a']}")
-
-    @commands.command(help="Fresh reddit memes")
-    async def meme(self, ctx):
-        # meme command base on dank memer, speed up asyncpraw code from https://stackoverflow.com/questions/67101891/discord-py-meme-command-takes-a-lot-of-time
-        random_sub = random.choice(all_sub)
-        all_sub.append(random_sub)
-
-        name = random_sub.title
-        url = random_sub.url
-        upvote = random_sub.score
-        comment = random_sub.num_comments
-        link = random_sub.permalink
-
-        embed = discord.Embed(title=f'{name}', color=discord.Color.orange(), url=f"https://reddit.com{link}")
-        embed.set_image(url=url)
-        embed.set_footer(text=f"👍 {upvote} | 💬 {comment}", icon_url='https://www.vectorico.com/download/social_media/Reddit-Icon.png')
-        await ctx.send(embed=embed)
-
-        if len(all_sub) <= 20:  # meme collection running out owo
-            await gen_meme()
 
     @commands.command(help="Get dog facts")
     @commands.cooldown(1, 10, commands.BucketType.user)

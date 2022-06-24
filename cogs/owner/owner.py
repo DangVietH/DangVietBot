@@ -1,8 +1,3 @@
-import contextlib
-import io
-import textwrap
-import traceback
-
 import discord
 from discord.ext import commands
 

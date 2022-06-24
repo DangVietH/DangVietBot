@@ -124,7 +124,7 @@ class Misc(commands.Cog):
             value=(
                 f"**Temperature**: {data['current']['temp_c']}°C\n"
                 f"**Humidity**: {data['current']['humidity']}%\n"
-                f"**Wind speed**: {data['current']['wind_mph']}mph\n"
+                f"**Wind speed**: {data['current']['wind_kph']}kph\n"
                 f"**Cloud**: {data['current']['cloud']}%\n"
             )
         )

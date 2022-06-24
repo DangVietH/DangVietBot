@@ -55,7 +55,7 @@ class Star(commands.Cog):
 
         star_channel = self.bot.get_channel(guildstats['channel'])
         channel = self.bot.get_channel(payload.channel_id)
-        emoji = guildstats['emoji']
+        emoji = "⭐️"
         if str(payload.emoji) == emoji:
             if guildstats['lock'] is True:
                 return
@@ -93,7 +93,7 @@ class Star(commands.Cog):
 
         star_channel = self.bot.get_channel(guildstats['channel'])
         channel = self.bot.get_channel(payload.channel_id)
-        emoji = guildstats['emoji']
+        emoji = "⭐️"
         if str(payload.emoji) == emoji:
             if guildstats['lock'] is True:
                 return
