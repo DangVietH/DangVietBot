@@ -330,6 +330,7 @@ Valid Variables:
                               color=self.bot.embed_color)
         msg = await ctx.send(embed=embed)
         questions = [
+            "What should be the starboard emoji (type `false` if you want default ⭐️):",
             "What should be the starboard amount (type `false` if you want default value, which is 2):",
             "Do you want users to self star their own message (type `true` or `false`):",
             "Do you want users to star message inn NSFW channel (type `true` or `false`):",
@@ -357,15 +358,17 @@ Valid Variables:
         insert_data = {
             "guild": ctx.guild.id,
             "channel": c_id,
-            "threshold": check_value(answers[0], "int") or 2,
+            "emoji": check_value(answers[0]) or '⭐️',
+            "threshold": check_value(answers[1], "int") or 2,
             "ignoreChannel": [],
             "lock": False,
-            "selfStar": check_return_dtype(answers[1]) or False,
-            "nsfw": check_return_dtype(answers[2]) or False
+            "selfStar": check_return_dtype(answers[2]) or False,
+            "nsfw": check_return_dtype(answers[3]) or False
         }
         await self.bot.mongo['sb']['config'].insert_one(insert_data)
         embed.description = "Wizard finished successfully!"
         embed.add_field(name="Starboard Channel", value=self.bot.get_channel(c_id).mention)
+        embed.add_field(name="Starboard Emoji", value=insert_data["emoji"])
         embed.add_field(name="Starboard Amount", value=insert_data["threshold"])
         embed.add_field(name="Self Star", value=insert_data["selfStar"])
         embed.add_field(name="Allow NSFW", value=insert_data["nsfw"])
@@ -379,7 +382,8 @@ Valid Variables:
         embed = discord.Embed(title="Starboard Stats", color=discord.Color.random())
         embed.add_field(name="Channel", value=f"{self.bot.get_channel(result['channel']).mention}")
         embed.add_field(name="Is Lock", value=f"{result['lock']}")
-        embed.add_field(name="Required Star Amount", value=f"{result['threshold']}")
+        embed.add_field(name="Emoji", value=f"{result['emoji']}")
+        embed.add_field(name="Amount", value=f"{result['threshold']}")
         embed.add_field(name="Allow NSFW", value=f"{result['nsfw']}")
         embed.add_field(name="Allow Self Star", value=f"{result['selfStar']}")
         embed.add_field(name="Ignored Channels",
@@ -394,6 +398,7 @@ Valid Variables:
             await self.bot.mongo['sb']['config'].insert_one({
                 "guild": ctx.guild.id,
                 "channel": channel.id,
+                "emoji": "⭐",
                 "threshold": 2,
                 "ignoreChannel": [],
                 "lock": False,

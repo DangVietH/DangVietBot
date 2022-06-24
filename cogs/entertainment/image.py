@@ -14,7 +14,7 @@ class Image(commands.Cog):
     async def gay(self, ctx, member: discord.Member = None):
         member = member or ctx.author
         resp = await self.bot.session.get(
-            f"https://some-random-api.ml/canvas/gay", params={"avatar": member.display_avatar.url}
+            f"https://some-random-api.ml/canvas/lgbt", params={"avatar": member.display_avatar.url}
         )
         await ctx.send(file=discord.File(
             io.BytesIO(await resp.read()), f"gay.png"
