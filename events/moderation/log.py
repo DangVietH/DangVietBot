@@ -45,10 +45,6 @@ class ModLog(commands.Cog):
         async for entry in guild.audit_logs(action=discord.AuditLogAction.ban, limit=10):
             if entry.target == user:
                 await self.run_modlog(guild, "ban", user, entry.user, entry.reason)
-                await self.bot.mongo["moderation"]['cases'].update_one(
-                    {"guild": guild.id},
-                    {"$addToSet": {"ban": user.id}}
-                )
                 return
 
     @commands.Cog.listener()
@@ -59,16 +55,7 @@ class ModLog(commands.Cog):
         async for entry in guild.audit_logs(action=discord.AuditLogAction.unban, limit=10):
             if entry.target == user:
                 await self.run_modlog(guild, "unban", user, entry.user, entry.reason)
-                await self.bot.mongo["moderation"]['cases'].update_one(
-                    {"guild": guild.id},
-                    {"$pull": {"ban": user.id}}
-                )
                 return
-
-    @commands.Cog.listener()
-    async def on_member_join(self, member):
-        if member.id in (await self.bot.mongo["moderation"]['cases'].find_one({"guild": member.guild.id}))["ban"]:
-            await member.ban(reason="User seems to evade IP ban")
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):

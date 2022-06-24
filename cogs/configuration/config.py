@@ -291,7 +291,7 @@ Valid Variables:
     @commands.command(help="Create a reaction role message")
     @commands.check_any(commands.has_permissions(manage_roles=True), has_config_role())
     async def reaction(self, ctx):
-        questions = ["Enter Message: ", "Enter Emojis: ", "Enter Roles (only type role id): ", "Enter Channel: "]
+        questions = ["Enter Message: ", "Enter Emojis **WARNING: Server emojis are not supported right now**: ", "Enter Roles (only type role id): ", "Enter Channel: "]
         answers = []
         msg = await ctx.send("Reaction role wizard")
 
@@ -330,7 +330,7 @@ Valid Variables:
                               color=self.bot.embed_color)
         msg = await ctx.send(embed=embed)
         questions = [
-            "What should be the starboard emoji (type `false` if you want default ⭐️):",
+            "What should be the starboard emoji (type `false` if you want default ⭐️) **WARNING: Server emojis are not supported right now**:",
             "What should be the starboard amount (type `false` if you want default value, which is 2):",
             "Do you want users to self star their own message (type `true` or `false`):",
             "Do you want users to star message inn NSFW channel (type `true` or `false`):",

@@ -26,8 +26,7 @@ class Reaction(commands.Cog):
             guild = self.bot.get_guild(payload.guild_id)
 
             for i in range(len(emojis)):
-                chose_emoji = str(payload.emoji)
-                if chose_emoji == emojis[i]:
+                if str(payload.emoji) == emojis[i]:
                     selected_role = roles[i]
 
                     role = guild.get_role(int(selected_role))
@@ -44,8 +43,7 @@ class Reaction(commands.Cog):
             guild = self.bot.get_guild(payload.guild_id)
 
             for i in range(len(emojis)):
-                chose_emoji = str(payload.emoji)
-                if chose_emoji == emojis[i]:
+                if str(payload.emoji) == emojis[i]:
                     selected_role = roles[i]
 
                     role = guild.get_role(int(selected_role))
