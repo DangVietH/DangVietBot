@@ -4,6 +4,8 @@ from utils.menuUtils import MenuPages, DefaultPageSource
 from cogs.info.help import CustomHelp
 import datetime
 import io
+import os
+import inspect
 
 
 class Info(commands.Cog):
@@ -13,6 +15,25 @@ class Info(commands.Cog):
         self.bot = bot
         bot.help_command = CustomHelp()
         bot.help_command.cog = self
+
+    @commands.command(aliases=['src'], help="Shows the source code for a command")
+    async def source(self, ctx, *, command=None):
+        source_url = "https://github.com/DangVietH/DangVietBot"
+        if command is None:
+            return await ctx.send(f"<{source_url}>")
+
+        command = self.bot.get_command(command)
+        if not command:
+            return await ctx.send("That command doesn't exist!'")
+
+        src = command.callback.__code__
+        filename = src.co_filename
+
+        lines, firstlineno = inspect.getsourcelines(src)
+
+        location = os.path.relpath(filename).replace("\\", "/")
+
+        await ctx.send(f"<{source_url}/blob/master/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>")
 
     @commands.command(help="See bot latency")
     async def ping(self, ctx):
@@ -26,13 +47,6 @@ class Info(commands.Cog):
         else:
             activity = None
 
-        member_perm_list = []
-
-        for name, value in ctx.channel.permissions_for(ctx.author):
-            name = name.replace('_', ' ').replace('guild', 'server').title()
-            if value:
-                member_perm_list.append(name)
-
         embed = discord.Embed(timestamp=ctx.message.created_at, color=user.color)
         embed.set_author(name=f"{user}", icon_url=user.display_avatar.url)
         embed.add_field(name="Nick", value=user.nick, inline=False)
@@ -42,8 +56,6 @@ class Info(commands.Cog):
         embed.add_field(name="Activity", value=activity)
         embed.add_field(name="Top role", value=user.top_role.mention)
         embed.add_field(name="Bot", value=user.bot)
-        embed.add_field(name="Roles", value=", ".join([r.mention for r in user.roles if r != ctx.guild.default_role]), inline=False)
-        embed.add_field(name="Guild Permission", value=", ".join(member_perm_list), inline=False)
         embed.add_field(name="Create at", value=f"<t:{int(user.created_at.timestamp())}:R>")
         embed.add_field(name="Join at", value=f"<t:{int(user.joined_at.timestamp())}:R>")
         embed.set_thumbnail(url=user.display_avatar.url)
