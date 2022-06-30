@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 import datetime
 
 
@@ -125,41 +125,10 @@ class Moderation(commands.Cog):
 
             for channel in guild.channels:
                 await channel.set_permissions(mutedRole,
-                                              speak=False,
                                               send_messages=False,
-                                              read_message_history=True,
-                                              read_messages=False)
+                                              add_reactions=False)
         await member.add_roles(mutedRole, reason=reason)
         await self.modlogUtils(ctx, member, "mute", reason, logging=True)
-
-    @commands.command(help="Mute member but with a timer")
-    @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
-    async def tempmute(self, ctx, member: discord.Member, time, *, reason=None):
-        if ctx.author.top_role.position < member.top_role.position:
-            return await ctx.send("You can't mute someone with a higher role than you")
-        converted_time = convert(time)
-        if converted_time == -1:
-            return await ctx.send("You didn't answer the time correctly")
-
-        elif converted_time == -2:
-            return await ctx.send("Time must be an integer")
-        guild = ctx.guild
-        mutedRole = discord.utils.get(guild.roles, name="muted")
-        if not mutedRole:
-            mutedRole = await guild.create_role(name="muted")
-
-            for channel in guild.channels:
-                await channel.set_permissions(mutedRole,
-                                              speak=False,
-                                              send_messages=False,
-                                              read_message_history=True,
-                                              read_messages=False)
-        await member.add_roles(mutedRole, reason=reason)
-        final_time = datetime.datetime.now() + datetime.timedelta(seconds=converted_time)
-        await member.send(
-            f"You were temporarily muted for <t:{int(datetime.datetime.timestamp(final_time))}:R> in **{guild.name}** for **{reason}**")
-        await self.bot.mongo["timer"]['mod'].insert_one({"guild": ctx.guild.id, "type": "mute", "time": final_time, "user": member.id})
-        await self.modlogUtils(ctx, member, "tempmute", reason, logging=True)
 
     @commands.command(help="Unmute member")
     @commands.check_any(has_mod_role(), commands.has_permissions(manage_roles=True))
@@ -230,31 +199,6 @@ class Moderation(commands.Cog):
         await self.bot.mongo["timer"]['mod'].insert_one({"guild": ctx.guild.id, "type": "ban", "time": final_time, "user": member.id})
         await self.modlogUtils(ctx, member, "tempban", reason)
 
-    @tasks.loop(seconds=10)
-    async def time_checker(self):
-        try:
-            all_timer = self.bot.mongo["timer"]['mod'].find({})
-            current_time = datetime.datetime.now()
-            async for x in all_timer:
-                if current_time >= x['time']:
-                    if x['type'] == "mute":
-                        server = self.bot.get_guild(int(x['guild']))
-                        member = server.get_member(int(x['user']))
-                        mutedRole = server.get_role(int(x['role']))
-                        await member.remove_roles(mutedRole)
-
-                        await self.bot.mongo["timer"]['mod'].delete_one(x)
-                    elif x['type'] == "ban":
-                        server = self.bot.get_guild(int(x['guild']))
-                        user = self.bot.get_user(int(x['user']))
-                        await server.unban(user, reason="Time up!")
-
-                        await self.bot.mongo["timer"]['mod'].delete_one(x)
-                else:
-                    pass
-        except Exception as e:
-            print(e)
-
     @commands.command(help="Unban member")
     @commands.check_any(has_mod_role(), commands.has_permissions(ban_members=True))
     async def unban(self, ctx, user_id: int, *, reason=None):
@@ -293,28 +237,3 @@ class Moderation(commands.Cog):
         for channel in ctx.guild.channels:
             if isinstance(channel, discord.TextChannel):
                 await channel.set_permissions(ctx.guild.default_role, send_messages=True)
-
-    @commands.Cog.listener()
-    async def on_guild_join(self, guild):
-        insert = {"guild": guild.id, "num": 0, "cases": [], "ban": []}
-        await self.bot.mongo["moderation"]['cases'].insert_one(insert)
-
-    @commands.Cog.listener()
-    async def on_guild_remove(self, guild):
-        await self.bot.mongo["moderation"]['cases'].delete_one({"guild": guild.id})
-        if await self.bot.mongo["moderation"]['modlog'].find_one({"guild": guild.id}):
-            await self.bot.mongo["moderation"]['modlog'].delete_one({"guild": guild.id})
-        if await self.bot.mongo["moderation"]['modrole'].find_one({"guild": guild.id}):
-            await self.bot.mongo["moderation"]['modrole'].delete_one({"guild": guild.id})
-        for member in guild.members:
-            if not member.bot:
-                result = await self.bot.mongo["moderation"]['user'].find_one({"guild": guild.id, "user": member.id})
-                if result is not None:
-                    await self.bot.mongo["moderation"]['user'].delete_one(result)
-
-    @commands.Cog.listener()
-    async def on_member_remove(self, member):
-        if not member.bot:
-            result = await self.bot.mongo["moderation"]['user'].find_one({"guild": member.guild.id, "user": member.id})
-            if result is not None:
-                await self.bot.mongo["moderation"]['user'].delete_one(result)
