@@ -36,10 +36,6 @@ class Moderation(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.time_checker.start()
-
-    async def cog_unload(self):
-        self.time_checker.cancel()
 
     async def modlogUtils(self, ctx, target, type_off: str, reason: str, logging=False):
         num_of_case = (await self.bot.mongo["moderation"]['cases'].find_one({"guild": ctx.guild.id}))['num'] + 1

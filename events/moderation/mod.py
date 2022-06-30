@@ -6,6 +6,10 @@ import datetime
 class ModEvent(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.time_checker.start()
+
+    async def cog_unload(self):
+        self.time_checker.cancel()
 
     @tasks.loop(seconds=10)
     async def time_checker(self):
