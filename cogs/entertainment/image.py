@@ -79,9 +79,10 @@ class Image(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def boil(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.session.get(
-            f"https://api.jeyy.xyz/image/boil", params={"image_url": member.display_avatar.url}
-        )
+        async with ctx.channel.typing():
+            resp = await self.bot.session.get(
+                f"https://api.jeyy.xyz/image/boil", params={"image_url": member.display_avatar.url}
+            )
         await ctx.send(file=discord.File(
             io.BytesIO(await resp.read()), f"boil.gif"
         ))
@@ -90,9 +91,10 @@ class Image(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def canny(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.session.get(
-            f"https://api.jeyy.xyz/image/canny", params={"image_url": member.display_avatar.url}
-        )
+        async with ctx.channel.typing():
+            resp = await self.bot.session.get(
+                f"https://api.jeyy.xyz/image/canny", params={"image_url": member.display_avatar.url}
+            )
         await ctx.send(file=discord.File(
             io.BytesIO(await resp.read()), f"canny.png"
         ))
@@ -101,9 +103,10 @@ class Image(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def cloth(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.session.get(
-            f"https://api.jeyy.xyz/image/cloth", params={"image_url": member.display_avatar.url}
-        )
+        async with ctx.channel.typing():
+            resp = await self.bot.session.get(
+                f"https://api.jeyy.xyz/image/cloth", params={"image_url": member.display_avatar.url}
+            )
         await ctx.send(file=discord.File(
             io.BytesIO(await resp.read()), f"cloth.gif"
         ))
@@ -112,9 +115,10 @@ class Image(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def cartoon(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.session.get(
-            f"https://api.jeyy.xyz/image/cartoon", params={"image_url": member.display_avatar.url}
-        )
+        async with ctx.channel.typing():
+            resp = await self.bot.session.get(
+                f"https://api.jeyy.xyz/image/cartoon", params={"image_url": member.display_avatar.url}
+            )
         await ctx.send(file=discord.File(
             io.BytesIO(await resp.read()), f"cartoon.png"
         ))
@@ -123,9 +127,10 @@ class Image(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def explicit(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.session.get(
-            f"https://api.jeyy.xyz/image/explicit", params={"image_url": member.display_avatar.url}
-        )
+        async with ctx.channel.typing():
+            resp = await self.bot.session.get(
+                f"https://api.jeyy.xyz/image/explicit", params={"image_url": member.display_avatar.url}
+            )
         await ctx.send(file=discord.File(
             io.BytesIO(await resp.read()), f"explicit.png"
         ))
@@ -134,9 +139,10 @@ class Image(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def tv(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.session.get(
-            f"https://api.jeyy.xyz/image/tv", params={"image_url": member.display_avatar.url}
-        )
+        async with ctx.channel.typing():
+            resp = await self.bot.session.get(
+                f"https://api.jeyy.xyz/image/tv", params={"image_url": member.display_avatar.url}
+            )
         await ctx.send(file=discord.File(
             io.BytesIO(await resp.read()), f"tv.gif"
         ))
@@ -145,9 +151,10 @@ class Image(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def shoot(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.session.get(
-            f"https://api.jeyy.xyz/image/shoot", params={"image_url": member.display_avatar.url}
-        )
+        async with ctx.channel.typing():
+            resp = await self.bot.session.get(
+                f"https://api.jeyy.xyz/image/shoot", params={"image_url": member.display_avatar.url}
+            )
         await ctx.send(file=discord.File(
             io.BytesIO(await resp.read()), f"shoot.gif"
         ))
@@ -156,9 +163,10 @@ class Image(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def rain(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.session.get(
-            f"https://api.jeyy.xyz/image/rain", params={"image_url": member.display_avatar.url}
-        )
+        async with ctx.channel.typing():
+            resp = await self.bot.session.get(
+                f"https://api.jeyy.xyz/image/rain", params={"image_url": member.display_avatar.url}
+            )
         await ctx.send(file=discord.File(
             io.BytesIO(await resp.read()), f"rain.gif"
         ))
@@ -167,9 +175,10 @@ class Image(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def clock(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.session.get(
-            f"https://api.jeyy.xyz/image/clock", params={"image_url": member.display_avatar.url}
-        )
+        async with ctx.channel.typing():
+            resp = await self.bot.session.get(
+                f"https://api.jeyy.xyz/image/clock", params={"image_url": member.display_avatar.url}
+            )
         await ctx.send(file=discord.File(
             io.BytesIO(await resp.read()), f"clock.gif"
         ))
@@ -178,9 +187,10 @@ class Image(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def glitch(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.session.get(
-            f"https://api.jeyy.xyz/image/glitch", params={"image_url": member.display_avatar.url}
-        )
+        async with ctx.channel.typing():
+            resp = await self.bot.session.get(
+                f"https://api.jeyy.xyz/image/glitch", params={"image_url": member.display_avatar.url}
+            )
         await ctx.send(file=discord.File(
             io.BytesIO(await resp.read()), f"glitch.gif"
         ))
@@ -189,9 +199,10 @@ class Image(commands.Cog):
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def balls(self, ctx, member: discord.Member = None):
         member = member or ctx.author
-        resp = await self.bot.session.get(
-            f"https://api.jeyy.xyz/image/balls", params={"image_url": member.display_avatar.url}
-        )
+        async with ctx.channel.typing():
+            resp = await self.bot.session.get(
+                f"https://api.jeyy.xyz/image/balls", params={"image_url": member.display_avatar.url}
+            )
         await ctx.send(file=discord.File(
             io.BytesIO(await resp.read()), f"balls.gif"
         ))
@@ -210,13 +221,14 @@ class Image(commands.Cog):
     @commands.command(help="Make a fake youtube video", aliases=['ytvideo'])
     @commands.cooldown(1, 10, commands.BucketType.user)
     async def ytvid(self, ctx, member: discord.Member = None, *, title="Sus"):
-        resp = await self.bot.session.get(
-            f"https://api.jeyy.xyz/image/youtube", params={
-                "avatar_url": member.display_avatar.url,
-                "title": title,
-                "author": member.display_name
-            }
-        )
+        async with ctx.channel.typing():
+            resp = await self.bot.session.get(
+                f"https://api.jeyy.xyz/image/youtube", params={
+                    "avatar_url": member.display_avatar.url,
+                    "title": title,
+                    "author": member.display_name
+                }
+            )
         await ctx.send(file=discord.File(
             io.BytesIO(await resp.read()), f"ytvid.gif"
         ))
