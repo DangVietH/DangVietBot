@@ -291,23 +291,29 @@ Valid Variables:
     @commands.command(help="Create a reaction role message")
     @commands.check_any(commands.has_permissions(manage_roles=True), has_config_role())
     async def reaction(self, ctx):
-        questions = ["Enter Message: ", "Enter Emojis **WARNING: Server emojis are not supported right now**: ", "Enter Roles (only type role id): ", "Enter Channel: "]
+        questions = [
+            "Hello. What will be your reaction role message? ",
+            "Alright, now we will add the emojis\n **NOTE: We do not support custom emojis right now.**",
+            "Nice, now we will add the roles\nMake sure you mention the role and add space between them. You also put the roles in the same order as the emojis.**",
+            "Finally, Enter the Channel you want the message to be in?: "
+        ]
         answers = []
-        msg = await ctx.send("Reaction role wizard")
 
         def check(user):
             return user.author == ctx.author and user.channel == ctx.channel
 
         for question in questions:
-            await msg.edit(content=question)
+            await ctx.send(question)
             user_msg = await self.bot.wait_for('message', check=check)
             answers.append(user_msg.content)
-            await ctx.channel.purge(limit=1)
 
         emojis = answers[1].split(" ")
         roles = answers[2].split(" ")
         c_id = int(answers[3][2:-1])
         channel = self.bot.get_channel(c_id)
+
+        for r in range(len(roles)):
+            roles[r] = int(roles[r][3:-1])
 
         bot_msg = await channel.send(answers[0])
 
@@ -315,7 +321,7 @@ Valid Variables:
         await self.bot.mongo["react_role"]['reaction_roles'].insert_one(insert)
         for emoji in emojis:
             await bot_msg.add_reaction(emoji)
-        await msg.edit(content="Wizard Complete. Now check the reaction role message")
+        await ctx.send("Wizard Complete. Now check the reaction role message")
 
     @commands.group(invoke_without_command=True, case_insensitive=True, help="Starboard stuff", aliases=['sb', 'star'])
     async def starboard(self, ctx):
@@ -330,7 +336,6 @@ Valid Variables:
                               color=self.bot.embed_color)
         msg = await ctx.send(embed=embed)
         questions = [
-            "What should be the starboard emoji (type `false` if you want default ⭐️) **WARNING: Server emojis are not supported right now**:",
             "What should be the starboard amount (type `false` if you want default value, which is 2):",
             "Do you want users to self star their own message (type `true` or `false`):",
             "Do you want users to star message inn NSFW channel (type `true` or `false`):",
@@ -349,7 +354,7 @@ Valid Variables:
             await ctx.channel.purge(limit=1)
 
         try:
-            c_id = int(answers[4][2:-1])
+            c_id = int(answers[3][2:-1])
         except ValueError:
             await msg.edit(
                 content=f'Wizard crash because you failed to mention the channel correctly.  Please do it like this: {ctx.channel.mention}')
@@ -358,12 +363,12 @@ Valid Variables:
         insert_data = {
             "guild": ctx.guild.id,
             "channel": c_id,
-            "emoji": check_value(answers[0]) or '⭐️',
-            "threshold": check_value(answers[1], "int") or 2,
+            "emoji": '⭐️',
+            "threshold": check_value(answers[0], "int") or 2,
             "ignoreChannel": [],
             "lock": False,
-            "selfStar": check_return_dtype(answers[2]) or False,
-            "nsfw": check_return_dtype(answers[3]) or False
+            "selfStar": check_return_dtype(answers[1]) or False,
+            "nsfw": check_return_dtype(answers[2]) or False
         }
         await self.bot.mongo['sb']['config'].insert_one(insert_data)
         embed.description = "Wizard finished successfully!"
